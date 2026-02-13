@@ -1,0 +1,166 @@
+# Project Specification
+
+## Overview
+
+**Project Name**: [Name]
+**Version**: 0.1.0
+**Status**: Planning / In Development / Production
+
+**One-line Description**: [What this project does and for whom]
+
+## Problem Statement
+
+[What problem are we solving? Who has this problem? Why does it matter?]
+
+## Solution
+
+[High-level description of how this project solves the problem]
+
+## Goals & Non-Goals
+
+### Goals
+- [Primary goal 1]
+- [Primary goal 2]
+- [Primary goal 3]
+
+### Non-Goals
+- [Explicitly out of scope 1]
+- [Explicitly out of scope 2]
+
+## User Stories
+
+### Primary User Flows
+
+1. **[User Type] wants to [action]**
+   - Context: [When/why would they do this?]
+   - Steps: [What do they do?]
+   - Outcome: [What happens?]
+
+2. **[User Type] wants to [action]**
+   - Context:
+   - Steps:
+   - Outcome:
+
+## Technical Design
+
+### Architecture
+
+[High-level architecture description or diagram]
+
+### Tech Stack
+
+- **Frontend**: [Framework, language, key libraries]
+- **Backend**: [Framework, language, database]
+- **Infrastructure**: [Hosting, deployment, CI/CD]
+- **External Services**: [APIs, third-party services]
+
+### Data Models
+
+```typescript
+// Key data structures
+interface User {
+  id: string;
+  // ...
+}
+
+interface Project {
+  id: string;
+  // ...
+}
+```
+
+### API Design
+
+#### Endpoints
+
+- `GET /api/resource` - [Description]
+- `POST /api/resource` - [Description]
+- `PUT /api/resource/:id` - [Description]
+- `DELETE /api/resource/:id` - [Description]
+
+### Security Considerations
+
+- [Authentication approach]
+- [Authorization model]
+- [Data encryption]
+- [API security]
+
+## UI/UX Design
+
+### Key Screens
+
+1. **[Screen Name]**
+   - Purpose: [What does this screen accomplish?]
+   - Components: [Main UI elements]
+   - User actions: [What can users do here?]
+
+2. **[Screen Name]**
+   - Purpose:
+   - Components:
+   - User actions:
+
+### Design Principles
+
+- [Principle 1: e.g., "Mobile-first responsive design"]
+- [Principle 2: e.g., "Accessible to WCAG 2.1 AA standard"]
+- [Principle 3: e.g., "Dark mode support"]
+
+## Implementation Plan
+
+### Phase 1: MVP
+- [ ] [Feature 1]
+- [ ] [Feature 2]
+- [ ] [Feature 3]
+
+### Phase 2: Enhancement
+- [ ] [Feature 1]
+- [ ] [Feature 2]
+
+### Phase 3: Scale
+- [ ] [Feature 1]
+- [ ] [Feature 2]
+
+## Open Questions
+
+- [ ] [Question 1 about implementation, UX, or technical decisions]
+- [ ] [Question 2]
+- [ ] [Question 3]
+
+## Trade-offs & Decisions
+
+### [Decision 1]
+- **Options**: [A, B, C]
+- **Chosen**: [Option A]
+- **Rationale**: [Why this choice?]
+- **Trade-offs**: [What we gained/lost]
+
+### [Decision 2]
+- **Options**:
+- **Chosen**:
+- **Rationale**:
+- **Trade-offs**:
+
+## Success Metrics
+
+- [Metric 1: e.g., "Time to complete task X reduced by 50%"]
+- [Metric 2: e.g., "User satisfaction score > 8/10"]
+- [Metric 3: e.g., "99.9% uptime"]
+
+## Risks & Mitigations
+
+| Risk | Impact | Likelihood | Mitigation |
+|------|--------|------------|------------|
+| [Risk 1] | High/Med/Low | High/Med/Low | [How to address] |
+| [Risk 2] | High/Med/Low | High/Med/Low | [How to address] |
+
+## Timeline
+
+- **Week 1-2**: [Milestone]
+- **Week 3-4**: [Milestone]
+- **Week 5+**: [Milestone]
+
+## References
+
+- [Link to design mockups]
+- [Link to similar projects]
+- [Link to technical documentation]

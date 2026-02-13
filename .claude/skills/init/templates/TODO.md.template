@@ -1,0 +1,42 @@
+# TODO
+
+## Current Sprint
+
+### In Progress
+- [ ] [Task currently being worked on]
+
+### Up Next
+- [ ] [Next priority task]
+- [ ] [Next priority task]
+
+## Backlog
+
+### High Priority
+- [ ] [Important task 1]
+- [ ] [Important task 2]
+
+### Medium Priority
+- [ ] [Task 1]
+- [ ] [Task 2]
+
+### Low Priority / Nice to Have
+- [ ] [Enhancement 1]
+- [ ] [Enhancement 2]
+
+## Future Ideas
+- [ ] [Future feature idea 1]
+- [ ] [Future feature idea 2]
+
+## Blocked
+- [ ] [Blocked task] - Blocked by: [reason]
+
+## Done
+- [x] [Completed task 1] - [Date]
+- [x] [Completed task 2] - [Date]
+
+---
+
+**Notes**:
+- Move completed tasks to Done section with completion date
+- Use `/ship` to automatically update this file when committing
+- Review and reprioritize weekly

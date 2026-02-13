@@ -1,0 +1,109 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with code in this repository.
+
+## Project Overview
+
+[Brief description of what this project does, who it's for, and the key value proposition.]
+
+**Tech Stack**:
+- Language: [TypeScript/JavaScript/Python/etc.]
+- Framework: [React/Next.js/Express/etc.]
+- Testing: [Jest/Vitest/pytest/etc.]
+- Build: [Vite/Webpack/etc.]
+
+## Commands
+
+```bash
+# Installation
+npm install
+
+# Development
+npm run dev          # Starts dev server on http://localhost:3000
+
+# Tests
+npm test             # Run all tests
+npm run test:watch   # Run tests in watch mode
+
+# Lint
+npm run lint
+
+# Build
+npm run build        # Output to dist/
+```
+
+## Architecture
+
+[Description of your application architecture]
+
+### Data Flow
+
+```
+User Input → [Component/Handler] → [Service/API] →
+[Data Store] → [Response] → UI Update
+```
+
+## Git Conventions
+
+**Conventional Commits**:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation changes
+- `refactor:` - Code refactoring
+- `test:` - Test additions/changes
+- `chore:` - Build process, dependencies, etc.
+
+**AI vs. Human Commits**:
+- AI commits: `git cai "message"` (prefixes "AI: ", sets AI author)
+- Human commits: `git ch "message"`
+
+**Custom Skills**:
+- `/ship` - Run tests, update CHANGELOG.md and TODO.md, stage changes, commit, and push
+- `/release` - Create versioned release with changelog, git tag, and GitHub Release
+- `/review-spec` - Review and refine project specification
+
+**Documentation Maintenance**:
+- When shipping, update CHANGELOG.md under [Unreleased]
+- Mark completed items in TODO.md
+- Update SPEC.md when requirements change
+
+**Security Rules**:
+- Never commit: `*.pem`, `.env`, private keys, API tokens, real user data
+- Staging policy: Stage files by name - never `git add -A` or `git add .`
+
+## Code Style
+
+**General Principles**:
+- Prefer functional programming patterns
+- Use TypeScript strict mode
+- Write self-documenting code
+- Add comments only for complex logic
+
+**Testing Strategy**:
+- Unit tests for utilities and services
+- Integration tests for API endpoints
+- E2E tests for critical user flows
+- Aim for 80%+ coverage
+
+## Known Mistakes
+
+Document known pitfalls or bugs to prevent Claude from repeating them:
+
+- [Issue 1]: [Description and correct approach]
+- [Issue 2]: [Description and correct approach]
+
+## Workflow Automation
+
+**Pre-commit Hooks** (if using Husky):
+```bash
+# Runs on commit
+npm run lint
+npm test
+```
+
+**Pre-push Hooks**:
+```bash
+# Runs before push
+npm run build
+npm test
+```

@@ -1,0 +1,165 @@
+---
+name: release
+description: Create a versioned release with changelog, git tag, and GitHub Release. Use when the user wants to publish a new version.
+argument-hint: [version]
+user-invocable: true
+allowed-tools: Bash, Read, Edit
+---
+
+# Create Release
+
+Create a new versioned release with proper tagging and GitHub Release.
+
+## Step 1: Determine Version
+
+If version provided as argument (`$ARGUMENTS`), use it. Otherwise:
+
+1. Read current version from `package.json` (if exists)
+2. Ask user for new version number
+3. Follow [Semantic Versioning](https://semver.org/):
+   - **MAJOR** (x.0.0): Breaking changes
+   - **MINOR** (0.x.0): New features, backward compatible
+   - **PATCH** (0.0.x): Bug fixes, backward compatible
+
+Example: `1.2.3` → `1.3.0` for new feature
+
+## Step 2: Update CHANGELOG.md
+
+1. Read CHANGELOG.md
+2. Find `## [Unreleased]` section
+3. Move all entries from `[Unreleased]` to new version section:
+
+```markdown
+## [Unreleased]
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [1.3.0] - 2024-03-15
+
+### Added
+- Feature 1
+- Feature 2
+
+### Fixed
+- Bug fix 1
+```
+
+4. Add current date (YYYY-MM-DD format)
+5. Leave `[Unreleased]` section empty for future changes
+
+## Step 3: Update package.json (if exists)
+
+If `package.json` exists:
+
+1. Read current version
+2. Update to new version:
+   ```json
+   {
+     "version": "1.3.0"
+   }
+   ```
+3. Save file
+
+## Step 4: Commit Changes
+
+Stage and commit version bump:
+
+```bash
+git add CHANGELOG.md package.json
+git commit -m "chore: release v1.3.0
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+```
+
+## Step 5: Create Git Tag
+
+Create annotated tag with changelog:
+
+```bash
+git tag -a v1.3.0 -m "Release v1.3.0
+
+[Copy the changelog entries for this version here]"
+```
+
+## Step 6: Push Changes and Tag
+
+```bash
+git push && git push --tags
+```
+
+Confirm both succeed before proceeding.
+
+## Step 7: Create GitHub Release
+
+Use `gh` CLI to create GitHub Release:
+
+```bash
+gh release create v1.3.0 \
+  --title "v1.3.0" \
+  --notes "$(cat <<'EOF'
+## What's New
+
+[Copy Added section from CHANGELOG]
+
+## Bug Fixes
+
+[Copy Fixed section from CHANGELOG]
+
+## Changes
+
+[Copy Changed section from CHANGELOG]
+
+---
+
+**Full Changelog**: https://github.com/OWNER/REPO/compare/v1.2.3...v1.3.0
+EOF
+)"
+```
+
+Options to consider:
+- `--draft` - Create as draft for review
+- `--prerelease` - Mark as pre-release (for beta, rc, etc.)
+- `--latest` - Mark as latest release (default)
+
+## Step 8: Verify Release
+
+1. Check GitHub Releases page
+2. Verify tag exists: `git tag -l`
+3. Confirm CHANGELOG.md updated correctly
+4. Confirm package.json version updated
+
+## Summary
+
+Report to user:
+- Version released: v1.3.0
+- Changelog updated ✓
+- Git tag created ✓
+- GitHub Release published ✓
+- Link to release: [URL]
+
+## Next Steps
+
+Suggest to user:
+- Announce the release
+- Update documentation if needed
+- Deploy to production if applicable
+
+## Error Handling
+
+- **No unreleased changes**: Warn user, ask if they want to proceed anyway
+- **Git push fails**: Report error, may need to pull first
+- **Tag already exists**: Error, ask user to choose different version
+- **gh CLI not available**: Provide manual instructions for creating release
+- **Permission denied**: User may need to authenticate with `gh auth login`
+
+## Version Naming Conventions
+
+- Release: `v1.2.3`
+- Pre-release: `v1.2.3-beta.1`, `v1.2.3-rc.2`
+- Major versions: `v1.0.0`, `v2.0.0`
+
+Always prefix with `v` for git tags.

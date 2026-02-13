@@ -1,0 +1,143 @@
+---
+name: ship
+description: Run tests, update CHANGELOG.md and TODO.md, stage changes, generate commit message, commit, and push. Use when the user wants to commit and push their work.
+user-invocable: true
+allowed-tools: Bash, Read, Edit, Glob, Grep
+---
+
+# Ship Changes
+
+Safely commit and push changes with proper validation and documentation updates.
+
+## Pre-flight Checks
+
+1. **Run Tests**
+   ```bash
+   npm test
+   ```
+   - If tests fail, STOP and report the failure
+   - Do not proceed unless all tests pass
+
+2. **Check Git Status**
+   ```bash
+   git status
+   ```
+   - Review staged and unstaged changes
+   - Identify which files need to be committed
+
+## Update Documentation
+
+### Update CHANGELOG.md
+
+1. Read current CHANGELOG.md
+2. Ask user to describe the changes made
+3. Categorize changes:
+   - **Added**: New features
+   - **Changed**: Changes to existing functionality
+   - **Deprecated**: Soon-to-be removed features
+   - **Removed**: Removed features
+   - **Fixed**: Bug fixes
+   - **Security**: Security improvements
+4. Add entries under `[Unreleased]` section
+5. Format: `- Brief description of change`
+
+### Update TODO.md
+
+1. Read current TODO.md
+2. Ask user which tasks were completed
+3. Move completed tasks from their current section to the `## Done` section
+4. Add completion date: `- [x] Task description - YYYY-MM-DD`
+
+## Stage Changes
+
+**IMPORTANT**: Stage files by name, NEVER use `git add .` or `git add -A`
+
+1. Review files to commit (from git status)
+2. Exclude any sensitive files:
+   - `*.pem`
+   - `.env`
+   - `*.key`
+   - Credentials or secrets
+3. Stage each file explicitly:
+   ```bash
+   git add file1.ts file2.ts CHANGELOG.md TODO.md
+   ```
+
+## Generate Commit Message
+
+Use **Conventional Commits** format:
+
+```
+<type>: <short description>
+
+<optional body>
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `refactor`: Code refactoring
+- `test`: Tests
+- `chore`: Build, dependencies
+
+**Example**:
+```
+feat: add user authentication
+
+Implemented JWT-based authentication with login and registration endpoints.
+Updated API to require auth tokens for protected routes.
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+1. Analyze the staged changes
+2. Review recent commits: `git log --oneline -5`
+3. Draft appropriate commit message
+4. Show message to user for approval
+
+## Commit and Push
+
+1. **Commit**:
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   feat: your commit message here
+
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+
+2. **Push**:
+   ```bash
+   git push
+   ```
+
+   - If push fails, report the error
+   - Common issues: need to pull first, no upstream branch
+
+3. **Verify**:
+   ```bash
+   git status
+   ```
+   - Confirm push succeeded
+
+## Summary
+
+After successful ship:
+- Tests passed ✓
+- CHANGELOG.md updated ✓
+- TODO.md updated ✓
+- Changes committed ✓
+- Changes pushed ✓
+
+Report to user: commit SHA and files changed.
+
+## Error Handling
+
+- **Tests fail**: Report failures, do not commit
+- **Sensitive files detected**: Warn user, exclude from staging
+- **Push fails**: Provide git output and suggest fixes
+- **Pre-commit hook fails**: Fix issues, create NEW commit (do not amend)
