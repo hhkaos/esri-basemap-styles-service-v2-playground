@@ -1,0 +1,193 @@
+---
+name: review-spec
+description: Review project specification in detail, asking in-depth questions about technical implementation, UI/UX, concerns, and tradeoffs. Update docs/SPEC.md with answers.
+---
+
+# Review Specification
+
+Conduct an in-depth review of the project specification with detailed Q&A.
+
+## Step 1: Read Current Specification
+
+1. Read `docs/SPEC.md`
+2. Analyze completeness of each section
+3. Identify areas needing clarification
+
+## Step 2: Technical Implementation Questions
+
+Ask detailed questions about:
+
+### Architecture & Design
+- What architectural pattern will you use? (MVC, microservices, serverless, etc.)
+- How will components communicate?
+- What's your state management strategy?
+- How will you handle data persistence?
+- What's your caching strategy?
+- How will you scale the application?
+
+### Tech Stack Details
+- Why did you choose [framework/library X] over alternatives?
+- What version constraints do you have?
+- Are there any legacy systems to integrate with?
+- What are the browser/platform support requirements?
+
+### Data Models
+- What are the core entities and their relationships?
+- What fields are required vs. optional?
+- How will you handle data validation?
+- What's your database schema?
+- How will you handle migrations?
+
+### API Design
+- RESTful, GraphQL, or RPC?
+- What authentication/authorization mechanism?
+- Rate limiting requirements?
+- Versioning strategy?
+- Error handling conventions?
+
+### Security
+- What are the main security threats?
+- How will you handle authentication? (JWT, sessions, OAuth, etc.)
+- What data needs encryption at rest vs. in transit?
+- How will you prevent common vulnerabilities? (XSS, CSRF, SQL injection, etc.)
+- What's your secret management strategy?
+
+## Step 3: UI/UX Questions
+
+### User Experience
+- Who are the primary user personas?
+- What are the critical user journeys?
+- What devices/screen sizes must be supported?
+- Any accessibility requirements? (WCAG level, screen readers, etc.)
+- How should the app handle errors and edge cases?
+- What loading states and feedback mechanisms?
+
+### Design System
+- Will you use an existing design system or create custom?
+- What's the visual style? (modern, minimal, playful, etc.)
+- Color palette and branding guidelines?
+- Typography choices?
+- Animation and interaction patterns?
+
+### Information Architecture
+- How will navigation work?
+- What information hierarchy?
+- How will users discover features?
+- What onboarding experience?
+
+## Step 4: Concerns & Constraints
+
+Ask about:
+
+### Technical Concerns
+- What are the main technical risks?
+- Any performance requirements? (load time, response time, etc.)
+- Offline functionality needed?
+- What's the expected data volume?
+- Concurrency and race condition handling?
+
+### Business Constraints
+- What's the deadline/timeline?
+- Budget constraints affecting tech choices?
+- Team size and skill levels?
+- Maintenance and support plan?
+
+### Operational Concerns
+- Monitoring and observability strategy?
+- Logging approach?
+- Backup and disaster recovery?
+- Deployment process?
+- How to handle rollbacks?
+
+## Step 5: Tradeoffs & Alternatives
+
+For major decisions, explore:
+
+### Each Technical Decision
+- What alternatives did you consider?
+- Why this choice over others?
+- What are you optimizing for? (speed, cost, maintainability, etc.)
+- What are the tradeoffs?
+- Under what conditions might you reconsider?
+
+### Example Tradeoff Discussion
+```
+Decision: Use [Technology X]
+Alternatives considered: [Y, Z]
+Chosen because: [reasons]
+Tradeoffs:
+  - Pros: [benefits]
+  - Cons: [drawbacks]
+Would reconsider if: [conditions]
+```
+
+## Step 6: Potential Improvements
+
+Suggest improvements based on:
+- Industry best practices
+- Common pitfalls to avoid
+- Scalability considerations
+- Maintainability concerns
+- Security enhancements
+- User experience optimizations
+
+Ask:
+- "Have you considered [alternative approach]?"
+- "What about [edge case]?"
+- "How will you handle [scaling concern]?"
+
+## Step 7: Update docs/SPEC.md
+
+For each answer received:
+
+1. Update the appropriate section in docs/SPEC.md
+2. Add new sections if needed
+3. Fill in "Open Questions" with answers
+4. Document decisions in "Trade-offs & Decisions"
+5. Update implementation plan with new details
+6. Add any identified risks to "Risks & Mitigations"
+
+## Step 8: Review Completeness
+
+After updates, verify docs/SPEC.md has:
+- [ ] Clear problem statement
+- [ ] Detailed solution description
+- [ ] Well-defined user stories
+- [ ] Complete technical design
+- [ ] Data models documented
+- [ ] API endpoints specified
+- [ ] Security considerations addressed
+- [ ] UI/UX design principles
+- [ ] Implementation plan with phases
+- [ ] All major decisions documented
+- [ ] Risks identified and mitigated
+- [ ] Success metrics defined
+
+## Step 9: Summary
+
+Provide user with:
+- Summary of changes made to docs/SPEC.md
+- Remaining open questions (if any)
+- Suggested next steps
+- Potential risks to be aware of
+
+## Asking Strategy
+
+- Ask 3-5 questions at a time (don't overwhelm)
+- Group related questions together
+- Provide context for why you're asking
+- Offer multiple choice options when helpful
+- Follow up on vague answers for specifics
+
+## Output Quality
+
+Ensure docs/SPEC.md updates are:
+- Specific and actionable
+- Well-organized
+- Easy to read
+- Include examples where helpful
+- Link to external resources when relevant
+
+## Last message for the user
+
+Ask if they want you to work on phased plan (PLAN.md) for implementation based on the reviewed specification.

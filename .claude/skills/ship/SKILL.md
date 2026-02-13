@@ -1,62 +1,141 @@
 ---
 name: ship
-description: Stage changes, generate a commit message, commit using a git alias, and push
-disable-model-invocation: true
+description: Run tests, update CHANGELOG.md and TODO.md, stage changes, generate commit message, commit, and push. Use when the user wants to commit and push their work.
 ---
 
-Follow these steps to commit changes:
+# Ship Changes
 
-## 1. Review changes
+Safely commit and push changes with proper validation and documentation updates.
 
-Run `git status` (never use `-uall`) and `git diff` (both staged and unstaged) to understand all current changes.
+## Pre-flight Checks
 
-## 2. Update project documentation
+1. **Run Tests**
+   ```bash
+   npm test
+   ```
+   - If tests fail, STOP and report the failure
+   - Do not proceed unless all tests pass
 
-Review the changes and update the following files as needed:
+2. **Check Git Status**
+   ```bash
+   git status
+   ```
+   - Review staged and unstaged changes
+   - Identify which files need to be committed
 
-### CHANGELOG.md
-Read `CHANGELOG.md` and add an entry under the `[Unreleased]` section describing the change. Place it under the appropriate subsection (`Added`, `Changed`, `Fixed`, `Removed`). Create the subsection if it doesn't exist. Keep entries concise (one bullet point per logical change). Each entry MUST specify which app it applies to (e.g. "Issuer:", "Verification:", "Both apps:", "Docs:") at the start of the bullet point so readers know the scope at a glance.
+## Update Documentation
 
-### docs/TODO.md
-Read `docs/TODO.md` and update checkboxes or status labels to reflect the current state of the project. For example:
-- Mark completed tasks as `[x]`
-- Update phase status labels (e.g. `⬜ TODO` → `🚧 IN PROGRESS` → `✅ COMPLETE`)
-- Update the V2 Progress Tracking section if a phase status changed
-- Update test counts or other metrics if they changed
-- Only modify items directly related to the current changes
+### Update CHANGELOG.md
 
-### docs/SPEC.md
-Read `docs/SPEC.md` and update it only if the changes affect the technical specification. For example:
-- New or changed features that alter the documented architecture or behavior
-- New acceptance criteria that should be checked off
-- Updated technology choices or dependencies
-- Skip this file if the changes are purely internal (refactoring, tests, tooling)
+1. Read current CHANGELOG.md
+2. Ask user to describe the changes made
+3. Categorize changes:
+   - **Added**: New features
+   - **Changed**: Changes to existing functionality
+   - **Deprecated**: Soon-to-be removed features
+   - **Removed**: Removed features
+   - **Fixed**: Bug fixes
+   - **Security**: Security improvements
+4. Add entries under `[Unreleased]` section
+5. Format: `- Brief description of change`
 
-## 3. Stage files
+### Update docs/TODO.md
 
-Stage the relevant files by name, including any updated documentation files (`CHANGELOG.md`, `docs/TODO.md`, `docs/SPEC.md`). Never use `git add -A` or `git add .`. Never stage files that may contain secrets (`.env`, credentials, private keys, etc.) — warn the user if any are detected.
+1. Read current docs/TODO.md
+2. Ask user which tasks were completed
+3. Move completed tasks from their current section to the `## Done` section
+4. Add completion date: `- [x] Task description - YYYY-MM-DD`
 
-## 4. Generate a commit message
+## Stage Changes
 
-- Run `git log --oneline -10` to see recent commit style.
-- Analyze the staged diff and draft a concise conventional commit message (e.g. `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
-- Focus on the "why" rather than the "what".
-- Keep it to 1-2 sentences.
-- Show the proposed message to the user before committing.
+**IMPORTANT**: Stage files by name, NEVER use `git add .` or `git add -A`
 
-## 5. Choose the git alias
+1. Review files to commit (from git status)
+2. Exclude any sensitive files:
+   - `*.pem`
+   - `.env`
+   - `*.key`
+   - Credentials or secrets
+3. Stage each file explicitly:
+   ```bash
+   git add file1.ts file2.ts CHANGELOG.md docs/TODO.md
+   ```
 
-Ask the user which alias to use:
+## Generate Commit Message
 
-- **`git cai`** — AI-attributed commit (sets author to "AI Generated (hhkaos)" and prefixes the message with "AI: ")
-- **`git ch`** — Regular commit with the user's default git identity
+Use **Conventional Commits** format:
 
-## 6. Commit
+```
+<type>: <short description>
 
-Run the chosen alias with the commit message. For example:
-- `git cai "feat: add dark mode toggle to settings page"`
-- `git ch "feat: add dark mode toggle to settings page"`
+<optional body>
 
-## 7. Push
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
 
-Run `git push`. If the branch has no upstream, use `git push -u origin <branch>`.
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `refactor`: Code refactoring
+- `test`: Tests
+- `chore`: Build, dependencies
+
+**Example**:
+```
+feat: add user authentication
+
+Implemented JWT-based authentication with login and registration endpoints.
+Updated API to require auth tokens for protected routes.
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+1. Analyze the staged changes
+2. Review recent commits: `git log --oneline -5`
+3. Draft appropriate commit message
+4. Show message to user for approval
+
+## Commit and Push
+
+1. **Commit**:
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   feat: your commit message here
+
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+
+2. **Push**:
+   ```bash
+   git push
+   ```
+
+   - If push fails, report the error
+   - Common issues: need to pull first, no upstream branch
+
+3. **Verify**:
+   ```bash
+   git status
+   ```
+   - Confirm push succeeded
+
+## Summary
+
+After successful ship:
+- Tests passed ✓
+- CHANGELOG.md updated ✓
+- docs/TODO.md updated ✓
+- Changes committed ✓
+- Changes pushed ✓
+
+Report to user: commit SHA and files changed.
+
+## Error Handling
+
+- **Tests fail**: Report failures, do not commit
+- **Sensitive files detected**: Warn user, exclude from staging
+- **Push fails**: Provide git output and suggest fixes
+- **Pre-commit hook fails**: Fix issues, create NEW commit (do not amend)

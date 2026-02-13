@@ -1,107 +1,162 @@
 ---
 name: release
-description: Create a new versioned release with changelog, git tag, and GitHub Release
-disable-model-invocation: true
+description: Create a versioned release with changelog, git tag, and GitHub Release. Use when the user wants to publish a new version.
 ---
 
-Follow these steps to create a new release:
+# Create Release
 
-## 1. Review unreleased changes
+Create a new versioned release with proper tagging and GitHub Release.
 
-Read `CHANGELOG.md` and show the user all items under `[Unreleased]`. Ask the user to confirm these are the changes they want to include in the release. If the `[Unreleased]` section is empty, stop and inform the user there is nothing to release.
+## Step 1: Determine Version
 
-## 2. Suggest version number
+If version provided as argument (`$ARGUMENTS`), use it. Otherwise:
 
-Look at the previous version in `CHANGELOG.md` (e.g. `[2.0]`) and analyze the unreleased changes to recommend a version bump:
+1. Read current version from `package.json` (if exists)
+2. Ask user for new version number
+3. Follow [Semantic Versioning](https://semver.org/):
+   - **MAJOR** (x.0.0): Breaking changes
+   - **MINOR** (0.x.0): New features, backward compatible
+   - **PATCH** (0.0.x): Bug fixes, backward compatible
 
-- **Major** (e.g. `2.0` → `3.0`) — breaking changes, architectural rewrites, or incompatible API changes
-- **Minor** (e.g. `2.0` → `2.1`) — new features, enhancements, or non-breaking additions
-- **Patch** (e.g. `2.1` → `2.1.1`) — bug fixes only, no new features
+Example: `1.2.3` → `1.3.0` for new feature
 
-Explain the reasoning and let the user confirm or override the suggested version.
+## Step 2: Update CHANGELOG.md
 
-## 3. Update project documentation
+1. Read CHANGELOG.md
+2. Find `## [Unreleased]` section
+3. Move all entries from `[Unreleased]` to new version section:
 
-### CHANGELOG.md
+```markdown
+## [Unreleased]
 
-- Rename `## [Unreleased]` to `## [<version>] - <today's date>` (format: `YYYY-MM-DD`)
-- Add a new empty `## [Unreleased]` section above it
-- Preserve all existing content below
+### Added
 
-### docs/TODO.md
+### Changed
 
-Read `docs/TODO.md` and update it to reflect the release:
+### Fixed
 
-- Mark completed tasks as `[x]`
-- Update phase status labels (e.g. `⬜ TODO` → `🚧 IN PROGRESS` → `✅ COMPLETE`)
-- Update the V2 Progress Tracking section
-- Update test counts or other metrics
-- Update the V2 Success Criteria checklist if applicable
+## [1.3.0] - 2024-03-15
 
-### docs/SPEC.md
+### Added
+- Feature 1
+- Feature 2
 
-Read `docs/SPEC.md` and update it if the release includes changes that affect the specification:
-
-- Update acceptance criteria checkboxes
-- Reflect any architecture, feature, or dependency changes
-- Update the document version and last updated date in the metadata section
-- Skip if the release is purely internal
-
-### package.json versions
-
-Set the `version` field to the new version in:
-
-- `issuer/package.json`
-- `verification/package.json`
-
-## 4. Regenerate documentation
-
-Run `npm run docs:generate` to rebuild the HTML documentation from the updated markdown files.
-
-## 5. Run tests
-
-Run `npm test` from the repo root to ensure everything passes before releasing. If tests fail, stop and inform the user.
-
-## 6. Build assets
-
-Run `npm run build` in both `issuer/` and `verification/` directories. Then create zip archives:
-
-- `zip -r issuer-v<version>.zip issuer/dist`
-- `zip -r verification-v<version>.zip verification/dist`
-
-## 7. Stage, commit, and push
-
-Stage the modified files (`CHANGELOG.md`, `docs/TODO.md`, `docs/SPEC.md`, `issuer/package.json`, `verification/package.json`) by name. Ask the user which alias to use:
-
-- **`git cai`** — AI-attributed commit (sets author to "AI Generated (hhkaos)" and prefixes the message with "AI: ")
-- **`git ch`** — Regular commit with the user's default git identity
-
-Commit with message: `release: v<version>`
-
-Then push with `git push`.
-
-## 8. Create git tag
-
-Run `git tag v<version>` and `git push --tags`.
-
-## 9. Create GitHub Release
-
-Use `gh release create` to create the release on GitHub:
-
-```
-gh release create v<version> \
-  --title "v<version>" \
-  --notes "<changelog entries for this version>" \
-  issuer-v<version>.zip \
-  verification-v<version>.zip
+### Fixed
+- Bug fix 1
 ```
 
-The `--notes` should contain the full changelog entries for this version (the Added, Changed, Fixed, Removed sections) formatted in markdown.
+4. Add current date (YYYY-MM-DD format)
+5. Leave `[Unreleased]` section empty for future changes
 
-## 10. Clean up
+## Step 3: Update package.json (if exists)
 
-Remove the temporary zip files:
+If `package.json` exists:
 
-- `rm issuer-v<version>.zip verification-v<version>.zip`
+1. Read current version
+2. Update to new version:
+   ```json
+   {
+     "version": "1.3.0"
+   }
+   ```
+3. Save file
 
-Confirm the release is live by showing the GitHub Release URL.
+## Step 4: Commit Changes
+
+Stage and commit version bump:
+
+```bash
+git add CHANGELOG.md package.json
+git commit -m "chore: release v1.3.0
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+```
+
+## Step 5: Create Git Tag
+
+Create annotated tag with changelog:
+
+```bash
+git tag -a v1.3.0 -m "Release v1.3.0
+
+[Copy the changelog entries for this version here]"
+```
+
+## Step 6: Push Changes and Tag
+
+```bash
+git push && git push --tags
+```
+
+Confirm both succeed before proceeding.
+
+## Step 7: Create GitHub Release
+
+Use `gh` CLI to create GitHub Release:
+
+```bash
+gh release create v1.3.0 \
+  --title "v1.3.0" \
+  --notes "$(cat <<'EOF'
+## What's New
+
+[Copy Added section from CHANGELOG]
+
+## Bug Fixes
+
+[Copy Fixed section from CHANGELOG]
+
+## Changes
+
+[Copy Changed section from CHANGELOG]
+
+---
+
+**Full Changelog**: https://github.com/OWNER/REPO/compare/v1.2.3...v1.3.0
+EOF
+)"
+```
+
+Options to consider:
+- `--draft` - Create as draft for review
+- `--prerelease` - Mark as pre-release (for beta, rc, etc.)
+- `--latest` - Mark as latest release (default)
+
+## Step 8: Verify Release
+
+1. Check GitHub Releases page
+2. Verify tag exists: `git tag -l`
+3. Confirm CHANGELOG.md updated correctly
+4. Confirm package.json version updated
+
+## Summary
+
+Report to user:
+- Version released: v1.3.0
+- Changelog updated ✓
+- Git tag created ✓
+- GitHub Release published ✓
+- Link to release: [URL]
+
+## Next Steps
+
+Suggest to user:
+- Announce the release
+- Update documentation if needed
+- Deploy to production if applicable
+
+## Error Handling
+
+- **No unreleased changes**: Warn user, ask if they want to proceed anyway
+- **Git push fails**: Report error, may need to pull first
+- **Tag already exists**: Error, ask user to choose different version
+- **gh CLI not available**: Provide manual instructions for creating release
+- **Permission denied**: User may need to authenticate with `gh auth login`
+
+## Version Naming Conventions
+
+- Release: `v1.2.3`
+- Pre-release: `v1.2.3-beta.1`, `v1.2.3-rc.2`
+- Major versions: `v1.0.0`, `v2.0.0`
+
+Always prefix with `v` for git tags.
