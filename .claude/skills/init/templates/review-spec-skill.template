@@ -189,3 +189,7 @@ Ensure SPEC.md updates are:
 - Easy to read
 - Include examples where helpful
 - Link to external resources when relevant
+
+## Last message for the user
+
+Ask if they want you to work on phased plan (PLAN.md) for implementation based on the reviewed specification.
