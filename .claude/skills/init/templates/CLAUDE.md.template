@@ -7,10 +7,13 @@ This file provides guidance to Claude Code when working with code in this reposi
 [Brief description of what this project does, who it's for, and the key value proposition.]
 
 **Tech Stack**:
-- Language: [TypeScript/JavaScript/Python/etc.]
-- Framework: [React/Next.js/Express/etc.]
-- Testing: [Jest/Vitest/pytest/etc.]
-- Build: [Vite/Webpack/etc.]
+- Language: [TypeScript/JavaScript/Python/Node/etc.] and latest stable version
+- Framework: [React/Next.js/Express/etc.] and latest stable version
+- Testing: [Jest/Vitest/pytest/etc.] and latest stable version
+- Build: [Vite/Webpack/etc.] and latest stable version
+- CI/CD: [GitHub Actions/Travis CI/etc.] for automated testing and deployment
+- Deployment: [GHPages/Vercel/Netlify/AWS/etc.] for hosting the application
+- Any other relevant tech [linters, caching mechanism, API style, authentication, databases, etc]
 
 ## Commands
 
