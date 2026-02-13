@@ -8,63 +8,106 @@ An interactive browser-based playground for developers to explore and experiment
 - Browse and filter available basemap styles (ArcGIS and Open families) organized by thematic groups
 - Configure style parameters (`language`, `worldview`, `places`) and see results in real-time
 - Generate ready-to-use code snippets for multiple mapping libraries
-- Export working examples to CodePen or download as standalone HTML files |~I will provide some code initial samples for each library, you need to templatize/improve it~|
-- Understand usage models (tile-based vs session-based) |~But this is not a priority or will be addressed in the initial phases; I mean not in the playground, but the standalone samples be configured depending on this~|
+- Export working examples to CodePen or download as standalone HTML files
+- Share configurations via URL with encoded parameters
+
+> **Note**: User will provide initial code samples for each library to be templatized/improved.
 
 ### 1.2 Key Principles
 - **Dynamic, not hardcoded**: Style catalog fetched from `/self` endpoint to always reflect latest available styles
-- **Educational focus**: Teach developers how to use the service through interactive exploration |~But each parameter will have a way to get links to existing documentation, code samples, API reference, to dive deeper~|
-- **Multi-library support**: Generate code for different mapping libraries via pluggable template system |~Should we specify versions of the libraries in the template and a call for contributions/requests?~|
-- **Developer-friendly**: Transparent code generation, clear documentation, easy to use UX
+- **Educational focus**: Teach developers how to use the service through interactive exploration
+  - Each parameter links to existing documentation, code samples, API reference for deeper learning
+- **Multi-library support**: Generate code for different mapping libraries via pluggable template system
+  - Templates specify library versions and include call for community contributions/requests
+- **Developer-friendly**: Transparent code generation, clear documentation, accessible UX
 
 ### 1.3 Out of Scope
 This playground focuses exclusively on **ArcGIS Location Platform** basemap styles. It does NOT cover:
 - ArcGIS Online basemaps (different service, different access patterns)
 - 3D map styles (may be added in future)
-- Backend services or authentication flows |~Add this as a future enhancement, to allow users to use their user identity to log in, get available API keys and pick one~|
-- Custom style editing (separate tool: Vector Tile Style Editor) |~We will consider this for the future~|
+- Backend services or authentication flows (future: allow users to log in with ArcGIS identity, see available API keys, and select one)
+- Custom style editing via Vector Tile Style Editor (future consideration)
+- Session-based usage model in playground UI (educational code examples only)
+  - Note: Templates will support session model configuration in generated code
 
 ---
 
 ## 2. Technical Architecture
 
 ### 2.1 Technology Stack
-- **Framework**: React (chosen for robust ecosystem and state management)
-- **UI Components**: Calcite Design System (Esri's official components / design system)
+- **Framework**: React (robust ecosystem and state management)
+- **UI Components**: Calcite Design System (Esri's official design system with React components)
 - **Mapping Library**: MapLibre GL JS v5.x for the playground viewer
-- **Node version**: Ensure Node 25 from .nvmrc
-- **Build Tool**: Vite (minimal modern bundler with HMR)
+- **Node Version**: Node 25 (enforced via `.nvmrc`)
+- **Build Tool**: Vite (modern bundler with HMR)
 - **Styling**: CSS Modules or Calcite's styling approach
-- **State Management**: React Context or simple prop drilling (avoid over-engineering)
+- **State Management**: React Context or simple prop drilling (avoid over-engineering for MVP)
+- **Testing**: Vitest + React Testing Library + pre-commit hooks
+- **Analytics**: Google Analytics with cookie consent
 - **Deployment**: GitHub Pages (static hosting)
 
-### 2.2 Project Structure (Recommended)
+### 2.2 Project Structure
 ```
+.nvmrc                           # Node 25
 src/
 ├── components/
-│   ├── StyleBrowser/        # Style grid, filters, badges
-│   ├── MapViewer/           # MapLibre map instance
-│   ├── ParameterControls/   # Language, worldview, places inputs
-│   ├── CodeGenerator/       # Code snippet display and export
-│   ├── TokenInput/          # API key input with security warnings
-│   └── ShowcaseLocations/   # Preset location buttons
-├── templates/ |~Consider if we should version the templates and if they should be HTML or a document with a frontmatter specifying tecnologies and versions, etc ~|
-│   ├── maplibre.js          # MapLibre template
-│   ├── leaflet.js           # Leaflet template
-│   └── arcgis-js.js         # ArcGIS Maps SDK template (future)
+│   ├── StyleBrowser/            # Style grid, filters, badges, expand modal
+│   ├── MapViewer/               # MapLibre map instance
+│   ├── ParameterControls/       # Language, worldview, places inputs
+│   ├── CodeGenerator/           # Export buttons, token input, CTA
+│   ├── ShowcaseLocations/       # Dropdown with location presets
+│   └── CookieConsent/           # Simple GDPR banner
+├── templates/
+│   ├── html/                    # Actual HTML templates (real code, not placeholders)
+│   │   ├── maplibre.html
+│   │   ├── leaflet.html
+│   │   └── ...
+│   ├── config/                  # Template metadata (library versions, CDN URLs, etc)
+│   │   ├── maplibre.json
+│   │   ├── leaflet.json
+│   │   └── ...
+│   └── index.js                 # Template registry and generator functions
 ├── services/
-│   ├── styleService.js      # Fetch from /self, cache management
-│   ├── codepenService.js    # CodePen POST integration
-│   └── analytics.js         # Usage telemetry (optional)
-├── config/ |~create the structure as a boileplate and I will fill it, but also allow me to configure ig I want to show this o not, per style or as a whole~|
-│   └── showcaseLocations.js # Hardcoded location presets per style
+│   ├── styleService.js          # Fetch /self, cache management with localStorage fallback
+│   ├── codepenService.js        # CodePen POST integration
+│   ├── shareService.js          # Generate/parse shareable URLs
+│   └── analytics.js             # Google Analytics with consent tracking
+├── config/
+│   ├── showcaseLocations.js     # Global list with style tags, configurable visibility
+│   └── appDefaults.js           # Default map state (style, center, zoom, language, places, etc)
 └── utils/
-    ├── urlGenerator.js      # Build style URLs with parameters
-    └── storage.js           # localStorage helpers with TTL
+    ├── urlGenerator.js          # Build style URLs with parameters
+    ├── storage.js               # localStorage helpers with TTL
+    └── urlEncoder.js            # Encode/decode config for share URLs
 ```
 
-### 2.3 Build and Development
+### 2.3 Template System Architecture
+**Goal**: Separate HTML from JS to improve DX, while keeping everything bundled.
+
+**Structure**:
+- **HTML files** (`/templates/html/`): Pure HTML with standard placeholders like `{{styleUrl}}`, `{{center}}`, `{{zoom}}`, etc.
+  - Real, working HTML code (not JS template literals)
+  - Syntax highlighting in IDE
+  - Easy to preview and test
+- **Config files** (`/templates/config/`): JSON with library metadata
+  ```json
+  {
+    "name": "MapLibre GL JS",
+    "version": "5.0.0",
+    "cdnJS": "https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js",
+    "cdnCSS": "https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.css",
+    "docs": "https://maplibre.org/maplibre-gl-js-docs/",
+    "attribution": "auto"
+  }
+  ```
+- **Generator** (`/templates/index.js`): Imports HTML as raw strings, replaces placeholders with runtime values
+
+**Template Dev Mode** (Phase 2): Separate dev server with file watcher to preview template changes without playground export step. If too complex for MVP, defer.
+
+### 2.4 Build and Development
 - **Development**: `npm run dev` (Vite dev server with HMR)
+- **Testing**: `npm run test` (Vitest + React Testing Library)
+- **Pre-commit**: Husky hook runs tests + linting (blocks commits if failures)
 - **Build**: `npm run build` (optimized static assets for GitHub Pages)
 - **Preview**: `npm run preview` (test production build locally)
 - **Deployment**: GitHub Actions workflow to build and deploy to `gh-pages` branch
@@ -79,7 +122,8 @@ https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/{style_respo
 ```
 
 **Path Parameters:**
-- **style_response**: `styles` (returns Mapbox Style JSON v8) or `webmaps` (returns ArcGIS web map) |~this is a capability that will be used internally, it is to help libraries that espect to receibe the style as a Mapbox Style JSON~|
+- **style_response**: `styles` (returns Mapbox Style JSON v8) or `webmaps` (returns ArcGIS web map)
+  - **Playground use**: Use `styles` for compatibility with libraries expecting Mapbox Style Spec
 - **style_family**: `arcgis` or `open`
 - **style_name**: e.g., `navigation`, `light-gray/labels`, etc.
 
@@ -88,23 +132,41 @@ https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/{style_respo
 | Family | Data Source | Supported Parameters | Notes |
 |--------|-------------|---------------------|-------|
 | **arcgis** | Esri and authoritative providers | `language`, `worldview`, `places` (varies by style) | More features, richer metadata |
-| **open** | Overture Maps, OpenStreetMap | `language` only | Community data, support fewer options than styles from the *arcgis* family |
+| **open** | Overture Maps, OpenStreetMap | `language` only | Community data, supports fewer options than ArcGIS family |
 
 ### 3.3 Style Groups (Categories)
 Styles are organized into thematic groups:
 
-1. **Streets** - Navigation and routing (e.g., `navigation`, `streets`, `community` and more)
-2. **Topography** - Terrain and natural features (e.g., `outdoor`, `terrain`, `oceans` and mode)
+1. **Streets** - Navigation and routing (e.g., `navigation`, `streets`, `community`, and more)
+2. **Topography** - Terrain and natural features (e.g., `outdoor`, `terrain`, `oceans`, and more)
 3. **Satellite** - Imagery-based (e.g., `imagery`, `imagery/labels`)
 4. **Reference** - Neutral backgrounds for data overlay (e.g., `light-gray`, `dark-gray`)
 5. **Creative** - Artistic styles (e.g., `nova`, `modern-antique`, `newspaper`)
 
-**Special Case: Label Styles**
+### 3.4 Special Layer Types
+
+#### Label Styles (`/labels`)
 - Styles ending in `/labels` (e.g., `light-gray/labels`, `oceans/labels`)
-- Should appear at the END of each group
-- |~Also include the `/base` ones, or Hillshage, that not normally found on other mapping providers and can not be clear what they are for~|
-- Badge/description: **"Use as overlay on custom base layers"** |~This doesnt' apply just to custom styles or label this badges and description should be included for all styles~|
-- These are transparent reference layers, not standalone basemaps |~correct, several of them, but not all. Base por example can be used if you want to reduce clutter (or I believe so, or add your on labels)~|
+- **Purpose**: Transparent reference layers for overlaying on custom base layers
+- **UI Treatment**:
+  - Position at END of each group
+  - Show "Labels Layer" badge
+  - Description: "Use as overlay on custom base layers"
+- **Note**: These are NOT standalone basemaps
+
+#### Base Styles (`/base`)
+- Styles ending in `/base` (e.g., `light-gray/base`, `terrain/base`)
+- **Purpose**: Base layers without labels, allowing users to add custom labels or reduce clutter
+- **UI Treatment**:
+  - Position at END of each group (before or with `/labels` styles)
+  - Show "Base Layer" badge
+  - Description: "Base layer without labels"
+- **Includes**: Hillshade styles and other specialty layers not commonly found in other mapping providers
+
+#### Styles with Embedded Labels
+- Styles that contain labels but aren't exclusively labels (e.g., `navigation`, `streets`)
+- Show "Labels" badge to indicate label support
+- Distinguish from label-only styles
 
 ---
 
@@ -114,11 +176,13 @@ Styles are organized into thematic groups:
 - **Type**: String (ISO 639 code or special keywords)
 - **Values**: `global` (English everywhere), `local` (native names in local regions, English elsewhere), or ISO codes like `es`, `fr`, `ja`, `zh-CN`, etc.
 - **Support**: Most styles support this parameter
-- **UI**: Dropdown with language name and code (e.g., "Español - es") |~Use English an the code language Spanish - es~|
+- **UI**: Dropdown with language name in English + code (e.g., "Spanish - es")
+  - **Note**: App UI remains in English for MVP (UI internationalization is future enhancement)
 - **Behavior Examples**:
   - `global`: "Tokyo" everywhere on the map
   - `local`: "東京" when viewing Japan, "Tokyo" when viewing other regions
   - `es`: "Tokio" everywhere on the map
+- **Documentation Links**: Near parameter control, link to [Language Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#language)
 
 ### 4.2 worldview
 - **Type**: String (country identifier)
@@ -127,8 +191,9 @@ Styles are organized into thematic groups:
 - **Purpose**: Controls boundary lines and labels in disputed territories
 - **UI**:
   - Dropdown, only enabled when style supports it
-  - Disabled state: grayed out with warning icon + tooltip explaining "This style does not support worldview capability"
-  - Tooltip on enabled state (subtle): "Controls boundaries and labels in disputed areas. Does not reflect Esri's geopolitical position."
+  - **Disabled state**: Grayed out with warning icon + tooltip: "This style does not support worldview capability"
+  - **Enabled tooltip** (subtle): "Controls boundaries and labels in disputed areas. Does not reflect Esri's geopolitical position."
+- **Documentation Links**: Link to [Worldview Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#worldview)
 
 ### 4.3 places
 - **Type**: String (enum)
@@ -139,28 +204,54 @@ Styles are organized into thematic groups:
 - **Support**: Only certain ArcGIS styles (e.g., `navigation`, `streets`, `imagery`)
 - **UI**:
   - Radio buttons or select dropdown
-  - Disabled when style doesn't support places |~Same behaviour as worldview or any other disabled paramenter: grayed out with warning icon + tooltip~|
-  - When enabled, show helper text about zoom-dependent visibility |~And consider (if enable) to highgligth the showcase locations. I might include some specific to highlight how places looks differently~|
+  - **Disabled state**: Grayed out with warning icon + tooltip (same behavior as worldview)
+  - **When enabled**: Show helper text about zoom-dependent visibility
+  - **When `attributed` selected**:
+    - Highlight showcase locations in dropdown (if configured for places)
+    - Display interactive hover popup on map showing `esri_place_id`, `name`, `category`
+- **Places Category Filtering** (Phase 2): Dropdown with multi-select, autocomplete search, "Select All" and "None" options
+- **Documentation Links**: Link to [Basemap Places Overview](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/)
 
 ### 4.4 token
 - **Type**: String (API key or session token)
-- **Required**: Yes (must have `premium:user:basemaps` privilege) |~If token fails provide a modal with tutorials, documentation, possible issues, videos, etc. I can help you with that, if you struggle finding them~|
-- **UI**:
-  - Password-style input (type="password") with optional show/hide toggle
-  - Clear security warnings about not sharing keys |~In basemaps keys are normally exposed, the important thing is to properly scope them and rotate them~|
-  - Include warnings that keys will be visible in generated CodePen examples
-- **Usage Models** (see Section 5)
+- **Required**: Yes (must have `premium:user:basemaps` privilege)
+- **UI Location**: Code generator panel (NOT header) - token is for generated code, not playground
+- **Input Type**: `type="password"` with optional show/hide toggle
+- **Placeholder**: "Paste your API key"
+- **Validation**:
+  - Only validate presence (not empty) to enable export buttons
+  - Do NOT validate against API in playground
+  - If export attempted without token, block and show prompt
+- **Empty State**: Before token entered, show prominent card:
+  ```
+  Need an API key?
+  Create a free ArcGIS Location Platform account to get started.
+  [Sign Up] [Learn More]
+  ```
+  - Track CTA clicks in analytics
+- **Failure Handling**: If user reports issues, show modal with:
+  - Link to [Get API Key tutorial](https://developers.arcgis.com/documentation/security-and-authentication/)
+  - Common troubleshooting (wrong privileges, expired key, etc.)
+  - Link to documentation
+  - Videos (user can provide these)
+- **Security Notes**:
+  - Basemap API keys are typically exposed in client-side code (unlike database credentials)
+  - Important: Properly scope keys to specific referrers and rotate frequently
+  - Link to security best practices repo page
+- **Storage**: NOT persisted (session memory only)
+
+**API Key Expiration Note**: API keys can be set to expire, but users can configure them to last up to 1 year.
 
 ### 4.5 echoToken
 - **Type**: Boolean
 - **Default**: `true`
 - **Purpose**: Controls whether token is included in style response
-- **Playground Use**: Ignore for MVP (internal optimization parameter)
+- **Playground Use**: Ignore completely (not relevant for playground purpose)
 
 ### 4.6 f
 - **Type**: String
 - **Values**: `json` or `pjson`
-- **Playground Use**: Default to `json`, hide from UI |~not relevant for the purpose of this playground~|
+- **Playground Use**: Default to `json`, hide from UI (not relevant)
 
 ---
 
@@ -169,7 +260,11 @@ Styles are organized into thematic groups:
 ### 5.1 Tile-Based Model
 - **Mechanism**: Each tile request counts as one basemap transaction
 - **Token**: Standard API key
-- **Use Case**: Low-traffic apps, testing, prototyping |~also for organizations that require more predictable costs, smaller screens, low interaction, etc.~|
+- **Use Cases**:
+  - Low-traffic apps, testing, prototyping
+  - Organizations requiring predictable costs
+  - Applications on smaller screens with low interaction
+  - Scenarios where tile count is naturally limited
 - **Implementation**: Add `?token=<API_KEY>` to style URL
 
 ### 5.2 Session-Based Model
@@ -181,9 +276,11 @@ Styles are organized into thematic groups:
   - Generate code snippets showing HOW to create and use sessions
   - Include comments explaining the model and when to use it
   - Link to documentation for implementation details
-- |~Keep in mind that current versions of the ArcGIS Maps SDK for JavaScript (<5.0) do not support session tokens, but they will in v5.0. So do not try to create a template now. Version 5.0 will be available by the end of February 2026~|
+- **Important Limitation**: ArcGIS Maps SDK for JavaScript versions <5.0 do NOT support session tokens
+  - Version 5.0 will be available by end of February 2026
+  - Do not create ArcGIS Maps SDK template until v5.0 is released
 
-**Rationale**: Session creation charges users and requires token refresh logic. Keep playground simple and non-transactional.
+**Rationale**: Session creation charges users and requires token refresh logic. Keep playground simple and non-transactional. Generated code can demonstrate session patterns.
 
 ---
 
@@ -218,15 +315,24 @@ Styles are organized into thematic groups:
   2. If cache is fresh (within TTL), use cached data
   3. If cache is stale or missing, fetch from `/self`
   4. Store fetched data with current timestamp
-  5. If fetch fails and cache exists, use stale cache with warning banner
+  5. **If fetch fails**: Use stale localStorage cache as fallback with warning banner
 
 ### 6.3 Error Handling
-- **Primary Strategy**: Show error message with retry button
-- **UI**:
-  - Block app initialization until `/self` succeeds OR user dismisses error
-  - Clear error message: "Unable to load basemap styles catalog. Please check your network connection or API key." |~This should be a message on the console, the user can not fix this in the playground~|
-  - Keep trying every few seconds
-  - |~If retry fails multiple times, display a message on the screen with a link to https://status.location.arcgis.com/ and inform the user something by be unestable~|
+- **Primary Strategy**: Auto-retry with console logging
+- **Flow**:
+  1. On `/self` failure, log error to console (user cannot fix in playground)
+  2. Retry every few seconds (configurable interval)
+  3. If cache exists, use it immediately while retrying in background
+  4. After multiple failures, show on-screen message:
+     ```
+     Unable to connect to basemap styles service.
+     Service may be experiencing issues.
+
+     [Check Status Page]
+     ```
+     Link to: https://status.location.arcgis.com/
+  5. Continue retrying in background
+- **No blocking**: Don't prevent app usage if cache is available
 
 ---
 
@@ -235,16 +341,22 @@ Styles are organized into thematic groups:
 ### 7.1 Overall Layout
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Header: Logo, Title, Token Input (collapsed)            │
+│ Header: Logo, Title, [Collapse Sidebar Button]          │
 ├───────────────┬─────────────────────────────────────────┤
-│               │                      Showcase locations │
+│               │  [Showcase Locations Dropdown] [Share]  │
 │  Left Sidebar │         Map Viewer                      │
-│  (collapsible)│      (MapLibre instance)                │
+│  [Collapsible]│      (MapLibre v5.x)                    │
+│               │                                         │
 │  - Family     │                                         │
-│    toggle     │                                         │
-│  - Style Grid │                                         │
+│    Toggle     │                                         │
+│               │                                         │
 │  - Filter     │                                         │
-│    chips      │                                         │
+│    Chips      │                                         │
+│               │                                         │
+│  - Style Grid │                                         │
+│   (scrollable)│                                         │
+│    [Expand    │                                         │
+│     Button]   │                                         │
 │               │                                         │
 │  - Parameter  │                                         │
 │    Controls   │                                         │
@@ -252,392 +364,762 @@ Styles are organized into thematic groups:
 │    • Worldview│                                         │
 │    • Places   │                                         │
 │               ├─────────────────────────────────────────┤
-│               │  Code Generator Panel (collapsible)     │
+│               │  Code Generator Panel (hidden by default)│
+│               │  - Token input with empty state CTA     │
 │               │  - Library tabs                         │
-│               │  - Code snippet display                 │
-│               │  - CodePen button / Download button     │
+│               │  - [Open in CodePen] [Download HTML]    │
 └───────────────┴─────────────────────────────────────────┘
+│ Cookie Consent Banner (if not accepted)                 │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### 7.2 Style Browser (Left Sidebar)
 
+#### Sidebar Collapsibility
+- **Toggle button** in header to collapse/expand entire left sidebar
+- **Purpose**: Maximize map view for focused exploration
+- **Behavior**: Smooth animation, persists state in session storage
+
 #### Family Toggle
 - **Design**: Toggle or tab component (Calcite)
 - **Options**: `ArcGIS` | `Open`
-- **Behavior**: Switching families resets parameters to defaults and updates style grid |~it should keep the parameters (when possible) ~|
-
-#### Style Grid
-- **Layout**: Grid of style cards, ALL visible (no accordion/tabs) |~There are many, so keep that in mind, maybe it should display a modal or a mechanishm to see them almost in full screen. Or a scroll by default with the possibility to display a "modal" to quickly check them~|
-- **Grouping**: Visually grouped by category with subtle headers (Streets, Topography, etc.)
-- **Card Design**:
-  - **Thumbnail**: From `thumbnail` field in `/self` response
-  - **Title**: Human-readable style name (e.g., "Navigation" not "arcgis/navigation")
-  - **Capability Badges**: Small colored icons/chips on or near thumbnail
-    - 🌐 Language support (always visible for most styles)
-    - 🗺️ Worldview support (when `supportedWorldviews` exists)
-    - 📍 Places support (when `supportsPlaces: true`)
-    - 🏷️ Labels layer (when style ends in `/labels`) |~this should be in all styles that contain labels, not just the specific that only contain labels~|
-    - |~Add another badge for "base" when the style include a base layer~|
-    - |~Badges should be listed on any style when it supported, and hidden when not. But in the config you should be able to configure this; allowing to show the badge but grayed out~|
-  - **Visual State**: Highlight selected style
-  - **Labels Styles**: Positioned at end of each group with distinct "overlay" badge |~I like this idea, but maybe "/base" layers should behave similarly~|
+- **Behavior**: Switching families updates style grid and **preserves parameter values when possible**
+  - Example: `language=es` remains if new family supports it
+  - Reset only incompatible parameters (e.g., `worldview` when switching to Open)
 
 #### Filter Chips (Above Grid)
 - **Chips**: "Streets", "Topography", "Satellite", "Reference", "Creative"
-- **Behavior**: Multi-select filter (can select multiple categories)
+- **Behavior**: Multi-select filter (can select multiple categories simultaneously)
 - **Active State**: Highlighted chip shows filtered styles
+- **Default**: All selected (show all styles)
 
 #### Capability Legend
 - **Position**: Above or below filter chips
-- **Content**: Small legend explaining badge icons (with tooltips)
+- **Content**: Small legend explaining badge icons with tooltips
+- **Badges**:
+  - 🌐 **Language** - Supports language parameter
+  - 🗺️ **Worldview** - Supports worldview parameter
+  - 📍 **Places** - Supports places parameter
+  - 🏷️ **Labels** - Style contains labels (not just label-only styles)
+  - 📄 **Base** - Base layer without labels (pattern: `/base` in name)
+
+#### Style Grid
+- **Layout**: Scrollable grid of style cards, ALL visible (no accordion/tabs)
+- **Scroll**: Vertical scroll within sidebar with virtual scrolling for performance
+- **Expand Button**: At top or bottom of grid, opens modal showing all styles in large format
+  - **Modal**: Full-screen or large modal with grid of styles, easier browsing
+  - **Use Case**: Quick scanning of all available styles without sidebar constraints
+- **Grouping**: Visually grouped by category with subtle headers (Streets, Topography, etc.)
+- **Card Design**:
+  - **Thumbnail**: From `thumbnail` field in `/self` response (lazy loaded)
+  - **Title**: Human-readable style name (e.g., "Navigation" not "arcgis/navigation")
+  - **Capability Badges**: Small colored icons/chips on or near thumbnail
+    - **MVP**: Hide unsupported badges (only show applicable ones)
+    - **Config**: Allow future toggle to "show all grayed out" for visual consistency
+  - **Visual State**: Highlight selected style with border/background
+  - **Special Positioning**:
+    - `/labels` styles at END of each group with "Labels Layer" badge
+    - `/base` styles at END of each group (similar treatment as labels) with "Base Layer" badge
 
 ### 7.3 Parameter Controls (Left Sidebar)
 
 #### Language Dropdown
-- **Options**: "Default (global)", "Local", then all supported ISO codes with names (e.g., "Español - es") |~I already made a note about keeping the language names in English (the app won't be localize in initial phases, but should be listed as a possible future enhancement)~|
+- **Options**: "Default (global)", "Local", then all supported ISO codes with names
+  - Format: "Spanish - es", "French - fr" (language names in English)
 - **Disabled State**: If style doesn't support language, gray out with tooltip
 - **Tooltip**: "Choose label language. 'Global' shows English everywhere, 'Local' shows native names in local regions."
+- **Learn More**: Icon linking to [Language Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#language)
 
 #### Worldview Dropdown
 - **Options**: "Default (Global View)", then country identifiers (e.g., "China", "India", "Israel", etc.)
 - **Disabled State**: Grayed out with warning icon when style doesn't support worldview
-  - Tooltip: "This style does not support worldview selection. Only certain ArcGIS styles (like Navigation, Streets, Community) support disputed boundary views."
-- **Enabled Tooltip** (subtle): "Controls boundaries in disputed territories. Does not reflect Esri's official position."
+  - **Tooltip**: "This style does not support worldview capability. Only certain ArcGIS styles (like Navigation, Streets, Community) support disputed boundary views."
+- **Enabled Tooltip** (subtle): "Controls boundaries and labels in disputed areas. Does not reflect Esri's official position."
+- **Learn More**: Icon linking to [Worldview Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#worldview)
 
 #### Places Control
-- **Type**: Radio buttons or select
+- **Type**: Radio buttons or select dropdown
 - **Options**: "None", "All POIs", "Attributed POIs"
-- **Disabled State**: Grayed out when `supportsPlaces: false`
-- **Helper Features** (when enabled and `attributed` selected):
-  - **Zoom Threshold Indicator**: "Places visible at zoom level 12+" (dynamically calculated based on current zoom) |~I'm not sure if this is actyally the zoom level wheree they become visible. I would prefer to have this as a config parameter.~|
-  - **Jump to Example Button**: "Show Places Example" - jumps to preset location with visible places |~Use a button if a single location, or a dropdown if I configure multiple~|
-  - **Interactive Hover**: When hovering over place features on map, show popup with `esri_place_id`, `name`, `category`
-  - |~Add the possibility to filter places by category~|
+- **Disabled State**: Grayed out with warning icon + tooltip when `supportsPlaces: false`
+- **Helper Text** (when enabled): "Places visibility depends on zoom level"
+- **Learn More**: Icon linking to [Basemap Places Overview](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/)
 
-### 7.4 Showcase Locations (Left Sidebar)
-- **Design**: List of preset location buttons
-- **Content**: Hardcoded config mapping styles to demo locations
-  - **Streets styles** → Dense urban areas (Tokyo, NYC, London, Paris)
-  - **Topography styles** → Natural landmarks (Grand Canyon, Swiss Alps, Himalayas)
-  - **Outdoor styles** → Parks, trails (Yosemite, Lake District, New Zealand)
-  - **Satellite styles** → Recognizable landmarks (Great Barrier Reef, Dubai Palm Islands)
-  - **Creative styles** → Visually interesting cities (Venice, Amsterdam, San Francisco)
-- **Behavior**: Click button to pan/zoom map to preset location
-- **UI**: Small chip-style buttons with location names |~I think this will be better as a dropdown and "onchange" move to the selected location~|
+**Phase 2: Places Category Filter**
+- Dropdown with multi-select and autocomplete
+- Options: "Select All", "None", individual categories (restaurants, hotels, parks, etc.)
+- Filters visible POIs on map by category
+
+### 7.4 Showcase Locations
+
+#### UI Component
+- **Type**: Dropdown selector (not buttons)
+- **Position**: Top-right of map viewer
+- **Behavior**: On selection change, pan/zoom map to location
+
+#### Configuration
+- **Format**: Global list with style tags
+  ```javascript
+  // config/showcaseLocations.js
+  export const showcaseLocations = [
+    {
+      name: "Tokyo (Dense Urban)",
+      lat: 35.6762,
+      lng: 139.6503,
+      zoom: 12,
+      tags: ["arcgis/navigation", "arcgis/streets", "Streets"], // specific styles + category
+      description: "Dense urban area showcasing street detail"
+    },
+    {
+      name: "Grand Canyon (Terrain)",
+      lat: 36.0544,
+      lng: -112.1401,
+      zoom: 11,
+      tags: ["Topography", "arcgis/outdoor", "arcgis/terrain"],
+      description: "Natural landmark highlighting topographic relief"
+    },
+    // ... more locations
+  ];
+  ```
+- **Filtering**: Show locations matching current style or category
+- **Visibility Toggle**: Config option to enable/disable per style or globally
+- **Dropdown Contents**:
+  - Show location name
+  - Optionally show description on hover
+  - If no matching locations for current style, show generic world view option
+
+#### Suggested Locations (User will populate)
+- **Streets styles** → Tokyo, NYC, London, Paris
+- **Topography styles** → Grand Canyon, Swiss Alps, Himalayas
+- **Outdoor styles** → Yosemite, Lake District, New Zealand
+- **Satellite styles** → Great Barrier Reef, Dubai Palm Islands
+- **Creative styles** → Venice, Amsterdam, San Francisco
 
 ### 7.5 Map Viewer (Center Panel)
-- **Library**: MapLibre GL JS (v5.x)
-- **Initial State**: |~This should be configurable in the config file~|
-  - Random style from default configurations OR `arcgis/navigation`
-  - Center: `[0, 30]`, Zoom: `2`
-  - Language: `global`
-  - Places: `none`
-  - |~Leave placeholders in the config file for all supported parameters in case I want to change it~|
-- **Interactions**:
-  - Standard pan/zoom controls
-  - Current zoom level displayed between +/- buttons
-  - When `places=attributed`: hover popup showing place details
-- **Behavior**: Updates immediately when parameters change via `map.setStyle()`
+
+#### Map Instance
+- **Library**: MapLibre GL JS v5.x
+- **Initial State**: Configurable in `config/appDefaults.js`
+  ```javascript
+  export const defaultMapState = {
+    style: "arcgis/navigation", // or random from list
+    center: [0, 30],
+    zoom: 2,
+    language: "global",
+    places: "none",
+    worldview: "", // empty = global
+    // Placeholders for all supported parameters
+  };
+  ```
+
+#### Map Controls
+- Standard pan/zoom controls
+- **Zoom display**: Current zoom level shown between +/- buttons
+- **Attribution**: MapLibre default attribution control
+
+#### Interactions
+- **Standard**: Pan, zoom, rotate (with keyboard shortcuts)
+- **Places Hover** (when `places=attributed`):
+  - Cursor becomes pointer over place features
+  - Popup shows: `esri_place_id`, `name`, `category`
+  - Popup follows cursor
+
+#### Updates
+- **Behavior**: Map updates immediately when parameters change via `map.setStyle()`
+- **Debouncing**: Debounce rapid parameter changes to avoid excessive re-renders
 
 ### 7.6 Code Generator Panel (Bottom)
-- **Collapsible**: Can be hidden/shown with toggle |~Initial state = hidden~|
-- **Library Tabs**: MapLibre GL JS, Leaflet (Phase 1), additional libraries later
-- **Code Display**: |~there is no need to display code in the playground the export buttons are enough~|
-- **Export Buttons**:
-  - **"Open in CodePen"**:
-    - POST code to CodePen with token included |~The token included by the user, not the playground token~|
-    - Show prominent warning modal before opening: "Your API key will be visible in the CodePen. Use for testing only. Learn about API keys best practices: https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication"
-  - **"Download HTML"**:
-    - Download self-contained HTML file
-    - CDN-linked libraries (lightweight)
-    - Includes user's current map state and token
-    - Comments with customization guidance |~and links to documentation pages~|
+
+#### Visibility
+- **Default**: Hidden (collapsed)
+- **Toggle**: Button to show/hide panel
+- **Position**: Docked at bottom of viewport, above cookie banner if present
+
+#### Code Display
+- **MVP**: NO code viewer (removed completely)
+  - Just export buttons and token input
+  - **Future Enhancement**: Add optional simple code snippet preview
+
+#### Token Input Section
+- **Location**: Within code generator panel (not header)
+- **Empty State** (no token entered):
+  ```
+  🔑 API Key Required
+
+  To generate code samples, you need an ArcGIS Location Platform API key.
+
+  [Create Free Account] [Learn More]
+
+  Already have a key?
+  [Enter API Key]
+  ```
+  - Track "Create Account" clicks in analytics
+  - "Learn More" links to [Get API Key tutorial](https://developers.arcgis.com/documentation/security-and-authentication/)
+
+- **With Token**:
+  - Password-style input with show/hide toggle
+  - Placeholder: "Paste your API key"
+  - Helper text: "Your key is used only in generated code, not by the playground"
+  - Security note icon with tooltip about scoping and rotation
+
+#### Library Tabs
+- **Phase 1**: MapLibre GL JS, Leaflet
+- **Phase 2+**: ArcGIS Maps SDK for JavaScript (v5.0+), CesiumJS, OpenLayers
+- **Tab Content**: Just library name and icon (no code display in MVP)
+
+#### Export Buttons
+- **"Open in CodePen"**:
+  - **Enabled**: Only when token is present
+  - **Click**: Show security warning modal first
+    ```
+    ⚠️ Security Notice
+
+    Your API key will be visible in the CodePen URL and to anyone who views the pen.
+
+    This is normal for basemap keys. To keep your key secure:
+    • Set HTTP referrer restrictions in your dashboard
+    • Rotate keys frequently
+
+    Learn more: https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication
+
+    [Cancel] [I Understand, Continue]
+    ```
+  - **On Confirm**: POST to CodePen with generated code, open in new tab
+  - **Generated Code**: Uses user's token (not playground token)
+
+- **"Download HTML"**:
+  - **Enabled**: Only when token is present
+  - **Click**: Download self-contained HTML file
+  - **Filename**: `{library}-{styleName}-{timestamp}.html`
+  - **Contents**:
+    - CDN-linked libraries (lightweight, no inline scripts)
+    - User's current map state (style, center, zoom, all parameters)
+    - User's API key
+    - Comments with:
+      - Customization guidance
+      - Links to documentation pages
+      - Security best practices (scoping, rotation)
+      - Link to playground repo for questions
+
+#### Share Button
+**Phase 1 MVP**: Share configuration via URL
+- **Location**: Near export buttons or in header
+- **Click**: Generate shareable URL with encoded parameters
+- **Encoded Parameters**:
+  - Selected style
+  - All parameter values (language, worldview, places)
+  - Map viewport (center, zoom)
+  - Selected library for code generation
+- **URL Format**: `?config=<base64-encoded-json>`
+- **Behavior**:
+  - Copy URL to clipboard
+  - Show toast: "Configuration URL copied to clipboard"
+  - URL loads playground with exact state
+- **Analytics**: Track share button usage
 
 ---
 
-## 8. Code Generation - Pluggable Template System
+## 8. Code Generation - Template System
 
-### 8.1 Architecture |~Reconsider as I said before if it should use a front matter with library versions, HTML, CSS, etc~|
-- **Location**: Templates stored as JavaScript modules in `src/templates/` 
-- **Structure**: Each template exports a function that receives context and returns code string
-- **Context Object**:
-  ```javascript
+### 8.1 Architecture Overview
+- **Goal**: Separate HTML from JavaScript for better developer experience
+- **Challenge**: Keep templates easy to edit while supporting dynamic values
+
+### 8.2 File Structure
+```
+src/templates/
+├── html/
+│   ├── maplibre.html      # Pure HTML with {{placeholders}}
+│   ├── leaflet.html       # Pure HTML with {{placeholders}}
+│   └── ...
+├── config/
+│   ├── maplibre.json      # Library metadata
+│   ├── leaflet.json
+│   └── ...
+└── index.js               # Template registry and generator
+```
+
+### 8.3 Template Format
+
+#### HTML Files (`/html/`)
+- **Format**: Standard HTML with mustache-style placeholders
+- **Placeholders**: `{{variableName}}` replaced at generation time
+- **Example** (`maplibre.html`):
+  ```html
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{styleName}} - MapLibre GL JS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="{{cdnJS}}"></script>
+    <link href="{{cdnCSS}}" rel="stylesheet">
+
+    <style>
+      body { margin: 0; padding: 0; }
+      #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // SECURITY: For production, use environment variables or a proxy
+      // Scope your API key to specific referrers: https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication
+      // Rotate keys frequently
+
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: '{{styleUrl}}',
+        center: [{{lng}}, {{lat}}],
+        zoom: {{zoom}},
+        attributionControl: true
+      });
+
+      map.on('load', () => {
+        console.log('Map loaded successfully');
+        // Add your custom layers or interactions here
+        // Examples: https://developers.arcgis.com/maplibre-gl-js/
+      });
+    </script>
+  </body>
+  </html>
+  ```
+
+#### Config Files (`/config/`)
+- **Format**: JSON with library metadata
+- **Example** (`maplibre.json`):
+  ```json
   {
-    styleUrl: "https://basemapstyles-api.arcgis.com/...",
-    token: "user's API key",
-    center: [lng, lat],
-    zoom: 12,
-    styleName: "arcgis/navigation",
-    language: "es",
-    worldview: "spain",
-    places: "attributed",
-    libraryVersion: "2.1.9" // from template config
+    "name": "MapLibre GL JS",
+    "version": "5.0.0",
+    "cdnJS": "https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js",
+    "cdnCSS": "https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.css",
+    "docs": "https://maplibre.org/maplibre-gl-js-docs/",
+    "examples": "https://developers.arcgis.com/maplibre-gl-js/",
+    "attribution": "auto",
+    "supportsSessionTokens": true
   }
   ```
 
-### 8.2 Template Example (MapLibre) |~This code sample is not accurate, in this case it should use MapLibreGL JS. Add this to the requirements and also for Leaflet, it should use Esri Leaflet plugin to load the basemaps~|
+#### Generator (`index.js`)
 ```javascript
-// src/templates/maplibre.js
-export const maplibreTemplate = (context) => {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>ArcGIS Basemap - ${context.styleName}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+import maplibreHTML from './html/maplibre.html?raw';
+import maplibreConfig from './config/maplibre.json';
+import leafletHTML from './html/leaflet.html?raw';
+import leafletConfig from './config/leaflet.json';
 
-  <!-- MapLibre GL JS -->
-  <script src="https://unpkg.com/maplibre-gl@${context.libraryVersion}/dist/maplibre-gl.js"></script>
-  <link href="https://unpkg.com/maplibre-gl@${context.libraryVersion}/dist/maplibre-gl.css" rel="stylesheet">
-
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-
-  <script>
-    // Initialize map with ArcGIS basemap style
-    // For production, use environment variables for API keys
-    // Learn more: https://developers.arcgis.com/documentation/security/
-
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: '${context.styleUrl}',
-      center: [${context.center[0]}, ${context.center[1]}],
-      zoom: ${context.zoom},
-      attributionControl: true
-      |~Consider if we should include all parameters, commented, for developer reference~|
-    });
-
-    // Add Esri attribution (required by Terms of Service)
-    map.on('load', () => {
-      console.log('Map loaded successfully');
-      // Add your custom layers or interactions here
-    });
-  </script>
-</body>
-</html>`;
-};
-
-export const config = {
-  name: "MapLibre GL JS",
-  version: "2.1.9", |~I guess this should match context.libraryVersion~|
-  docs: "https://maplibre.org/maplibre-gl-js-docs/",
-  icon: "maplibre-icon.svg"
-};
-```
-
-### 8.3 Template Registry |~remember, we want to be able to community maintain this in the long run, so supporting version is required~|
-```javascript
-// src/templates/index.js
-import { maplibreTemplate, config as maplibreConfig } from './maplibre';
-import { leafletTemplate, config as leafletConfig } from './leaflet';
+// Template replacement function
+function generateCode(template, context) {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return context[key] !== undefined ? context[key] : match;
+  });
+}
 
 export const templates = {
-  maplibre: { generate: maplibreTemplate, ...maplibreConfig },
-  leaflet: { generate: leafletTemplate, ...leafletConfig },
-  // Future: arcgis-js, cesium, openlayers
+  maplibre: {
+    config: maplibreConfig,
+    generate: (context) => generateCode(maplibreHTML, {
+      ...maplibreConfig,
+      ...context,
+      styleUrl: context.styleUrl,
+      styleName: context.styleName,
+      lng: context.center[0],
+      lat: context.center[1],
+      zoom: context.zoom
+    })
+  },
+  leaflet: {
+    config: leafletConfig,
+    generate: (context) => generateCode(leafletHTML, {
+      ...leafletConfig,
+      ...context,
+      // Leaflet-specific context transformations
+    })
+  }
 };
 ```
 
-### 8.4 Template Requirements
+### 8.4 Context Object
+When generating code, pass runtime values:
+```javascript
+const context = {
+  styleUrl: "https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/navigation?language=es&token=...",
+  token: "user's API key",
+  center: [-122.4194, 37.7749], // [lng, lat]
+  zoom: 12,
+  styleName: "arcgis/navigation",
+  language: "es",
+  worldview: "", // empty or specific country
+  places: "attributed"
+};
+```
+
+### 8.5 Template Requirements
 Each template MUST:
 1. Generate a fully functional standalone HTML file
-2. Include proper library CDN links with specific versions
-3. Show the exact map state from the playground (style, center, zoom)|~and any other supported and parameter set in the playground~|
-4. Include Esri attribution as per Terms of Service |~Some libraries do that by default, other need to add it manually, but with the samples I will provide you should be OK~|
-5. Add security comments about API key management |~Importance of scoping and rotate them frequently. You could include a link to a page in the repo with more information, link to docs, an issue for questions, etc~|
+2. Include proper library CDN links with specific versions from config
+3. Show the exact map state from playground (style, center, zoom, and ALL set parameters)
+4. Include Esri attribution (MapLibre does this automatically, Leaflet requires Esri Leaflet plugin)
+5. Add security comments about:
+   - API key scoping to referrers
+   - Frequent rotation
+   - Link to repo page with more info and issue tracker for questions
 6. Add helpful comments for customization
-7. Reference examples from `developers.arcgis.com` in comments |~Or any other developer resources like tutorials or documentations pages~|
-8. |~There should be a mechanism or easy way to debug the templates locally, meaning the used HTML should probably be imported in the build process byt would allow me do easily to manual changes if needed~|
+7. Reference examples from `developers.arcgis.com` or other developer resources
 
-### 8.5 Adding New Templates (Future) |~Reevaluate based on my previous annotations~|
+**Important**:
+- **MapLibre templates**: Use standard MapLibre GL JS syntax
+- **Leaflet templates**: MUST use Esri Leaflet plugin to load basemaps correctly
+  - CDN: `https://unpkg.com/esri-leaflet@3.x/dist/esri-leaflet.js`
+  - Example: User will provide accurate sample code to templatize
+
+### 8.6 Template Debugging (Phase 2)
+**Goal**: Preview template changes without playground export step
+
+**Approach**: Separate dev mode with file watcher
+- Command: `npm run template-dev`
+- Watches `/templates/html/` for changes
+- Serves templates on localhost with mock data
+- Hot reload on save
+- **If too complex for MVP**: Defer to Phase 2
+
+**Fallback**: Test generated HTML by exporting and opening in browser
+
+### 8.7 Template Versioning
+- **Library versions**: Explicitly specified in `config/*.json`
+- **Version updates**: Community can submit PRs to update library versions
+- **Call for Contributions**: README includes section:
+  ```markdown
+  ## Contributing Templates
+
+  We welcome community contributions for:
+  - New library templates (OpenLayers, CesiumJS, etc.)
+  - Library version updates
+  - Template improvements
+
+  See CONTRIBUTING.md for guidelines.
+  ```
+
+### 8.8 Adding New Templates
 Process for contributors:
-1. Create new file in `src/templates/[library-name].js`
-2. Export `template` function and `config` object
-3. Follow template requirements above
-4. Add to registry in `src/templates/index.js`
-5. Test with multiple styles and parameter combinations
-6. Submit PR with example output
+1. Create new HTML file in `src/templates/html/[library-name].html`
+2. Create new config file in `src/templates/config/[library-name].json`
+3. Add to registry in `src/templates/index.js`
+4. Test with multiple styles and parameter combinations
+5. Ensure all template requirements are met (Section 8.5)
+6. Submit PR with:
+   - Example output HTML
+   - Screenshot of generated code working
+   - Note on library version tested
 
 ---
 
 ## 9. Token Management and Security
 
-### 9.1 Token Input
-- **Location**: Collapsible section in header or settings panel |~This should be  in the code generator panel. It's not been used by the playground by the the generated code ~|
-- **Input Type**: `type="password"` with optional show/hide toggle
-- **Placeholder**: "Paste your API key (required)"
-- **Validation**:
-  - |~It shouldn't validate in the playground, only make sure it was introduced to be able to generate the code sample, otherwise not enable the button to generate the code~|
-- **Storage**: NOT persisted (session memory only for security)
+### 9.1 Token Input Location
+- **Where**: Code Generator Panel (NOT header)
+- **Why**: Token is used in generated code, not by the playground itself
 
-### 9.2 Security Warnings |~Reevaluate this warning and focus on setting referrers and rotate frequently~|
-- **Before CodePen**: Modal with prominent warning:
+### 9.2 Token Validation
+- **No validation in playground**: Don't test token against API
+- **Only requirement**: Token must be present (not empty) to enable export buttons
+- **On export without token**: Block action and show prompt to enter key
+
+### 9.3 Security Messaging
+
+#### Near Input
+- Helper text: "Your API key is used only in generated code"
+- Security icon with tooltip:
   ```
-  ⚠️ Security Warning
-
-  Your API key will be visible in the generated CodePen URL and to anyone who views the pen.
-
-  For testing only. For production:
-  - Use environment variables
-  - Implement a proxy server
-  - Use OAuth 2.0 for user authentication
+  API Key Security Best Practices:
+  • Basemap keys are typically exposed in client code
+  • Set HTTP referrer restrictions in your dashboard
+  • Rotate keys frequently (every few months)
+  • Monitor usage for unexpected activity
 
   Learn more: [link to security docs]
-
-  [Cancel] [I Understand, Open CodePen]
   ```
-- **In Generated Code**: Comments warning about token exposure and linking to security best practices
 
-### 9.3 Download Option (Safer Alternative)
-- Generates same code but downloaded as local HTML file
-- User can test locally without exposing token in a public URL
-- Recommended in UI as safer option for experimentation
+#### Before CodePen Export
+- Modal warning (see Section 7.6 for full text)
+- **Focus on**: Referrer scoping and rotation (not hiding the key)
+
+#### In Generated Code
+- Comments at top of script section:
+  ```javascript
+  // SECURITY NOTICE
+  // API keys for basemaps are exposed in client-side code.
+  // This is expected behavior. To keep your key secure:
+  //
+  // 1. Set HTTP referrer restrictions in your ArcGIS dashboard
+  //    Only allow requests from your domain(s)
+  //
+  // 2. Rotate keys frequently (every 3-6 months)
+  //    Create new keys and retire old ones regularly
+  //
+  // 3. Monitor usage in your dashboard
+  //    Watch for unexpected spikes or unauthorized domains
+  //
+  // Learn more: https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication
+  // Questions? https://github.com/[your-repo]/issues
+  ```
+
+### 9.4 Storage
+- **Session memory only**: Never persist to localStorage
+- **Clear on page reload**: User must re-enter token each session
 
 ---
 
 ## 10. Analytics and Telemetry
 
-### 10.1 Metrics to Track
+### 10.1 Implementation
+- **Service**: Google Analytics
+- **Privacy**: No PII collection
+- **Do Not Track**: Respect browser DNT headers
+- **Cookie Consent**: Required (see Section 10.3)
+
+### 10.2 Metrics to Track
 - Page views and session duration
 - Style selection frequency (which styles are most explored)
 - Parameter usage (how often worldview/places are used)
 - Library preferences in code generation
 - CodePen vs Download button usage
-- Error rates (failed /self calls, invalid tokens) |~Consider if using something like rollerbar to receive error warning would be easy, or add it to the future improvements~|
-- |~The app should have a call to action to create an account when needing to set an API key (in case the user do not have an account). Track clicks here too~|
-- |~Add a cookie consent notice for visitors from laws regarding to it, like Europeans~|
+- Share button usage
+- Error rates (failed `/self` calls)
+- Empty state CTA clicks (account creation link)
+- **Future Enhancement**: Consider Rollbar or similar for error monitoring
 
+### 10.3 Cookie Consent
+**Requirement**: GDPR compliance for European visitors
 
-### 10.2 Implementation
-- Use Google Analytics
-- No PII collection
-- Respect Do Not Track headers
-- Clear privacy policy link in footer |~I don't personally have one. This will live on my personal repo, so include a markdown file with a template and include a TODO list for me or placeholders to fill it.~|
+**Implementation**: Simple consent banner
+- **Position**: Fixed at bottom of viewport
+- **Content**:
+  ```
+  🍪 This site uses cookies to analyze usage and improve your experience.
 
-### 10.3 Purpose
-- Understand developer behavior to improve playground
-- Identify popular styles for prioritization
-- Track/identify issues to be able to solve them (high error rates, confusing UX)
+  [Accept] [Learn More]
+  ```
+- **Behavior**:
+  - Show on first visit
+  - "Accept" sets consent cookie and enables analytics
+  - "Learn More" links to privacy policy
+  - Banner dismissed on accept, doesn't reappear
+  - If not accepted, analytics remain disabled
+- **Storage**: Consent choice stored in localStorage
+
+### 10.4 Privacy Policy
+**Challenge**: User doesn't have a personal privacy policy
+
+**Solution**: Include template markdown file
+- **File**: `PRIVACY_TEMPLATE.md` in repo
+- **Content**:
+  ```markdown
+  # Privacy Policy - ArcGIS Basemap Styles Playground
+
+  ## TODO: Personalize
+  - [ ] Replace [YOUR NAME] with your name
+  - [ ] Replace [YOUR EMAIL] with your contact email
+  - [ ] Replace [EFFECTIVE DATE] with current date
+  - [ ] Review and adjust as needed
+
+  ## Analytics
+  This playground uses Google Analytics to understand how developers use the tool...
+
+  ## Data Collection
+  We collect:
+  - Page views and usage patterns
+  - No personally identifiable information
+  - No API keys (stored in session memory only)
+
+  ## Contact
+  Questions? Email [YOUR EMAIL] or open an issue on GitHub.
+  ```
+- **Link**: Footer includes "Privacy Policy" link
 
 ---
 
-## 11. Phase 1 MVP - Feature Prioritization |~Reevaluate based on all my previous annotations~|
+## 11. Phase-Based Roadmap
 
-### 11.1 Phase 1 Scope (MVP)
-**Goal**: Core exploration and code generation with 1 or 2 libraries
+### 11.1 Phase 1: Core MVP (Aggressive Scope)
+**Goal**: Functional playground with essential features only
 
 **Included**:
-- ✅ Dynamic style loading from `/self` with simple TTL cache
-- ✅ Family toggle (ArcGIS / Open)
-- ✅ Style browser with grid layout, filters, and capability badges
-- ✅ Parameter controls (language, worldview, places) with proper disabled states
-- ✅ MapLibre map viewer with real-time updates
-- ✅ Showcase location presets (hardcoded config)
-- ✅ Places interaction (hover popup with id/name/category when `attributed`)
-- ✅ Code generation for **MapLibre GL JS** and **Leaflet**
-- ✅ CodePen export with security warnings
+- ✅ Dynamic style loading from `/self` with TTL cache + localStorage fallback
+- ✅ Family toggle (ArcGIS / Open) with parameter preservation
+- ✅ Style browser with grid layout, scroll, expand modal
+- ✅ Filter chips (category multi-select)
+- ✅ Capability badges (hide unsupported)
+- ✅ Parameter controls (language, worldview, places) with disabled states
+- ✅ MapLibre GL JS v5.x map viewer with real-time updates
+- ✅ Collapsible left sidebar
+- ✅ Showcase location dropdown (global list with style tags)
+- ✅ Places hover popup (id/name/category when `attributed`)
+- ✅ Code generation for **MapLibre GL JS** and **Leaflet** (HTML templates with separate configs)
+- ✅ CodePen export with security warning modal
 - ✅ HTML download option
-- ✅ Token input (password-style, non-persistent)
-- ✅ Responsive layout (desktop + tablet)
-- ✅ Basic error handling (/self failures, invalid tokens)
+- ✅ Token input in code panel with empty state CTA
+- ✅ Share configuration via URL (all parameters + viewport)
+- ✅ Responsive layout (desktop + tablet, 768px+)
+- ✅ Basic error handling (console + retry + status link)
 - ✅ Calcite Design System components
-- ✅ Tooltips and help text for all parameters
+- ✅ Tooltips and "Learn More" links for all parameters
+- ✅ Cookie consent banner (simple accept button)
+- ✅ Google Analytics with consent gating
+- ✅ Privacy policy template
+- ✅ Vitest + React Testing Library + pre-commit hooks
+- ✅ Node 25, MapLibre v5.x
 
-**Excluded** (Future Phases):
-- ❌ Session-based model active management (educational code examples only)
-- ❌ Custom style itemId search
-- ❌ Multi-view (simultaneous maps at different zooms)
-- ❌ Additional libraries (ArcGIS Maps SDK, Cesium, OpenLayers)
-- ❌ 3D map styles
-- ❌ Tile usage counter
-- ❌ Advanced caching (versioning, migrations)
-- ❌ UI internationalization (English only for MVP)
-- ❌ Mobile-optimized layout (tablet+ only)
+**Excluded** (Deferred):
+- ❌ Places category filtering → Phase 2
+- ❌ Template dev mode with file watcher → Phase 2
+- ❌ Split-view swipe comparison → Future
+- ❌ Educational markers/popovers on locations → Future
+- ❌ Custom style itemId search → Phase 2
+- ❌ Session-based model UI (code examples only in MVP)
+- ❌ Multi-view (simultaneous maps) → Phase 2
+- ❌ ArcGIS Maps SDK template (wait for v5.0 - Feb 2026) → Phase 2
+- ❌ CesiumJS, OpenLayers templates → Phase 3
+- ❌ 3D map styles → Phase 3
+- ❌ Code viewer in playground (removed completely, future: snippet preview) → Future
+- ❌ Tile usage counter → Phase 3
+- ❌ Advanced caching (versioning, migrations) → Phase 3
+- ❌ UI internationalization → Phase 3
+- ❌ Mobile-optimized layout (<768px) → Phase 2
+- ❌ Dark mode → Future
+- ❌ Rollbar error monitoring → Future
+- ❌ Issue templates → Future
+- ❌ MapViewer integration → Future
+- ❌ Community showcase gallery → Future
+- ❌ iframe embed code → Future
 
-### 11.2 Phase 2 (Enhanced)
-- Multi-view option (2 synchronized maps)
-- ArcGIS Maps SDK for JavaScript template
+### 11.2 Phase 2: Enhanced Experience
+**Goal**: Add deferred features that improve usability
+
+- Places category filtering (multi-select dropdown with autocomplete)
+- Template dev mode with file watcher
 - Custom style search by itemId
-- Mobile responsive refinements
+- Mobile responsive refinements (<768px)
+- ArcGIS Maps SDK for JavaScript template (v5.0+)
 - Session model educational examples with step-by-step guide
+- Multi-view option (2 synchronized maps)
+- Badge visibility config (show grayed vs hide)
 - Improved analytics dashboard
+- Issue templates for contributions
 
-### 11.3 Phase 3 (Advanced)
+### 11.3 Phase 3: Advanced Features
+**Goal**: Community-driven enhancements
+
 - CesiumJS and OpenLayers templates
 - 3D map styles support
 - Tile usage visualization (educational mock counter)
-- UI internationalization
-- Community template contributions (external fetch)
+- UI internationalization (Spanish, French, etc.)
+- Advanced caching (versioning, migrations)
+- Community template contributions (external hosting)
 - Advanced showcase mode (multiple preset views per style)
+
+### 11.4 Future Enhancements (Beyond Phase 3)
+- **Dark mode**: UI theme toggle
+- **Split-view swipe comparison**: Drag slider to compare two styles side-by-side
+- **Educational location markers**: Popovers explaining style features (water bodies, trails, etc.)
+- **Comparison Mode**: Side-by-side view of two different styles
+- **MapViewer integration**: Link to ArcGIS Map Viewer with current style/params
+- **Style Customization Preview**: Light integration with Vector Tile Style Editor
+- **Community Showcase**: Gallery of beautifully designed map experiences
+- **Embed Code**: iframe embed snippets for documentation sites
+- **User authentication**: Log in with ArcGIS identity, see/select available API keys
+- **Rollbar error monitoring**: Proactive error detection
+- **Code snippet preview**: Simple viewer showing key lines (future, removed from MVP)
 
 ---
 
-## 12. Accessibility and Best Practices |~Reevaluate based on all my previous annotations. I think basemaps is not a great technology for blind people, so simplify this if needed, but keep accesibility for other issues~|
+## 12. Accessibility and Best Practices
 
 ### 12.1 Accessibility (WCAG 2.1 AA Compliance)
-- ✅ Keyboard navigation for all interactive elements
-- ✅ Proper focus indicators (visible outlines)
+**Note**: Basemaps are inherently visual. Prioritize accessibility for UI controls over map content.
+
+**Focus Areas**:
+- ✅ Keyboard navigation for all interactive elements (tab order, enter/space activation)
+- ✅ Proper focus indicators (visible outlines, high contrast)
 - ✅ ARIA labels for icon buttons and controls
 - ✅ Semantic HTML (headings, landmarks, lists)
-- ✅ Color contrast ratios minimum 4.5:1
-- ✅ Screen reader announcements for map updates
+- ✅ Color contrast ratios minimum 4.5:1 for text
+- ✅ Screen reader announcements for parameter changes (e.g., "Language changed to Spanish")
 - ✅ Alt text for style thumbnails
 - ✅ Form labels associated with inputs
+- ⚠️ Skip complex screen reader support for map canvas (inherent limitation)
 
 ### 12.2 Performance
-- Lazy load style thumbnails (intersection observer)
-- Debounce map updates on parameter changes
+- Lazy load style thumbnails (Intersection Observer)
+- Virtual scrolling for style grid (if many styles)
+- Debounce map updates on parameter changes (300ms)
 - Minimize re-renders (React.memo, useMemo where appropriate)
-- Code splitting by route if multi-page (not needed for MVP)
 - Compress images and assets
+- Code splitting (Vite handles automatically)
 
 ### 12.3 Browser Support
 - Modern evergreen browsers (Chrome, Firefox, Safari, Edge)
 - ES2020+ features (no IE11 support)
 - WebGL required (MapLibre dependency)
+- Node 25 for development (enforced via `.nvmrc`)
 
 ### 12.4 Mobile Responsiveness
-- Phase 1: Desktop and tablet (768px+)
-- Phase 2: Mobile optimization (< 768px)
-- Touch-friendly controls (minimum 44x44px tap targets)
+- **Phase 1**: Desktop and tablet (768px+)
+- **Phase 2**: Mobile optimization (<768px)
+  - Collapsible sidebar becomes modal/drawer on mobile
+  - Touch-friendly controls (minimum 44x44px tap targets)
+  - Simplified layout for small screens
 
 ---
 
-## 13. Testing Strategy |~I basically want to be sure that while we make progress, we don't break things that previously worked. So I want to have tests that can be runned frequently to identify introduced bugs and fix them before doing any commits ~|
+## 13. Testing Strategy
 
-### 13.1 Unit Tests
+### 13.1 Goal
+Prevent regressions by running tests frequently before commits.
+
+### 13.2 Testing Stack
+- **Unit/Integration**: Vitest + React Testing Library
+- **Pre-commit Hook**: Husky runs tests + linting
+  - Blocks commits if tests fail
+  - Ensures code quality before changes enter repo
+- **CI**: GitHub Actions runs tests on PR (future enhancement)
+
+### 13.3 Unit Tests
 - URL generation with various parameter combinations
-- Cache TTL logic
-- Template generation for each library
+- Cache TTL logic and localStorage fallback
+- Template generation for each library (placeholder replacement)
 - Error handling edge cases
+- Share URL encoding/decoding
 
-### 13.2 Integration Tests
+### 13.4 Integration Tests
 - `/self` endpoint fetch and parsing
 - Map initialization with different styles
 - Parameter changes triggering style reload
 - CodePen POST integration
+- Cookie consent flow
 
-### 13.3 E2E Tests (Optional)
+### 13.5 E2E Tests (Optional, Phase 2)
+- Playwright or Cypress for browser automation
 - Full user flow: select style → configure params → generate code → export
 - Error scenarios (network failures, invalid tokens)
 
-### 13.4 Manual Testing Checklist
+### 13.6 Manual Testing Checklist
+Before each release:
 - [ ] All styles load correctly in both families
 - [ ] Parameter controls enable/disable appropriately per style
 - [ ] Map updates on parameter change
-- [ ] Code snippets match current selections
+- [ ] Family toggle preserves compatible parameters
+- [ ] Share URL correctly encodes/restores state
 - [ ] CodePen export opens with correct code
 - [ ] Download generates working HTML file
 - [ ] Showcase locations navigate correctly
 - [ ] Places hover/popup works at appropriate zoom
 - [ ] Error messages clear and actionable
+- [ ] Sidebar collapse/expand works smoothly
+- [ ] Cookie consent banner appears and persists choice
 - [ ] Accessible via keyboard only
-- [ ] Responsive on tablet
+- [ ] Responsive on tablet (768px+)
 
 ---
 
@@ -645,20 +1127,40 @@ Process for contributors:
 
 ### 14.1 In-App Help
 - **Tooltips**: On all controls explaining purpose and behavior
-- **Info Icons**: Link to relevant documentation sections
-- **Contextual Help**: "Learn More" links near complex features
-- **Welcome Modal** (optional): First-time user tutorial |~I'm OK with this, but it should be pretty usable with the previous elements. But I'm OK adding a optional icon in the interface (where they use to be in case anyone needs more guided instructions), but not a first time  modal displayed by default~|
+- **Info Icons**: "Learn More" links near each parameter to relevant docs:
+  - Language → [Language Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#language)
+  - Worldview → [Worldview Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#worldview)
+  - Places → [Basemap Places Overview](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/)
+- **Contextual Help**: Security tooltips, empty state guidance, error explanations
+- **Help Icon** (Optional): Small "?" icon in header opening help modal with guided tour
+  - **NOT** a forced first-time modal
+  - Available for users who want guided instructions
 
 ### 14.2 External Documentation
-- README.md with:
-  - What is the playground
-  - How to use it
-  - How to contribute templates
-  - Deployment instructions
-- CONTRIBUTING.md for developers wanting to add templates |~Or suggest improvements, report bugs, etc. Consider adding issue templates at some point.~|
-- Link to official Esri docs: https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/ and https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/
 
-### 14.3 Example Links to Include
+#### README.md
+- What is the playground
+- Live demo link
+- How to use it (quick start)
+- How to contribute templates
+- Deployment instructions
+- Link to official Esri docs
+
+#### CONTRIBUTING.md
+- How to add templates
+- How to suggest improvements
+- How to report bugs
+- Code style guidelines
+- PR process
+- **Future**: Issue templates for bugs, features, template requests
+
+#### PRIVACY_TEMPLATE.md
+- Template with TODOs for user to personalize
+- Placeholder for name, email, effective date
+- Standard privacy policy structure
+
+### 14.3 Links to Official Documentation
+Include these throughout the UI:
 - [Introduction to Basemap Styles Service](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/introduction-basemap-styles-service/)
 - [ArcGIS Styles Reference](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/arcgis-styles/)
 - [Open Styles Reference](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/open-styles/)
@@ -666,109 +1168,56 @@ Process for contributors:
 - [Worldview Parameter Details](https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#worldview)
 - [Basemap Places Overview](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/)
 - [Usage Models Comparison](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-usage-styles/)
-- [API Key Security Best Practices](https://developers.arcgis.com/documentation/security/)
+- [API Key Security Best Practices](https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication)
 
 ---
 
 ## 15. Known Considerations and Design Decisions
 
 ### 15.1 Why React + Calcite?
-- **React**: Robust state management, component reusability, large ecosystem
-- **Calcite**: Official Esri design system, pre-built accessible components, consistent branding
+- **React**: Robust state management, component reusability, large ecosystem, excellent testing support
+- **Calcite**: Official Esri design system, pre-built accessible components, consistent branding with other Esri dev tools
 
 ### 15.2 Why Not Active Session Management?
 - Complex lifecycle management (expiration, renewal)
 - Playground should be exploratory, not transactional
-- Educational approach (show code) achieves learning goal
+- Educational approach (show code) achieves learning goal without billing users
 
-### 15.3 Why Pluggable Templates in Codebase (Not External)?
-- Simpler architecture for MVP
-- Templates versioned with app (no version mismatch issues)
-- Easier testing and quality control
-- Can evolve to external fetching in Phase 2/3
+### 15.3 Why Separate HTML Templates from JS?
+- Better developer experience (syntax highlighting, IDE support)
+- Easier for community to contribute templates
+- Simpler to review changes in PRs
+- Can preview/test templates without building entire app (Phase 2)
 
 ### 15.4 Why Skip Custom Styles in MVP?
-- Adds complexity (unknown schema, validation)
+- Adds complexity (unknown schema, validation, error handling)
 - Core value is exploring public catalog
-- Can add later once core flows are solid
+- Can add later once core flows are solid (Phase 2)
 
-### 15.5 Why Simple TTL Cache (Not Sophisticated)?
+### 15.5 Why Simple TTL Cache with localStorage Fallback?
 - MVP needs to ship quickly
-- Service catalog doesn't change frequently
-- 24-hour TTL is reasonable balance
-- Can enhance with versioning/migrations later
+- Service catalog doesn't change frequently (24hr TTL is safe)
+- Fallback ensures app works even when API is down
+- Can enhance with versioning/migrations later (Phase 3)
 
 ### 15.6 Why Password Input for Token?
-- Signals sensitivity to users
+- Signals sensitivity to users (even though basemap keys are typically exposed)
 - Prevents accidental screenshots with visible keys
 - Standard pattern for sensitive inputs
 
----
+### 15.7 Why Remove Code Display from MVP?
+- Simplifies UI (less visual clutter)
+- Export buttons serve primary use case (test in CodePen or download)
+- Can add back as optional preview in future enhancement
 
-## 16. Future Enhancements (Beyond Phase 3)
-
-### 16.1 Potential Features
-- **Dark Mode**: UI theme toggle
-- **Save/Share Configurations**: Generate shareable URLs with encoded parameters |~Add this to the MVP. It should be rocket science, right?~|
-- **Comparison Mode**: Side-by-side view of two different styles
-- **Layer Overlay**: Allow users to add GeoJSON for testing data visualization on various basemaps |~I don't personally think this make too much sense, it should allow to use the MapViewer instead, but it is true that I think some basemap parameters like enable/disable places is not in the Map Viewer Interface. Any ArcGIS Location Platform user have access to it~| 
-- **Style Customization Preview**: Light integration with Vector Tile Style Editor
-- **Community Showcase**: Gallery of user-created examples |~with beautifully designed maps experiences~|
-- **Embed Code**: iframe embed snippets for documentation sites
-- |~Add specific locations per style to highlight specific features, like how outdoors styles highlight specific features like water bodies, green areas or trails. With some markers drawing user attention to them and labels with popovers with explanations. That will help understand the user what's the difference between styles and why some are a better fit for some applications than others~|
-- |~Be able to enable a split view with a "swipe bar" that allows the user to visually compare the different between styles dragging and dropping~|
-
-### 16.2 API Enhancements (Requires Esri Action)
-- Include showcase locations in `/self` response metadata
-- Provide zoom threshold data for places visibility
-- Versioning for style catalog (for smarter cache invalidation)
+### 15.8 Why Aggressive MVP Scope?
+- Many features added complexity (places filtering, template dev mode, etc.)
+- Ship faster with core features, iterate based on user feedback
+- Deferred features can be prioritized by actual usage patterns
 
 ---
 
-## 17. Success Metrics |~I don't think this is too relevant for the AI model to build this, right? consider removing this~|
-
-### 17.1 Developer Adoption
-- Number of unique visitors
-- Code generation events (CodePen opens, downloads)
-- Return visitor rate
-
-### 17.2 Educational Impact
-- Reduction in support questions about basemap styles
-- Increase in diverse style usage (beyond just `navigation`)
-- Positive feedback from developer community
-
-### 17.3 Technical Health
-- Error rate < 1% for `/self` fetches
-- Map load time < 2 seconds on average
-- Accessibility audit score > 90
-
----
-
-## 18. Appendix: Style URL Examples |~This is incomplete, I'm not sure what's the purpose of having this here when we have the link to "/self"~|
-
-### 18.1 Basic Navigation Style
-```
-https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/navigation?token=YOUR_API_KEY
-```
-
-### 18.2 Spanish Labels with China Worldview
-```
-https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/streets?language=es&worldview=china&token=YOUR_API_KEY
-```
-
-### 18.3 Imagery with Attributed Places
-```
-https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=global&places=attributed&token=YOUR_API_KEY
-```
-
-### 18.4 Open Style (Fewer Parameters)
-```
-https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/open/navigation?language=fr&token=YOUR_API_KEY
-```
-
----
-
-## 19. Glossary
+## 16. Glossary
 
 - **Basemap**: Background map providing geographic context for data visualization
 - **Style**: Visual design specification (colors, symbols, labels) for rendering map data
@@ -777,21 +1226,35 @@ https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/open/
 - **POI**: Point of Interest (restaurant, landmark, business, etc.)
 - **Worldview**: Political/territorial boundary perspective for disputed areas
 - **Attribution**: Legal requirement to credit data providers
-- **API Key**: Token authorizing access to Esri services |~This one also expire, but the user can set them to last for 1 year~|
-- **Session Token**: Temporary token for unlimited tile access within time window
+- **API Key**: Token authorizing access to Esri services (can expire, but users can set up to 1 year)
+- **Session Token**: Temporary token for unlimited tile access within time window (up to 12 hours)
 - **TTL**: Time-To-Live (cache expiration duration)
+- **HMR**: Hot Module Replacement (instant updates during development)
+- **GDPR**: General Data Protection Regulation (European privacy law requiring cookie consent)
 
 ---
 
-## 20. Revision History
+## 17. Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 2.0 | 2026-02-13 | [Author] | Complete rewrite merging original SPEC.md and SPEC2.md with stakeholder interview decisions. Moved to React architecture with phased delivery approach. |
-| 1.0 | [Previous] | [Author] | Initial specification for single-page HTML implementation |
+| 3.0 | 2026-02-13 | Claude + User | Major revision incorporating user annotations. Key changes: HTML templates separated from JS, code display removed, aggressive MVP scope, MapLibre v5, Node 25, share URLs added to MVP, collapsible sidebar, places filter deferred, template dev mode deferred, cookie consent added, testing strategy refined. |
+| 2.0 | 2026-02-13 | Claude | Complete rewrite merging original SPEC.md and SPEC2.md with stakeholder interview decisions. Moved to React architecture with phased delivery approach. |
+| 1.0 | [Previous] | Original Author | Initial specification for single-page HTML implementation |
 
 ---
 
 **End of Specification**
 
-For questions or clarifications, contact: [developers@esri.com](mailto:developers@esri.com)
+**Next Steps**:
+1. Set up React + Vite project with Node 25
+2. Create basic project structure and install dependencies
+3. Implement `/self` fetch with caching
+4. Build style browser with Calcite components
+5. Integrate MapLibre v5
+6. Create template system with MapLibre and Leaflet examples
+7. Implement export functionality
+8. Add testing framework
+9. Deploy to GitHub Pages
+
+For questions or clarifications, contact: [developers@esri.com](mailto:developers@esri.com) or open an issue on GitHub.
