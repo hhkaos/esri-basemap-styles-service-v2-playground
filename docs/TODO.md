@@ -3,51 +3,170 @@
 ## Current Sprint
 
 ### In Progress
-- [ ] Integrate MapLibre GL JS v5.x viewer
+
+- [ ] Implement template system (MapLibre + Leaflet)
 
 ### Up Next
-- [ ] Create parameter controls (language, worldview, places)
-- [ ] Implement template system (MapLibre + Leaflet)
+
+- [ ] Build code generator panel UI (bottom-docked, collapsible)
+- [ ] Add CodePen export with security warning modal
+- [ ] Add HTML download option
 
 ## Backlog
 
 ### High Priority (Phase 1 - MVP)
-- [ ] Create parameter controls (language, worldview, places)
-- [ ] Implement template system (MapLibre + Leaflet)
-- [ ] Add CodePen export functionality
-- [ ] Add HTML download option
-- [ ] Implement share configuration via URL
-- [ ] Add cookie consent banner
+
+#### Style Browser
+
+- [ ] Add family toggle (ArcGIS / Open) with parameter preservation on switch
+- [ ] Add filter chips (Streets, Topography, Satellite, Reference, Creative) with multi-select
+- [ ] Add capability badges with legend (Language, Worldview, Places, Labels, Base)
+- [ ] Group styles visually by category with subtle headers
+- [ ] Position `/labels` and `/base` styles at end of each group with badges
+- [ ] Add lazy-loaded thumbnails with Intersection Observer
+
+#### Sidebar
+
+- [ ] Add sidebar collapse/expand toggle in header (smooth animation, session storage persistence)
+
+#### Parameter Controls
+
+- [ ] Add tooltips on all parameter controls (language, worldview, places)
+- [ ] Add "Learn More" info icons linking to documentation URLs
+- [ ] Add warning icon + tooltip on disabled parameter controls
+
+#### Showcase Locations
+
+- [ ] Create showcase location dropdown (top-right of map, tag-based filtering per style)
+- [ ] Create `config/showcaseLocations.js` with global location list, style tags, descriptions
+
+#### Map Viewer
+
+- [ ] Add zoom level display between +/- buttons
+- [ ] Add places hover popup (esri_place_id, name, category when `places=attributed`)
+- [ ] Add debouncing for rapid parameter changes (300ms)
+
+#### Code Generator Panel
+
+- [ ] Build code generator panel UI (bottom-docked, hidden by default, toggle button)
+- [ ] Add token input with password show/hide toggle
+- [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", "Learn More")
+- [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
+- [ ] Add library tabs (MapLibre GL JS, Leaflet)
+- [ ] Add security warning modal before CodePen export
+
+#### Templates
+
+- [ ] Implement template system (MapLibre + Leaflet HTML templates with `{{placeholders}}`)
+- [ ] Create template config JSON files (`src/templates/config/maplibre.json`, `leaflet.json`)
+- [ ] Create template generator registry (`src/templates/index.js`)
+- [ ] Add security comments in generated code (API key scoping, rotation, repo link)
+- [ ] Ensure Esri attribution in all templates (Leaflet requires Esri Leaflet plugin)
+- [ ] Add CodePen POST export functionality
+- [ ] Add HTML download with filename convention (`{library}-{styleName}-{timestamp}.html`)
+
+#### Share
+
+- [ ] Implement share configuration via URL (base64-encoded JSON, clipboard copy, toast notification)
+
+#### Analytics & Privacy
+
+- [ ] Add cookie consent banner (accept button, localStorage persistence)
 - [ ] Set up Google Analytics with consent gating
-- [ ] Deploy to GitHub Pages
+- [ ] Respect browser Do Not Track (DNT) headers
+- [ ] Track analytics events: style selection, parameter usage, library preferences, export usage, share clicks, error rates, CTA clicks
+- [ ] Create `PRIVACY_TEMPLATE.md` with placeholders
+
+#### Accessibility (WCAG 2.1 AA)
+
+- [ ] Ensure keyboard navigation for all interactive elements (tab order, enter/space)
+- [ ] Add proper focus indicators (visible outlines, high contrast)
+- [ ] Add ARIA labels for icon buttons and controls
+- [ ] Use semantic HTML (headings, landmarks, lists)
+- [ ] Verify color contrast ratios minimum 4.5:1 for text
+- [ ] Add screen reader announcements for parameter changes
+- [ ] Ensure alt text for all style thumbnails
+- [ ] Associate form labels with inputs
+
+#### Performance
+
+- [ ] Add virtual scrolling for style grid (if many styles)
+- [ ] Apply React.memo / useMemo optimizations where needed
+
+#### Responsiveness
+
+- [ ] Ensure responsive layout at desktop + tablet (768px+)
+
+#### Error Handling
+
+- [ ] Add auto-retry on `/self` failure with configurable interval and background retry
+- [ ] Show on-screen error with status page link after multiple failures
+
+#### Testing
+
+- [ ] Add unit tests for template generation (placeholder replacement per library)
+- [ ] Add integration tests for CodePen POST
+- [ ] Add integration tests for cookie consent flow
+- [ ] Add pre-push hooks (build + tests)
+
+#### Documentation
+
+- [ ] Write README.md (quick start, live demo link, contribute templates, deployment)
+- [ ] Write CONTRIBUTING.md (add templates, suggest improvements, report bugs, PR process)
+- [ ] Add in-app tooltips on all controls
+
+#### Deployment
+
+- [ ] Set up GitHub Actions workflow (build and deploy to `gh-pages` branch)
 
 ### Medium Priority (Phase 2)
-- [ ] Add places category filtering
-- [ ] Create template dev mode with file watcher
-- [ ] Implement mobile responsive layout (<768px)
+
+- [ ] Add places category filtering (multi-select dropdown with autocomplete)
+- [ ] Create template dev mode with file watcher, mock data, hot reload
+- [ ] Implement mobile responsive layout (<768px) with modal/drawer sidebar
+- [ ] Add touch-friendly controls (minimum 44x44px tap targets)
 - [ ] Add ArcGIS Maps SDK for JavaScript template (v5.0+)
 - [ ] Add multi-view option (2 synchronized maps)
+- [ ] Add custom style search by itemId
+- [ ] Add session model educational examples with step-by-step guide
+- [ ] Add badge visibility config (show grayed vs hide unsupported)
+- [ ] Improve analytics dashboard
+- [ ] Create issue templates for contributions
+- [ ] Add E2E tests (Playwright or Cypress)
+- [ ] Add optional help icon ("?") in header with guided tour modal
 
 ### Low Priority / Nice to Have (Phase 3+)
+
 - [ ] CesiumJS template
 - [ ] OpenLayers template
 - [ ] 3D map styles support
 - [ ] UI internationalization (Spanish, French, etc.)
 - [ ] Dark mode toggle
-- [ ] Advanced caching with versioning
+- [ ] Advanced caching with versioning and migrations
+- [ ] Tile usage visualization (educational mock counter)
+- [ ] Community template contributions (external hosting)
+- [ ] Advanced showcase mode (multiple preset views per style)
+- [ ] Template versioning and community PR process
 
 ## Future Ideas
+
 - [ ] Split-view swipe comparison
 - [ ] Educational location markers with popovers
-- [ ] MapViewer integration
+- [ ] Comparison mode (side-by-side two different styles)
+- [ ] Style customization preview (Vector Tile Style Editor integration)
+- [ ] Static basemap tiles for lightweight previews and non-interactive embeds
+- [ ] Code snippet preview (simple viewer showing key lines)
 - [ ] Community showcase gallery
 - [ ] iframe embed code generation
 - [ ] User authentication with ArcGIS identity
+- [ ] Rollbar error monitoring
 
 ## Blocked
+
 - [ ] ArcGIS Maps SDK template - Blocked by: Waiting for v5.0 release (Feb 2026)
 
 ## Done
+
 - [x] Project initialization with /init skill - 2026-02-13
 - [x] Create comprehensive specification (docs/SPEC.md) - 2026-02-13
 - [x] Set up React + Vite project with Node 25 - 2026-02-13
@@ -65,10 +184,21 @@
 - [x] Build style browser with Calcite components and live `/self` loading/filtering - 2026-02-16
 - [x] Fix runtime console errors (Calcite custom element registration, asset-path 404s, and form label issues) - 2026-02-16
 - [x] Add default playground API key support via env var (`VITE_DEFAULT_PLAYGROUND_API_KEY`) - 2026-02-16
+- [x] Integrate MapLibre GL JS viewer with live style selection from Style Browser - 2026-02-16
+- [x] Add parameter controls (language, worldview, places) with capability-based disabling - 2026-02-16
+- [x] Preserve viewport/camera when style or parameter changes update map style - 2026-02-16
+- [x] Implement scrollable style grid + expand view and constrain app layout to viewport height - 2026-02-16
+- [x] Compact sidebar/header UI, remove sidebar token input, and add 3-column thumbnail style grid with error-only refresh - 2026-02-16
+- [x] Refactor app layout to Calcite Shell + Shell Panel for cleaner structure and height management - 2026-02-16
+- [x] Replace app header with Calcite Navigation and wrap viewer in Calcite Panel with codegen placeholder footer - 2026-02-16
+- [x] Fix Calcite structure (proper shell slots, CalciteSelect, design tokens, remove CSS overrides) - 2026-02-16
+- [x] Fetch global capabilities from `/v2/self` (languages, worldviews, places) with cache - 2026-02-16
+- [x] Replace hardcoded parameter options with dynamic data from `/v2/self` API - 2026-02-16
 
 ---
 
 **Notes**:
+
 - Move completed tasks to Done section with completion date
 - Use `/ship` to automatically update this file when committing
 - Review and reprioritize weekly

@@ -425,8 +425,10 @@ Styles are organized into thematic groups:
     - `/base` styles at END of each group (similar treatment as labels) with "Base Layer" badge
 - **Implementation Status (2026-02-16)**:
   - Added a first Style Browser UI in `src/components/StyleBrowser/StyleBrowser.jsx` using Calcite components
-  - Supports token input, load/refresh actions, client-side text filtering, and style metadata chips
-  - Wired to `getStyleCatalog()` for cache-aware `/self` loading with source status messaging
+  - Supports load/refresh actions, client-side text filtering, and style metadata chips
+  - Wired to `getStyleCatalog()` for cache-aware `/self` loading with source logging in console
+  - Added internal scrollable style-grid container and an "Expand View" dialog for full-grid browsing
+  - Updated layout CSS so app content stays within viewport height with internal panel scrolling and denser thumbnail cards
 
 ### 7.3 Parameter Controls (Left Sidebar)
 
@@ -450,6 +452,10 @@ Styles are organized into thematic groups:
 - **Disabled State**: Grayed out with warning icon + tooltip when `supportsPlaces: false`
 - **Helper Text** (when enabled): "Places visibility depends on zoom level"
 - **Learn More**: Icon linking to [Basemap Places Overview](https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/)
+- **Implementation Status (2026-02-16)**:
+  - Added `src/components/ParameterControls/ParameterControls.jsx` with language, worldview, and places controls
+  - Controls are capability-aware (disabled when unsupported by selected style)
+  - Parameter values are sanitized on style changes and applied to MapLibre style URL updates
 
 **Phase 2: Places Category Filter**
 - Dropdown with multi-select and autocomplete
@@ -533,6 +539,10 @@ Styles are organized into thematic groups:
 #### Updates
 - **Behavior**: Map updates immediately when parameters change via `map.setStyle()`
 - **Debouncing**: Debounce rapid parameter changes to avoid excessive re-renders
+- **Implementation Status (2026-02-16)**:
+  - Added `src/components/MapViewer/MapViewer.jsx` using MapLibre GL JS v5 with navigation controls
+  - Wired style selection from Style Browser into map updates via `map.setStyle()`
+  - Map initializes only when both style and token are available, with inline error display
 
 ### 7.6 Code Generator Panel (Bottom)
 
@@ -829,6 +839,7 @@ Process for contributors:
 - **Why**: Keep export token handling near export actions and security messaging
 - **Playground Preview Key** (implementation note):
   - The playground may use a default key from `VITE_DEFAULT_PLAYGROUND_API_KEY` for runtime preview requests (for example `/self` style discovery)
+  - Style Browser does not expose a token input and does not override the preview key
   - This preview key is separate from the user-provided export key used in generated code
 
 ### 9.2 Token Validation
@@ -1249,6 +1260,12 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.9 | 2026-02-16 | Codex + User | Replaced app header with `calcite-navigation`, removed map viewer internal header, and wrapped viewer area in `calcite-panel` with footer placeholder for future collapsible code generation section. |
+| 3.8 | 2026-02-16 | Codex + User | Refactored main app layout to use `calcite-shell` and `calcite-shell-panel`, simplifying sidebar/main structure and viewport height handling. |
+| 3.7 | 2026-02-16 | Codex + User | Refined vertical-space layout: compact header, inline labels, sidebar token input removal, thumbnail-first 3-column style grid, and error-only refresh visibility. |
+| 3.6 | 2026-02-16 | Codex + User | Implemented scrollable Style Browser grid with expand dialog and viewport-constrained app layout to avoid height overflow. |
+| 3.5 | 2026-02-16 | Codex + User | Added parameter controls (`language`, `worldview`, `places`) with capability-aware disabling and live MapLibre URL updates via shared app state. |
+| 3.4 | 2026-02-16 | Codex + User | Integrated MapLibre viewer (`src/components/MapViewer/MapViewer.jsx`) and connected live style selection from Style Browser to map style updates. |
 | 3.3 | 2026-02-16 | Codex + User | Added default playground API key support via `VITE_DEFAULT_PLAYGROUND_API_KEY` for runtime preview requests while keeping export token workflow separate. |
 | 3.2 | 2026-02-16 | Codex + User | Implemented initial Style Browser UI (`src/components/StyleBrowser/StyleBrowser.jsx`) with Calcite controls and integration with the `/self` cache-aware style service. |
 | 3.1 | 2026-02-16 | Codex + User | Implemented `/self` style catalog service (`src/services/styleService.js`) with localStorage TTL caching and stale fallback, plus unit tests in `src/services/styleService.test.js`. |
@@ -1263,10 +1280,9 @@ Include these throughout the UI:
 **Next Steps**:
 1. Set up React + Vite project with Node 25
 2. Create basic project structure and install dependencies
-3. Integrate MapLibre v5
-4. Create template system with MapLibre and Leaflet examples
-5. Implement export functionality
-6. Add testing framework
-7. Deploy to GitHub Pages
+3. Create template system with MapLibre and Leaflet examples
+4. Implement export functionality
+5. Add testing framework
+6. Deploy to GitHub Pages
 
 For questions or clarifications, contact: [developers@esri.com](mailto:developers@esri.com) or open an issue on GitHub.

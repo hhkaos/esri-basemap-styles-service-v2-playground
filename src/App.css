@@ -7,29 +7,30 @@ body,
   width: 100%;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  background: #f5f6f8;
-  color: #151515;
+.app-shell {
+  height: 100%;
   font-family: 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
-.app-header {
-  padding: 1.25rem 1rem 0.5rem;
-}
-
-.app-header h1 {
-  margin: 0 0 0.4rem;
-  font-size: 1.6rem;
-}
-
-.app-header p {
+.app-title {
   margin: 0;
-  color: #5f6368;
+  padding-inline-start: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--calcite-color-text-1);
 }
 
-.app-main {
-  padding: 0.75rem 1rem 1rem;
+.app-viewer-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.app-codegen-placeholder {
+  font-size: 0.82rem;
+  color: var(--calcite-color-text-3);
+  padding: 0.4rem 0.6rem;
+  border-top: 1px solid var(--calcite-color-border-3);
+  background: var(--calcite-color-foreground-2);
 }

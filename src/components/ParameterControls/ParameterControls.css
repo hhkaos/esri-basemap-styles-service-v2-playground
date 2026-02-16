@@ -1,0 +1,5 @@
+.parameter-controls-grid {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.5rem;
+}
