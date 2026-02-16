@@ -413,7 +413,7 @@ Styles are organized into thematic groups:
   - **Modal**: Full-screen or large modal with grid of styles, easier browsing
   - **Use Case**: Quick scanning of all available styles without sidebar constraints
 - **Grouping**: Visually grouped by category with subtle headers (Streets, Topography, etc.)
-- **Card Design**:
+  - **Card Design**:
   - **Thumbnail**: From `thumbnail` field in `/self` response (lazy loaded)
   - **Title**: Human-readable style name (e.g., "Navigation" not "arcgis/navigation")
   - **Capability Badges**: Small colored icons/chips on or near thumbnail
@@ -423,6 +423,10 @@ Styles are organized into thematic groups:
   - **Special Positioning**:
     - `/labels` styles at END of each group with "Labels Layer" badge
     - `/base` styles at END of each group (similar treatment as labels) with "Base Layer" badge
+- **Implementation Status (2026-02-16)**:
+  - Added a first Style Browser UI in `src/components/StyleBrowser/StyleBrowser.jsx` using Calcite components
+  - Supports token input, load/refresh actions, client-side text filtering, and style metadata chips
+  - Wired to `getStyleCatalog()` for cache-aware `/self` loading with source status messaging
 
 ### 7.3 Parameter Controls (Left Sidebar)
 
@@ -1029,6 +1033,7 @@ Process for contributors:
 - **Comparison Mode**: Side-by-side view of two different styles
 - **MapViewer integration**: Link to ArcGIS Map Viewer with current style/params
 - **Style Customization Preview**: Light integration with Vector Tile Style Editor
+- **Static basemap tiles**: Optional static map tile/image support for lightweight previews and non-interactive embeds
 - **Community Showcase**: Gallery of beautifully designed map experiences
 - **Embed Code**: iframe embed snippets for documentation sites
 - **User authentication**: Log in with ArcGIS identity, see/select available API keys
@@ -1241,6 +1246,7 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.2 | 2026-02-16 | Codex + User | Implemented initial Style Browser UI (`src/components/StyleBrowser/StyleBrowser.jsx`) with Calcite controls and integration with the `/self` cache-aware style service. |
 | 3.1 | 2026-02-16 | Codex + User | Implemented `/self` style catalog service (`src/services/styleService.js`) with localStorage TTL caching and stale fallback, plus unit tests in `src/services/styleService.test.js`. |
 | 3.0 | 2026-02-13 | Claude + User | Major revision incorporating user annotations. Key changes: HTML templates separated from JS, code display removed, aggressive MVP scope, MapLibre v5, Node 25, share URLs added to MVP, collapsible sidebar, places filter deferred, template dev mode deferred, cookie consent added, testing strategy refined. |
 | 2.0 | 2026-02-13 | Claude | Complete rewrite merging original SPEC.md and SPEC2.md with stakeholder interview decisions. Moved to React architecture with phased delivery approach. |
@@ -1253,11 +1259,10 @@ Include these throughout the UI:
 **Next Steps**:
 1. Set up React + Vite project with Node 25
 2. Create basic project structure and install dependencies
-3. Build style browser with Calcite components
-4. Integrate MapLibre v5
-5. Create template system with MapLibre and Leaflet examples
-6. Implement export functionality
-7. Add testing framework
-8. Deploy to GitHub Pages
+3. Integrate MapLibre v5
+4. Create template system with MapLibre and Leaflet examples
+5. Implement export functionality
+6. Add testing framework
+7. Deploy to GitHub Pages
 
 For questions or clarifications, contact: [developers@esri.com](mailto:developers@esri.com) or open an issue on GitHub.
