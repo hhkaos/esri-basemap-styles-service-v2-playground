@@ -3,10 +3,9 @@
 ## Current Sprint
 
 ### In Progress
-- [ ] Verify Phase 1 foundation is working (dev server, build, tests, linting)
+- [ ] Implement `/self` fetch with caching
 
 ### Up Next
-- [ ] Implement `/self` fetch with caching
 - [ ] Build style browser with Calcite components
 - [ ] Integrate MapLibre GL JS v5.x viewer
 
@@ -59,6 +58,9 @@
 - [x] Fix Calcite Components v5 integration (CSS import, asset path) - 2026-02-13
 - [x] Fix Vite base path for dev/production - 2026-02-13
 - [x] Create utility functions with tests (urlGenerator, storage, urlEncoder) - 2026-02-13
+- [x] Verify Phase 1 foundation is working (build, tests, linting) - 2026-02-16
+- [x] Fix Husky v9 deprecation warning in pre-commit hook - 2026-02-16
+- [x] Fix ESLint no-unused-vars error in storage catch block - 2026-02-16
 
 ---
 

@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code when working with code in this repository.
+This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -138,7 +138,7 @@ Style Service (/self API) → Cache (localStorage) → UI Update
 
 ## Known Mistakes
 
-Document known pitfalls or bugs to prevent Claude from repeating them:
+Document known pitfalls or bugs to prevent Codex from repeating them:
 
 - **Session Tokens**: ArcGIS Maps SDK for JavaScript versions <5.0 do NOT support session tokens. Do not create templates for ArcGIS Maps SDK until v5.0 is released (expected February 2026).
 - **Leaflet Integration**: Must use Esri Leaflet plugin for loading basemaps correctly, not vanilla Leaflet tile layers.
