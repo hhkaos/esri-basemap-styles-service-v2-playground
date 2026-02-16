@@ -146,6 +146,46 @@ Document known pitfalls or bugs to prevent Claude from repeating them:
 - **Cache Fallback**: Always provide localStorage fallback when `/self` endpoint fails.
 - **Parameter Preservation**: When switching style families, preserve compatible parameters (e.g., language) but reset incompatible ones (e.g., worldview when switching to Open family).
 
+## Lessons Learned (2026-02-13)
+
+**CRITICAL: Always verify before proceeding**:
+- **Run tests BEFORE adding features** - `npm test` must pass before moving to next phase
+- **Verify each phase works** - Let user manually verify dev server, build, tests, and linting before proceeding
+- **Update docs/TODO.md after completing each task** - Keep documentation in sync with actual progress
+- **Don't implement multiple phases at once** - Wait for user approval between phases
+
+**Calcite Components v5 Integration**:
+- **CSS Import**: Use `@esri/calcite-components/main.css` (exported in package.json), NOT `@esri/calcite-components/dist/calcite/calcite.css` or `dist/cdn/main.css`
+- **Asset Path**: Use CDN for assets: `https://cdn.jsdelivr.net/npm/@esri/calcite-components@5.0.1/dist/components/assets` (works in both dev and production), NOT local node_modules path
+- **Latest Version**: Always use latest stable version (5.0.1 as of Feb 2026), check npm for updates
+
+**Vite Configuration**:
+- **Base Path**: Must be conditional for dev vs production to prevent WebSocket HMR errors:
+  ```javascript
+  base: command === 'build' ? '/esri-basemap-styles-service-v2-playground/' : '/'
+  ```
+- **Dev server**: Use `base: '/'` in development
+- **Production**: Use GitHub Pages path in production builds
+
+**Testing Setup**:
+- **Mock localStorage**: Must implement actual storage functionality in tests, not just return null:
+  ```javascript
+  const localStorageMock = (() => {
+    let store = {};
+    return {
+      getItem: (key) => store[key] || null,
+      setItem: (key, value) => { store[key] = value.toString(); },
+      removeItem: (key) => { delete store[key]; },
+      clear: () => { store = {}; }
+    };
+  })();
+  ```
+
+**ESLint Configuration**:
+- **Missing Globals**: Add browser APIs to globals: `btoa`, `atob`, `URLSearchParams`
+- **Unused Variables**: Remove unused catch parameters or use underscore prefix
+- **Library Versions**: Always verify latest stable versions before adding dependencies
+
 ## Workflow Automation
 
 **Pre-commit Hooks** (using Husky):

@@ -3,17 +3,16 @@
 ## Current Sprint
 
 ### In Progress
-- [ ] Set up React + Vite project with Node 25
+- [ ] Verify Phase 1 foundation is working (dev server, build, tests, linting)
 
 ### Up Next
-- [ ] Create basic project structure
 - [ ] Implement `/self` fetch with caching
 - [ ] Build style browser with Calcite components
+- [ ] Integrate MapLibre GL JS v5.x viewer
 
 ## Backlog
 
 ### High Priority (Phase 1 - MVP)
-- [ ] Integrate MapLibre GL JS v5.x viewer
 - [ ] Create parameter controls (language, worldview, places)
 - [ ] Implement template system (MapLibre + Leaflet)
 - [ ] Add CodePen export functionality
@@ -21,8 +20,6 @@
 - [ ] Implement share configuration via URL
 - [ ] Add cookie consent banner
 - [ ] Set up Google Analytics with consent gating
-- [ ] Configure Vitest + React Testing Library
-- [ ] Set up pre-commit hooks (Husky)
 - [ ] Deploy to GitHub Pages
 
 ### Medium Priority (Phase 2)
@@ -54,6 +51,14 @@
 ## Done
 - [x] Project initialization with /init skill - 2026-02-13
 - [x] Create comprehensive specification (docs/SPEC.md) - 2026-02-13
+- [x] Set up React + Vite project with Node 25 - 2026-02-13
+- [x] Create basic project structure (src/, components/, services/, etc.) - 2026-02-13
+- [x] Configure Vitest + React Testing Library - 2026-02-13
+- [x] Set up pre-commit hooks (Husky) - 2026-02-13
+- [x] Configure ESLint and Prettier - 2026-02-13
+- [x] Fix Calcite Components v5 integration (CSS import, asset path) - 2026-02-13
+- [x] Fix Vite base path for dev/production - 2026-02-13
+- [x] Create utility functions with tests (urlGenerator, storage, urlEncoder) - 2026-02-13
 
 ---
 

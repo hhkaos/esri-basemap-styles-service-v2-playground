@@ -1,0 +1,699 @@
+<!--
+  
+  To run this demo, you need to replace 'YOUR_API_KEY' with an API key from the ArcGIS Developers dashboard.
+  
+  Sign up for a free account and get an API key.
+  
+  https://developers.arcgis.com/documentation/mapping-apis-and-services/get-started/
+  
+-->
+
+
+<html>
+
+<head>
+  <title>Basemaps style service v2 | Playground</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js></script>
+  <link href=https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css rel="stylesheet" />
+  
+  <script type="module" src="https://js.arcgis.com/calcite-components/1.9.2/calcite.esm.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.9.2/calcite.css" />
+  
+  <script src="https://unpkg.com/@esri/arcgis-rest-request@4.0.0/dist/bundled/request.umd.js"></script>
+  <script src="https://unpkg.com/@esri/arcgis-rest-geocoding@4.0.0/dist/bundled/geocoding.umd.js"></script>
+  
+  
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <link rel="stylesheet"
+  href="//unpkg.com/@highlightjs/cdn-assets@11.5.1/styles/atom-one-light.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- HTML template engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.8/handlebars.min.js" integrity="sha512-E1dSFxg+wsfJ4HKjutk/WaCzK7S2wv1POn1RRPGh8ZK+ag9l244Vqxji3r6wgz9YBf6+vhQEYJZpSjqWFPg9gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <!-- and it's easy to individually load additional languages -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+  
+  <style>
+    html,
+    body,
+    #map {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    
+    #code{
+      position: absolute;
+      bottom: 30px;
+      max-width: 1110px;
+      z-index: 10;
+      font-size: 1.2rem;
+      left: 0; 
+      right: 0; 
+      margin-left: auto; 
+      margin-right: auto; 
+    }
+    code{
+      white-space: break-spaces;
+    }
+    calcite-block {
+      --calcite-block-padding: 10px;
+    }
+    calcite-label{
+      padding-top: 1rem;
+      padding-right: 1rem;
+    }
+    calcite-block calcite-block {
+      --calcite-block-padding: 0;
+    }
+    #boundaries-modal iframe{
+      border: 0;
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+  
+</head>
+
+<body>
+
+  <calcite-modal aria-labelledby="modal-title" id="boundaries-modal">
+    <div slot="header" id="modal-title">
+      Disputed boundaries
+    </div>
+    <div slot="content">
+      <p>
+        Wikipedia: <a href="https://en.wikipedia.org/wiki/List_of_territorial_disputes">List of territorial disputes</a>.<br/>
+        ArcGIS blog: <a href="https://www.esri.com/arcgis-blog/products/mapping/mapping/customize-esri-vector-basemap-boundaries-and-labels/">Customize Esri Vector Basemap Boundaries and Labels</a>.
+      </p>
+      <iframe src="https://www.arcgis.com/apps/View/index.html?webmap=7ea62b469fd148e680606fca46317d84"></iframe>
+    </div>
+  </calcite-modal>
+  
+<script id="code-template" type="text/x-handlebars-template">
+const baseUrl 'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/';
+const spec = 'styles';
+const style = '{{style}}';
+{{#if view}}
+const view = '{{view}}';
+{{/if}}
+{{#ifNotEquals lang "global"}}
+const lang = '{{lang}}';
+{{/ifNotEquals}}
+{{#ifNotEquals places "none"}}
+const places = '{{places}}';
+{{/ifNotEquals}}
+const apiKey = '<YOUR_API_KEY>';
+
+const styleUrl = `${baseUrl}/${spec}/${style}?{{#if view}}worldview=${view}&{{/if}}{{#ifNotEquals lang "global"}}language=${lang}&{{/ifNotEquals}}{{#ifNotEquals places "none"}}places=${places}&{{/ifNotEquals}}token=${apiKey}`;
+
+// Discover +10 compatible SDKs at: links.esri.com/dev/basemaps-v2
+</script>
+
+    <calcite-shell content-behind>
+      <calcite-navigation slot="header">
+        <calcite-navigation-logo slot="logo" heading="Basemaps style service v2 | Playground"></calcite-navigation-logo>
+        <div slot="content-end">
+          <calcite-label layout="inline" icon="map-pin" scale="l" id="codeSwitcher">
+            Show URL
+            <calcite-switch checked></calcite-switch>
+            
+          </calcite-label>
+          <calcite-action icon="information" id="information"></calcite-action>
+        </div>
+      </calcite-navigation>
+ 
+      
+      <calcite-shell-panel slot="panel-start" display-mode="float">
+        
+        <!-- Action bar -->
+        <calcite-action-bar slot="action-bar" >
+          <calcite-action data-action-id="mapstyle" icon="basemap" text="Basemaps"></calcite-action>
+          <calcite-action data-action-id="worldview" icon="globe" text="Boundaries"></calcite-action>
+          <calcite-action data-action-id="language" icon="language" text="Language"></calcite-action>
+          <calcite-action data-action-id="places" icon="pins" text="Places"></calcite-action>
+        </calcite-action-bar>
+        
+        <!-- Map styles -->
+        
+        
+        <calcite-panel heading="Choose a map style" data-panel-id="mapstyle" hidden>
+          
+          <calcite-block open>
+            
+            <calcite-select id="style-select" class="update-style">
+              
+              <calcite-option value="arcgis/navigation">arcgis/navigation</calcite-option>
+              <calcite-option value="arcgis/navigation-night">arcgis/navigation-night</calcite-option>
+              <calcite-option value="arcgis/imagery">arcgis/imagery</calcite-option>
+              <calcite-option value="arcgis/imagery/standard">arcgis/imagery/standard</calcite-option>
+              <calcite-option value="arcgis/imagery/labels">arcgis/imagery/labels</calcite-option>
+              <calcite-option value="arcgis/light-gray">arcgis/light-gray</calcite-option>
+              <calcite-option value="arcgis/light-gray/base">arcgis/light-gray/base</calcite-option>
+              <calcite-option value="arcgis/light-gray/labels">arcgis/light-gray/labels</calcite-option>
+              <calcite-option value="arcgis/dark-gray">arcgis/dark-gray</calcite-option>
+              <calcite-option value="arcgis/dark-gray/base">arcgis/dark-gray/base</calcite-option>
+              <calcite-option value="arcgis/dark-gray/labels">arcgis/dark-gray/labels</calcite-option>
+              <calcite-option value="arcgis/streets">arcgis/streets</calcite-option>
+              <calcite-option value="arcgis/streets-night">arcgis/streets-night</calcite-option>
+              <calcite-option value="arcgis/streets-relief">arcgis/streets-relief</calcite-option>
+              <calcite-option value="arcgis/streets-relief/base">arcgis/streets-relief/base</calcite-option>
+              <calcite-option value="arcgis/topographic">arcgis/topographic</calcite-option>
+              <calcite-option value="arcgis/topographic/base">arcgis/topographic/base</calcite-option>
+              <calcite-option value="arcgis/oceans">arcgis/oceans</calcite-option>
+              <calcite-option value="arcgis/oceans/base">arcgis/oceans/base</calcite-option>
+              <calcite-option value="arcgis/oceans/labels">arcgis/oceans/labels</calcite-option>
+              <calcite-option value="arcgis/terrain">arcgis/terrain</calcite-option>
+              <calcite-option value="arcgis/terrain/base">arcgis/terrain/base</calcite-option>
+              <calcite-option value="arcgis/terrain/detail">arcgis/terrain/detail</calcite-option>
+              <calcite-option value="arcgis/community">arcgis/community</calcite-option>
+              <calcite-option value="arcgis/charted-territory">arcgis/charted-territory</calcite-option>
+              <calcite-option value="arcgis/charted-territory/base">arcgis/charted-territory/base</calcite-option>
+              <calcite-option value="arcgis/colored-pencil">arcgis/colored-pencil</calcite-option>
+              <calcite-option value="arcgis/nova">arcgis/nova</calcite-option>
+              <calcite-option value="arcgis/modern-antique">arcgis/modern-antique</calcite-option>
+              <calcite-option value="arcgis/modern-antique/base">arcgis/modern-antique/base</calcite-option>
+              <calcite-option value="arcgis/midcentury">arcgis/midcentury</calcite-option>
+              <calcite-option value="arcgis/newspaper">arcgis/newspaper</calcite-option>
+              <calcite-option value="arcgis/hillshade/light">arcgis/hillshade/light</calcite-option>
+              <calcite-option value="arcgis/hillshade/dark">arcgis/hillshade/dark</calcite-option>
+              <calcite-option value="arcgis/human-geography">arcgis/human-geography</calcite-option>
+              <calcite-option value="arcgis/human-geography/base">arcgis/human-geography/base</calcite-option>
+              <calcite-option value="arcgis/human-geography/detail">arcgis/human-geography/detail</calcite-option>
+              <calcite-option value="arcgis/human-geography/labels">arcgis/human-geography/labels</calcite-option>
+              <calcite-option value="arcgis/human-geography-dark">arcgis/human-geography-dark</calcite-option>
+              <calcite-option value="arcgis/human-geography-dark/base">arcgis/human-geography-dark/base</calcite-option>
+              <calcite-option value="arcgis/human-geography-dark/detail">arcgis/human-geography-dark/detail</calcite-option>
+              <calcite-option value="arcgis/human-geography-dark/labels">arcgis/human-geography-dark/labels</calcite-option>
+              <calcite-option value="arcgis/outdoor">arcgis/outdoor</calcite-option>
+              <calcite-option value="custom">Custom style</calcite-option>
+            </calcite-select>
+            
+            <calcite-block id="custom-style-block">
+              <calcite-label>
+                Add your custom style:
+                <calcite-input placeholder="items/<portal_id>" id="custom-style"></calcite-input>
+                </calcite-label>
+                <calcite-button width="full" icon-end="palette-check" id="custom-style-button">Apply custom style</calcite-button>
+              </calcite-block>
+            </calcite-block>
+          </calcite-panel>
+          
+          
+          <calcite-panel open heading="Worldview (boundaries & labels)" data-panel-id="worldview" hidden>
+            <calcite-block open>
+              <calcite-select id="worldview-select" class="update-style">
+                <calcite-option value="">Default</calcite-option>              
+                <calcite-option value="argentina">argentina</calcite-option>
+                <calcite-option value="azerbaijan">azerbaijan</calcite-option>
+                <calcite-option value="bhutan">bhutan</calcite-option>
+                <calcite-option value="brazil">brazil</calcite-option>
+                <calcite-option value="china">china</calcite-option>
+                <calcite-option value="croatia">croatia</calcite-option>
+                <calcite-option value="democraticRepublicOfCongo">democraticRepublicOfCongo</calcite-option>
+                <calcite-option value="egypt">egypt</calcite-option>
+                <calcite-option value="frenchGuiana">frenchGuiana</calcite-option>
+                <calcite-option value="georgia">georgia</calcite-option>
+                <calcite-option value="greece">greece</calcite-option>
+                <calcite-option value="guyana">guyana</calcite-option>
+                <calcite-option value="india">india</calcite-option>
+                <calcite-option value="israel">israel</calcite-option>
+                <calcite-option value="kenya">kenya</calcite-option>
+                <calcite-option value="kosovo">kosovo</calcite-option>
+                <calcite-option value="malawi">malawi</calcite-option>
+                <calcite-option value="morocco">morocco</calcite-option>
+                <calcite-option value="nepal">nepal</calcite-option>
+                <calcite-option value="pakistan">pakistan</calcite-option>
+                <calcite-option value="stateOfPalastine-gazaStrip">stateOfPalastine-gazaStrip</calcite-option>
+                <calcite-option value="republicOfArtsakh-nagornoKarabakh">republicOfArtsakh-nagornoKarabakh</calcite-option>
+                <calcite-option value="republicOfCongo">republicOfCongo</calcite-option>
+                <calcite-option value="republicOfAbkhazia">republicOfAbkhazia</calcite-option>
+                <calcite-option value="serbia">serbia</calcite-option>
+                <calcite-option value="southOssetia">southOssetia</calcite-option>
+                <calcite-option value="southSudan">southSudan</calcite-option>
+                <calcite-option value="suriname">suriname</calcite-option>
+                <calcite-option value="sudan">sudan</calcite-option>
+                <calcite-option value="syria">syria</calcite-option>
+                <calcite-option value="tanzania">tanzania</calcite-option>
+                <calcite-option value="turkey">turkey</calcite-option>
+                <calcite-option value="uruguay">uruguay</calcite-option>
+                <calcite-option value="westernSahara">westernSahara</calcite-option>
+              </calcite-select>
+            </calcite-block>
+          </calcite-panel>
+          
+          <calcite-panel open heading="Labels language" data-panel-id="language" hidden>
+            <calcite-block open>
+              <calcite-select id="language-select" class="update-style">
+                <calcite-option value="global">Global</calcite-option>
+                <calcite-option value="local">Local</calcite-option>
+                <calcite-option value="ar">Arabic</calcite-option>
+                <calcite-option value="bs">Bosnian</calcite-option>
+                <calcite-option value="bg">Bulgarian</calcite-option>
+                <calcite-option value="ca">Catalan</calcite-option>
+                <calcite-option value="zh-HK">Chinese (Hong Kong)</calcite-option>
+                <calcite-option value="zh-CN">Chinese (Simplified)</calcite-option>
+                <calcite-option value="zh-TW">Chinese (Taiwan)</calcite-option>
+                <calcite-option value="hr">Croatian</calcite-option>
+                <calcite-option value="cs">Czech</calcite-option>
+                <calcite-option value="da">Danish</calcite-option>
+                <calcite-option value="nl">Dutch</calcite-option>
+                <calcite-option value="en">English</calcite-option>
+                <calcite-option value="et">Estonian</calcite-option>
+                <calcite-option value="fi">Finnish</calcite-option>
+                <calcite-option value="fr">French</calcite-option>
+                <calcite-option value="de">German</calcite-option>
+                <calcite-option value="el">Greek</calcite-option>
+                <calcite-option value="he">Hebrew</calcite-option>
+                <calcite-option value="hu">Hungarian</calcite-option>
+                <calcite-option value="id">Indonesian</calcite-option>
+                <calcite-option value="it">Italian</calcite-option>
+                <calcite-option value="ja">Japanese</calcite-option>
+                <calcite-option value="ko">Korean</calcite-option>
+                <calcite-option value="lv">Latvian</calcite-option>
+                <calcite-option value="lt">Lithuanian</calcite-option>
+                <calcite-option value="nb">Norwegian</calcite-option>
+                <calcite-option value="pl">Polish</calcite-option>
+                <calcite-option value="pt-BR">Portuguese (Brazil)</calcite-option>
+                <calcite-option value="pt-PT">Portuguese (Portugal)</calcite-option>
+                <calcite-option value="ro">Romanian</calcite-option>
+                <calcite-option value="ru">Russian</calcite-option>
+                <calcite-option value="sr">Serbian</calcite-option>
+                <calcite-option value="sk">Slovak</calcite-option>
+                <calcite-option value="sl">Slovenian</calcite-option>
+                <calcite-option value="es">Spanish</calcite-option>
+                <calcite-option value="sv">Swedish</calcite-option>
+                <calcite-option value="th">Thai</calcite-option>
+                <calcite-option value="tr">Turkish</calcite-option>
+                <calcite-option value="uk">Ukrainian</calcite-option>
+                <calcite-option value="vi">Vietnamese</calcite-option>
+              </calcite-select>
+            </calcite-block>
+          </calcite-panel>
+          
+
+          <calcite-panel heading="Add places to basemap" data-panel-id="places" hidden>
+          
+            <calcite-block open>
+              <calcite-label>
+                <calcite-button icon-end="erase" width="full" id="locate">  
+                  Zoom to street level
+                </calcite-button>
+              </calcite-label>
+              
+              <calcite-label>
+                Display:
+                <calcite-select name="places" id="places-select" class="update-style">
+                  <calcite-option value="none">None</calcite-option>
+                  <calcite-option value="all">All</calcite-option>
+                  <calcite-option value="attributed">Attributed</calcite-option>
+                </calcite-select>
+              </calcite-label>
+              
+              <calcite-label id="filter-places-label" hidden>
+                Filter places:
+                <calcite-select placeholder="Filter places" id="filter-places-select">
+                  <calcite-option value="All">All</calcite-option>
+<calcite-option value="Food and Drink place">Food and drink</calcite-option>
+<calcite-option value="Lodging place">Lodging</calcite-option>
+<calcite-option value="Shop or Service place">Shop and service</calcite-option>
+<calcite-option value="Arts and Entertainment place"
+>Arts and entertainment</calcite-option>
+<calcite-option value="Government or Public Facility place"
+>Government or public facility</calcite-option>
+<calcite-option value="Residence place">Residence</calcite-option>
+<calcite-option value="Industrial or Infrastructure place"
+>Industrial or infrastructure</calcite-option>
+<calcite-option value="Land Feature place">Land feature</calcite-option>
+<calcite-option value="Landmark place">Landmark</calcite-option>
+<calcite-option value="Water Feature place">Water feature</calcite-option>
+<calcite-option value="Sport place">Sport</calcite-option>
+<calcite-option value="Outdoors place">Outdoors</calcite-option>
+<calcite-option value="Transportation place">Transportation</calcite-option>
+<calcite-option value="Medical place">Medical</calcite-option>
+<calcite-option value="Education place">Education</calcite-option>
+<calcite-option value="Religion place">Religion</calcite-option>
+<calcite-option value="POI Other place">POI other</calcite-option>
+                </calcite-select>
+              </calcite-label>
+            </calcite-block>
+          </calcite-panel>
+          
+        </calcite-shell-panel>
+
+        <calcite-shell-panel slot="panel-end" id="place-details" hidden>
+          <calcite-block id="nameLabel" hidden heading="Name" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="title"></calcite-icon>
+          </calcite-block>
+          <calcite-block id="categoryLabel" hidden heading="Name" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="organization"></calcite-icon>
+          </calcite-block>
+          <calcite-block id="addressLabel" hidden heading="Address" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="map-pin"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="walking"></calcite-action>
+            <calcite-action slot="control" text="Information" icon="biking"></calcite-action>
+            <calcite-action slot="control" text="Information" icon="car"></calcite-action>
+          </calcite-block>
+          <calcite-block id="phoneLabel" hidden heading="Phone" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="mobile"></calcite-icon>
+          </calcite-block>
+          <calcite-block id="hoursLabel" hidden heading="Hours" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="clock"></calcite-icon>
+          </calcite-block>
+          <calcite-block id="ratingLabel" hidden heading="Rating" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="star"></calcite-icon>
+          </calcite-block>
+          <calcite-block id="emailLabel" hidden heading="Email" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="email-address"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="launch"></calcite-action>
+          </calcite-block>
+          <calcite-block id="websiteLabel" hidden heading="Website" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="information"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="launch"></calcite-action>
+          </calcite-block>
+          <calcite-block id="facebookLabel" hidden heading="Facebook" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="speech-bubble-social"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="launch"></calcite-action>
+          </calcite-block>
+          <calcite-block id="twitterLabel" hidden heading="Twitter" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="speech-bubbles"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="launch"></calcite-action>
+          </calcite-block>
+          <calcite-block id="instagramLabel" hidden heading="Instagram" scale="l" description="">
+            <calcite-icon scale="m" slot="icon" icon="camera"></calcite-icon>
+            <calcite-action slot="control" text="Information" icon="launch"></calcite-action>
+          </calcite-block>
+          <calcite-block scale="l" description="" open>
+            <calcite-button width="full" id="close-place-details">
+              Close
+            </calcite-button>
+          </calcite-block>
+        </calcite-panel>
+        </calcite-shell-panel>
+
+        <div id="map">
+        <div id="code">
+      
+          <pre><code class="javascript">
+const baseUrl 'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2';
+const spec = 'styles';
+const style = 'arcgis/navigation';
+const apiKey = '&lt;YOUR_API_KEY&gt;';
+
+const styleUrl = `${baseUrl}/${spec}/${style}?token=${apiKey}`;
+
+// Discover +10 compatible SDKs at: links.esri.com/dev/basemaps-v2
+          </code></pre>
+          
+        </div>
+        </div>      
+      </calcite-shell>
+      
+      
+      <script>
+        const server_url = "https://basemapstyles-api.arcgis.com";
+        const apiKey = "AAPK98882d449ec74b5a9256d2030c92e930jR8X2TZmHvUaiTDFkVigEZ3njuahYetsg0I1gZ1u2GIK_Z3XXJ8scWKLbHJCvFJM"
+
+        hljs.highlightAll();
+        Handlebars.registerHelper('ifNotEquals', function(arg1, arg2, options) {
+          return (arg1 !== arg2) ? options.fn(this) : options.inverse(this);
+        });
+        
+        function generate_url(params) {
+          const  {style, lang, view, places} = params ;
+          if (view) {
+            return `${server_url}/arcgis/rest/services/styles/v2/styles/${style}?token=${apiKey}&language=${lang}&places=${places}&worldview=${view}`;
+          }
+          else {
+            return `${server_url}/arcgis/rest/services/styles/v2/styles/${style}?token=${apiKey}&language=${lang}&places=${places}`;
+          }
+        }
+        
+        var map = new maplibregl.Map({
+          container: "map",
+          style: generate_url({
+            style: "arcgis/navigation",
+            lang: "en",
+            places: "none"
+          }),
+          zoom: 2,
+          center: [0, 30]
+        });
+        
+        // Show/hide code switcher
+        document.getElementById("codeSwitcher").addEventListener("calciteSwitchChange", evt => { 
+          document.getElementById("code").hidden = !evt.target.checked;
+        });
+        
+        document.getElementById("information").addEventListener("click", evt => {
+          document.getElementById('boundaries-modal').open = true;
+        })
+        
+        // Trigger changes on calcite select change
+        document.querySelectorAll("calcite-select.update-style").forEach(el => {
+          el.addEventListener("calciteSelectChange", evt => applyStyle());
+        });
+        
+        document.getElementById("custom-style-button").addEventListener("click", evt => applyStyle());
+        
+        function applyStyle(){
+          let style;
+          let view = document.getElementById("worldview-select").value;
+          let lang = document.getElementById("language-select").value;
+          let places = document.getElementById("places-select").value;
+          
+          if(document.getElementById("style-select").value === "custom"){
+            style = document.getElementById("custom-style").value;
+            document.getElementById("custom-style-block").open = true;
+            if(style){
+              map.setStyle(generate_url({ style, view, lang, places }));
+            }
+          }else{
+            document.getElementById("custom-style-block").open = false;
+            style = document.getElementById("style-select").value;
+            map.setStyle(generate_url({ style, view, lang, places }));
+          }
+          
+          const template = Handlebars.compile(document.getElementById('code-template').innerHTML);
+
+          document.querySelector("#code code").innerHTML = hljs.highlightAuto(template({ style, view, lang, places})).value
+          // template({ style })
+          // hljs.highlightAll();
+          
+        }
+        
+      
+        
+        /*CALCITE LOGIC*/
+        let activeWidget;
+        const handleActionBarClick = ({ target }) => {
+          if (target.tagName !== "CALCITE-ACTION") {
+            return;
+          }
+          // debugger
+          if (activeWidget) {
+            document.querySelector(`[data-action-id=${activeWidget}]`).active = false;
+            document.querySelector(`[data-panel-id=${activeWidget}]`).hidden = true;
+          }
+          
+          const nextWidget = target.dataset.actionId;
+          if (nextWidget !== activeWidget) {
+            document.querySelector(`[data-action-id=${nextWidget}]`).active = true;
+            document.querySelector(`[data-panel-id=${nextWidget}]`).hidden = false;
+            activeWidget = nextWidget;
+          } else {
+            activeWidget = null;
+          }
+        };
+        document.querySelector("calcite-action-bar").addEventListener("click", handleActionBarClick);
+        
+        document.addEventListener("calciteActionBarToggle", event => {
+          actionBarExpanded = !actionBarExpanded;
+          view.padding = {
+            left: actionBarExpanded ? 150 : 49
+          };
+        });
+          
+        /******************** PLACES LOGIC ********************/
+
+        document.getElementById("locate").addEventListener("click", evt => {
+          document.getElementById("style-select").value = "arcgis/navigation-night";
+          document.getElementById("worldview-select").value = "";
+          document.getElementById("language-select").value = "global";
+          applyStyle()
+          map.setCenter([13.392550, 52.512107])
+          map.setZoom(16);
+          // navigator.geolocation.getCurrentPosition(position => {
+          //   const {latitude, longitude} = position.coords;
+          //   map.flyTo({
+          //         center: [longitude, latitude],
+          //         zoom: 17
+          //     });
+          // });
+        });
+        
+        const popup = new maplibregl.Popup({
+          closeOnClick: true,
+          closeButton: false,
+        });
+        popup.setMaxWidth("350");
+
+
+        map.once("load", () => {
+        map.on("mousemove", function (e) {
+          const features = map.queryRenderedFeatures(e.point);
+          if (features.length && features[0].properties.esri_place_id) {
+            // found feature
+            map.getCanvas().style.cursor = "pointer";
+            const feature = features[0];
+            if (popup.esri_place_id !== feature.properties.esri_place_id) {
+              popup.esri_place_id = feature.properties.esri_place_id;
+              showPopup(feature);
+            }
+          } else {
+            // exit feature
+            if (popup.esri_place_id) {
+              popup.esri_place_id = null;
+              map.getCanvas().style.cursor = "";
+            }
+          }
+        });
+
+        map.on("click", function (e) {
+          const features = map.queryRenderedFeatures(e.point);
+          if (features.length && features[0].properties.esri_place_id) {
+            showMarker(features[0].geometry.coordinates);
+            map.panTo(features[0].geometry.coordinates);
+            showPlaceDetails(features[0]); // Get place info from Places service
+          }
+        });
+
+        document.getElementById("places-select").addEventListener("calciteSelectChange", (e) => {
+          document.getElementById("filter-places-label").hidden = e.target.value === "attributed"? false: true;
+        });
+
+        //Update filter places after each style change
+        map.on("styledata", evt => {
+          filterByCategory(document.getElementById("filter-places-select").value);
+        })
+
+        document.getElementById("filter-places-select").addEventListener("calciteSelectChange", (e) => {
+          filterByCategory(e.target.value);
+          showMarker([0, 0], true);
+        });
+      });
+
+      let marker;
+
+      const showMarker = (lnglat, remove) => {
+        if (!marker) {
+          marker = new maplibregl.Marker({ color: "#000" }); // #7a00ae
+          marker.setLngLat(lnglat);
+          marker.addTo(map);
+        } else {
+          marker.setLngLat(lnglat);
+        }
+        if (remove) {
+          marker.remove();
+          marker = null;
+        }
+      };
+
+      const showPopup = (feature) => {
+        popup.setLngLat(feature.geometry.coordinates);
+        popup.setHTML(`<div>${feature.properties._name}</div>`).addTo(map);
+      };
+
+      const nameElement = document.getElementById("nameLabel");
+      const categoryElement = document.getElementById("categoryLabel");
+      const addressElement = document.getElementById("addressLabel");
+      const phoneElement = document.getElementById("phoneLabel");
+      const hoursElement = document.getElementById("hoursLabel");
+      const ratingElement = document.getElementById("ratingLabel");
+      const emailElement = document.getElementById("emailLabel");
+      const websiteElement = document.getElementById("websiteLabel");
+      const facebookElement = document.getElementById("facebookLabel");
+      const twitterElement = document.getElementById("twitterLabel");
+      const instagramElement = document.getElementById("instagramLabel");
+
+      const authentication = arcgisRest.ApiKeyManager.fromKey(
+        // "AAPKb3b3809a4add47fc9520f2a77893e73fHZge0cmstjhupuqFlqLFfcWMQ3c40goH8b7SiYiq5ETUmXh73MYAZ3xqdbWIakwj"
+        "AAPKeb85fd22f1bc4ccd89553c100c5d87b3rSg2jpmlfRymPAULCe1lpm-2yl4vU429eila8GjS2od3Gg8BvhgvEidp1q53j0NN"
+      );
+
+      document.getElementById("close-place-details").addEventListener("click", evt => {
+        document.getElementById("place-details").hidden = true
+        showMarker([0,0], true);
+      });
+
+      const showPlaceDetails = (feature) => {
+        document.getElementById("place-details").hidden = false;
+        
+        const placeID = feature.properties.esri_place_id;
+        arcgisRest
+          .getPlaceDetails({
+            placeId: placeID,
+            requestedFields: "all",
+            // requestedFields: "categories,hours",
+            authentication,
+          })
+          .then((result) => {
+            const placeDetails = result.placeDetails;
+            setPlaceDetails(placeDetails, feature);
+          });
+      };
+
+      const setPlaceDetails = (placeDetails, feature) => {
+        setElementProperties(nameElement, placeDetails.name);
+        let categories = placeDetails.categories.length == 1? placeDetails.categories[0].label : placeDetails.categories.reduce((accumulator, current) => `${current.label}, ${accumulator}`, '');
+        setElementProperties(categoryElement, categories);
+        
+        // const location = `Longitude: ${feature.geometry.coordinates[0].toFixed(4)}, Latitude: ${feature.geometry.coordinates[1].toFixed(4)}`;
+        // setElementProperties(locationElement,location);
+        setElementProperties(addressElement, placeDetails?.address?.streetAddress);
+        setElementProperties(phoneElement, placeDetails?.contactInfo?.telephone);
+        setElementProperties(hoursElement, placeDetails?.hours?.openingText);
+        setElementProperties(ratingElement, placeDetails?.rating?.user);
+        setElementProperties(emailElement, placeDetails?.contactInfo?.email);
+        // setElementProperties(websiteElement, placeDetails?.contactInfo?.website?.replace(/^https?:\/\//, "").replace(//$/, ""));
+        setElementProperties(facebookElement, (placeDetails?.socialMedia?.facebookId) ? `www.facebook.com/${placeDetails.socialMedia.facebookId}` : null);
+        setElementProperties(twitterElement, (placeDetails?.socialMedia?.twitter) ? `www.twitter.com/${placeDetails.socialMedia.twitter}` : null);
+        setElementProperties(instagramElement, (placeDetails?.socialMedia?.instagram) ? `www.instagram.com/${placeDetails.socialMedia.instagram}` : null);
+      };
+
+      const setElementProperties = (element, validValue) => {
+        if (validValue) {
+          element.hidden = false;
+          element.description = validValue;
+        } else {
+          element.hidden = true;
+        }
+      };
+
+      const filterByCategory = (category) => {
+        const layers = map.getStyle().layers;
+        const placeLayers = layers.filter((layer) => layer.source === "esri-places");
+        
+        placeLayers.forEach((layer) => {
+          if (layer["source-layer"] === category || category === "All") {
+            map.setLayoutProperty(layer.id, "visibility", "visible");
+          } else {
+            map.setLayoutProperty(layer.id, "visibility", "none");
+          }
+        });
+        
+        popup.remove();
+      
+      };
+          
+        </script>
+        <script src="https://unpkg.com/@esri/arcgis-rest-request@4.0.0/dist/bundled/request.umd.js"></script>
+        <script src="https://unpkg.com/@esri/arcgis-rest-places@1.0.0/dist/bundled/places.umd.min.js"></script>
+      </body>
+      
+      </html>
