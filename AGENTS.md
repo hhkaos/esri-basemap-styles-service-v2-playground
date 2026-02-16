@@ -100,6 +100,7 @@ Style Service (/self API) → Cache (localStorage) → UI Update
 - When shipping, update CHANGELOG.md under [Unreleased]
 - After every codebase change, update docs/TODO.md to reflect what changed (status, done items, and next steps)
 - For every new feature, update docs/SPEC.md to keep the specification aligned with implementation
+- After every new feature, explicitly tell the user what checks/tests they should run (or confirm which checks/tests were already run and passed)
 
 **Security Rules**:
 - Never commit: `*.pem`, `.env`, `*.key`, private keys, API tokens, real user data

@@ -333,6 +333,9 @@ Styles are organized into thematic groups:
      Link to: https://status.location.arcgis.com/
   5. Continue retrying in background
 - **No blocking**: Don't prevent app usage if cache is available
+- **Implementation Status (2026-02-16)**:
+  - Added `src/services/styleService.js` with `/self` URL builder, network fetch, TTL cache reads/writes, and stale-cache fallback on fetch failure
+  - Added `src/services/styleService.test.js` coverage for cache-hit, network fetch/cache write, stale fallback, and hard failure behavior
 
 ---
 
@@ -1238,6 +1241,7 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.1 | 2026-02-16 | Codex + User | Implemented `/self` style catalog service (`src/services/styleService.js`) with localStorage TTL caching and stale fallback, plus unit tests in `src/services/styleService.test.js`. |
 | 3.0 | 2026-02-13 | Claude + User | Major revision incorporating user annotations. Key changes: HTML templates separated from JS, code display removed, aggressive MVP scope, MapLibre v5, Node 25, share URLs added to MVP, collapsible sidebar, places filter deferred, template dev mode deferred, cookie consent added, testing strategy refined. |
 | 2.0 | 2026-02-13 | Claude | Complete rewrite merging original SPEC.md and SPEC2.md with stakeholder interview decisions. Moved to React architecture with phased delivery approach. |
 | 1.0 | [Previous] | Original Author | Initial specification for single-page HTML implementation |
@@ -1249,12 +1253,11 @@ Include these throughout the UI:
 **Next Steps**:
 1. Set up React + Vite project with Node 25
 2. Create basic project structure and install dependencies
-3. Implement `/self` fetch with caching
-4. Build style browser with Calcite components
-5. Integrate MapLibre v5
-6. Create template system with MapLibre and Leaflet examples
-7. Implement export functionality
-8. Add testing framework
-9. Deploy to GitHub Pages
+3. Build style browser with Calcite components
+4. Integrate MapLibre v5
+5. Create template system with MapLibre and Leaflet examples
+6. Implement export functionality
+7. Add testing framework
+8. Deploy to GitHub Pages
 
 For questions or clarifications, contact: [developers@esri.com](mailto:developers@esri.com) or open an issue on GitHub.

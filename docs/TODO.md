@@ -3,11 +3,11 @@
 ## Current Sprint
 
 ### In Progress
-- [ ] Implement `/self` fetch with caching
+- [ ] Build style browser with Calcite components
 
 ### Up Next
-- [ ] Build style browser with Calcite components
 - [ ] Integrate MapLibre GL JS v5.x viewer
+- [ ] Create parameter controls (language, worldview, places)
 
 ## Backlog
 
@@ -61,6 +61,7 @@
 - [x] Verify Phase 1 foundation is working (build, tests, linting) - 2026-02-16
 - [x] Fix Husky v9 deprecation warning in pre-commit hook - 2026-02-16
 - [x] Fix ESLint no-unused-vars error in storage catch block - 2026-02-16
+- [x] Implement `/self` fetch with caching (TTL + stale localStorage fallback) - 2026-02-16
 
 ---
 
