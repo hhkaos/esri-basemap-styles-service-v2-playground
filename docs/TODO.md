@@ -3,11 +3,11 @@
 ## Current Sprint
 
 ### In Progress
-- [ ] Build style browser with Calcite components
+- [ ] Integrate MapLibre GL JS v5.x viewer
 
 ### Up Next
-- [ ] Integrate MapLibre GL JS v5.x viewer
 - [ ] Create parameter controls (language, worldview, places)
+- [ ] Implement template system (MapLibre + Leaflet)
 
 ## Backlog
 
@@ -62,6 +62,9 @@
 - [x] Fix Husky v9 deprecation warning in pre-commit hook - 2026-02-16
 - [x] Fix ESLint no-unused-vars error in storage catch block - 2026-02-16
 - [x] Implement `/self` fetch with caching (TTL + stale localStorage fallback) - 2026-02-16
+- [x] Build style browser with Calcite components and live `/self` loading/filtering - 2026-02-16
+- [x] Fix runtime console errors (Calcite custom element registration, asset-path 404s, and form label issues) - 2026-02-16
+- [x] Add default playground API key support via env var (`VITE_DEFAULT_PLAYGROUND_API_KEY`) - 2026-02-16
 
 ---
 

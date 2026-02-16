@@ -826,7 +826,10 @@ Process for contributors:
 
 ### 9.1 Token Input Location
 - **Where**: Code Generator Panel (NOT header)
-- **Why**: Token is used in generated code, not by the playground itself
+- **Why**: Keep export token handling near export actions and security messaging
+- **Playground Preview Key** (implementation note):
+  - The playground may use a default key from `VITE_DEFAULT_PLAYGROUND_API_KEY` for runtime preview requests (for example `/self` style discovery)
+  - This preview key is separate from the user-provided export key used in generated code
 
 ### 9.2 Token Validation
 - **No validation in playground**: Don't test token against API
@@ -1246,6 +1249,7 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.3 | 2026-02-16 | Codex + User | Added default playground API key support via `VITE_DEFAULT_PLAYGROUND_API_KEY` for runtime preview requests while keeping export token workflow separate. |
 | 3.2 | 2026-02-16 | Codex + User | Implemented initial Style Browser UI (`src/components/StyleBrowser/StyleBrowser.jsx`) with Calcite controls and integration with the `/self` cache-aware style service. |
 | 3.1 | 2026-02-16 | Codex + User | Implemented `/self` style catalog service (`src/services/styleService.js`) with localStorage TTL caching and stale fallback, plus unit tests in `src/services/styleService.test.js`. |
 | 3.0 | 2026-02-13 | Claude + User | Major revision incorporating user annotations. Key changes: HTML templates separated from JS, code display removed, aggressive MVP scope, MapLibre v5, Node 25, share URLs added to MVP, collapsible sidebar, places filter deferred, template dev mode deferred, cookie consent added, testing strategy refined. |
