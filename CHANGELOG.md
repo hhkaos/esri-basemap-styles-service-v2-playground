@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compact sidebar UI with error-only refresh
 
 ### Changed
+- Simplified style browser controls by removing block wrappers and keeping refresh action error-only
+- Updated sidebar panel layout to use fixed-height grid sections and inline parameter labels for tighter spacing
 
 ### Deprecated
 

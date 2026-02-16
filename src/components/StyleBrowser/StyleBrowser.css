@@ -1,9 +1,10 @@
 .style-browser-panel {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   min-height: 0;
+  gap: 0.35rem;
 }
 
 .style-browser-controls {
@@ -32,8 +33,8 @@
 
 .style-browser-grid-block {
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .style-browser-summary {
@@ -53,7 +54,6 @@
 
 .style-browser-list-container {
   min-height: 0;
-  flex: 1;
   overflow: auto;
   padding-right: 0.25rem;
 }

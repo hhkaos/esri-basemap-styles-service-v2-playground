@@ -30,8 +30,8 @@ function App() {
         </span>
       </CalciteNavigation>
 
-      <CalciteShellPanel slot="panel-start" position="start" widthScale="m">
-        <CalcitePanel heading="Style Browser">
+      <CalciteShellPanel slot="panel-start" position="start" widthScale="m" className="app-shell-side">
+        <CalcitePanel className="app-style-panel">
           <StyleBrowser
             selectedStyleName={selectedStyleName}
             onStyleSelect={setSelectedStyleName}
@@ -39,7 +39,7 @@ function App() {
             onCapabilitiesLoad={handleCapabilitiesLoad}
           />
         </CalcitePanel>
-        <CalcitePanel heading="Parameters">
+        <CalcitePanel heading="Parameters" className="app-parameters-panel">
           <ParameterControls selectedStyle={selectedStyle} parameters={parameters} onChange={setParameters} capabilities={capabilities} />
         </CalcitePanel>
       </CalciteShellPanel>

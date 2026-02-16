@@ -191,9 +191,11 @@
 - [x] Compact sidebar/header UI, remove sidebar token input, and add 3-column thumbnail style grid with error-only refresh - 2026-02-16
 - [x] Refactor app layout to Calcite Shell + Shell Panel for cleaner structure and height management - 2026-02-16
 - [x] Replace app header with Calcite Navigation and wrap viewer in Calcite Panel with codegen placeholder footer - 2026-02-16
+- [x] Simplify style browser controls (remove block headings/load button) and enforce fixed-filter + full-height scroll grid layout - 2026-02-16
 - [x] Fix Calcite structure (proper shell slots, CalciteSelect, design tokens, remove CSS overrides) - 2026-02-16
 - [x] Fetch global capabilities from `/v2/self` (languages, worldviews, places) with cache - 2026-02-16
 - [x] Replace hardcoded parameter options with dynamic data from `/v2/self` API - 2026-02-16
+- [x] Create Codex `ship` skill from template in `~/.codex/skills/ship/SKILL.md` - 2026-02-16
 
 ---
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  CalciteBlock,
   CalciteButton,
   CalciteChip,
   CalciteDialog,
@@ -167,35 +166,30 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
 
   return (
     <div className="style-browser-panel">
-      <CalciteBlock heading="Controls" expanded>
-        <div className="style-browser-controls">
-          <CalciteLabel className="style-browser-inline-label" layout="inline">
-            Filter
-            <CalciteInputText
-              id="filter-input"
-              name="filter-input"
-              placeholder="Filter by name, provider, or category"
-              value={filter}
-              onCalciteInputTextInput={(event) => setFilter(getInputValue(event))}
-            />
-          </CalciteLabel>
+      <div className="style-browser-controls">
+        <CalciteLabel className="style-browser-inline-label" layout="inline">
+          Filter
+          <CalciteInputText
+            id="filter-input"
+            name="filter-input"
+            placeholder="Filter by name, provider, or category"
+            value={filter}
+            onCalciteInputTextInput={(event) => setFilter(getInputValue(event))}
+          />
+        </CalciteLabel>
+        {error ? (
           <div className="style-browser-actions">
-            <CalciteButton onClick={() => loadStyles()} disabled={loading} scale="s">
-              Load Styles
+            <CalciteButton
+              appearance="outline"
+              onClick={() => loadStyles({ forceRefresh: true })}
+              disabled={loading}
+              scale="s"
+            >
+              Refresh
             </CalciteButton>
-            {error ? (
-              <CalciteButton
-                appearance="outline"
-                onClick={() => loadStyles({ forceRefresh: true })}
-                disabled={loading}
-                scale="s"
-              >
-                Refresh
-              </CalciteButton>
-            ) : null}
           </div>
-        </div>
-      </CalciteBlock>
+        ) : null}
+      </div>
 
       {loading ? (
         <div className="style-browser-loading" aria-live="polite">
@@ -211,7 +205,7 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         </CalciteNotice>
       ) : null}
 
-      <CalciteBlock heading="Styles" expanded className="style-browser-grid-block">
+      <div className="style-browser-grid-block">
         <div className="style-browser-summary-row">
           <div className="style-browser-summary">
             <strong>{filteredStyles.length}</strong> style{filteredStyles.length === 1 ? '' : 's'}
@@ -227,7 +221,7 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
             <p className="style-browser-empty">No styles to display. Load styles and adjust filters.</p>
           ) : null}
         </div>
-      </CalciteBlock>
+      </div>
 
       <CalciteDialog heading="All Styles" open={expanded} onCalciteDialogClose={() => setExpanded(false)}>
         <div className="style-browser-dialog-grid">{renderStyleItems({ inDialog: true })}</div>

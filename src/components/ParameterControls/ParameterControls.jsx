@@ -65,7 +65,7 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
 
   return (
     <div className="parameter-controls-grid">
-      <CalciteLabel>
+      <CalciteLabel layout="inline">
         Language
         <CalciteSelect
           label="Language"
@@ -80,7 +80,7 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
         </CalciteSelect>
       </CalciteLabel>
 
-      <CalciteLabel>
+      <CalciteLabel layout="inline">
         Worldview
         <CalciteSelect
           label="Worldview"
@@ -95,7 +95,7 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
         </CalciteSelect>
       </CalciteLabel>
 
-      <CalciteLabel>
+      <CalciteLabel layout="inline">
         Places
         <CalciteSelect
           label="Places"
