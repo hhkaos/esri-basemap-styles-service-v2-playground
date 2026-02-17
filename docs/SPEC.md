@@ -574,7 +574,8 @@ Styles are organized into thematic groups:
 - **Empty state CTA**:
   - `Need an API key?`
   - `Create Free Account`
-  - `Learn More` (ArcGIS security/auth docs)
+  - `Create and configure an API key tutorial` (`https://www.youtube.com/watch?v=h68pd449wd4`)
+  - `Intro to API key documentation` (`https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/`)
 - **With token**:
   - Password-style input with show/hide toggle
   - Placeholder: `Paste your API key`
@@ -609,18 +610,34 @@ Styles are organized into thematic groups:
 
 #### Share Button
 **Phase 1 MVP**: Share configuration via URL
-- **Location**: Near export buttons or in header
-- **Click**: Generate shareable URL with encoded parameters
-- **Encoded Parameters**:
-  - Selected style
-  - All parameter values (language, worldview, places)
-  - Map viewport (center, zoom)
-  - Selected library for code generation
+- **Locations (2026-02-17)**:
+  - `Code Generator` step 4 quick action (`Copy Share Link`)
+  - Dedicated `Share` panel in the tools action bar with selective controls
+- **Share panel controls**:
+  - Include toggles: style, language, worldview, places, default open panel
+  - Default open-panel dropdown (style selection, language, worldview, places, code generator, share, contact)
+  - If default panel is `Code Generator`, show extra toggles for:
+    - include exported parameters (step 1)
+    - include selected client library (step 2)
+    - include API key (unchecked by default)
+    - force download on open
+- **Encoded Parameters** (selective):
+  - Optional style and parameter subset
+  - Optional UI default panel (`ui.panel`)
+  - Optional code-generator preset (`codeGenerator`) to restore wizard state
+  - Optional map viewport (center, zoom)
 - **URL Format**: `?config=<base64-encoded-json>`
 - **Behavior**:
   - Copy URL to clipboard
-  - Show toast: "Configuration URL copied to clipboard"
-  - URL loads playground with exact state
+  - Show toast: "Share link copied to clipboard."
+  - URL loads playground with shared state and opens the requested panel
+  - If shared code-generator preset omits API key but includes library, wizard opens at step 3
+  - If shared preset includes API key, wizard can open at step 4; with `forceDownload`, it auto-downloads HTML once on load
+- **Implementation status (2026-02-17)**:
+  - Added `src/components/SharePanel/SharePanel.jsx` for selective share-link creation from the action bar
+  - Extended `src/services/shareService.js` with selective payload building + parsing and code-generator preset normalization
+  - Updated URL hydration in `src/App.jsx` to restore shared default panel and code-generator presets
+  - Updated `src/components/CodeGenerator/CodeGenerator.jsx` to accept shared presets and support one-time forced download
 - **Analytics**: Track share button usage
 
 ---
@@ -1124,7 +1141,7 @@ Before each release:
 - [ ] Parameter controls enable/disable appropriately per style
 - [ ] Map updates on parameter change
 - [ ] Family toggle preserves compatible parameters
-- [ ] Share URL correctly encodes/restores state
+- [x] Share URL correctly encodes/restores state
 - [ ] CodePen export opens with correct code
 - [ ] Download generates working HTML file
 - [ ] Showcase locations navigate correctly
@@ -1252,6 +1269,7 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.18 | 2026-02-17 | Codex + User | Implemented Phase 1 share URL flow end-to-end: copy share link in Code Generator, restore style/parameters/viewport from `?config=`, and added share service tests. |
 | 3.17 | 2026-02-17 | Codex + User | Added optional style-specific documentation links to the Phase 1 style-info modal content model and modal display order. |
 | 3.16 | 2026-02-17 | Codex + User | Refined Phase 1 style-info modal requirements: full style-id keyed descriptions, category descriptions, ordered modal content (style then category), fallback behavior, and optional sample-app links. |
 | 3.15 | 2026-02-17 | Codex + User | Added Phase 1 requirement for per-style info icon overlay on thumbnails that opens a use-case modal with configurable text and fallback behavior. |

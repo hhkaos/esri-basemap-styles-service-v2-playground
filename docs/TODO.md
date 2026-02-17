@@ -4,11 +4,11 @@
 
 ### In Progress
 
-- [ ] Implement share configuration via URL (base64-encoded JSON, clipboard copy, toast notification)
+- [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
 
 ### Up Next
 
-- [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
+- [ ] Add lazy-loaded thumbnails with Intersection Observer
 
 ## Backlog
 
@@ -37,7 +37,7 @@
 
 #### Code Generator Panel
 
-- [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", "Learn More")
+- [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", tutorial video link, API key documentation link)
 - [ ] Add library tabs (MapLibre GL JS, Leaflet)
 
 #### Templates
@@ -50,7 +50,7 @@
 
 #### Share
 
-- [ ] Implement share configuration via URL (base64-encoded JSON, clipboard copy, toast notification)
+- [x] Implement share configuration via URL (base64-encoded JSON, clipboard copy, toast notification)
 
 #### Analytics & Privacy
 
@@ -148,6 +148,15 @@
 
 ## Done
 
+- [x] Keep `StyleBrowser` mounted while inactive so shared links that open on non-style panels still hydrate style metadata/capabilities and correctly load Language/Worldview/Places selections - 2026-02-17
+- [x] Add App-level shared-link hydration regression test asserting real parameter radio selections (`ca`, `china`, `all`) after opening on Code Generator panel - 2026-02-17
+- [x] Fix parameter radio hydration UI by explicitly binding `checked` on Language/Worldview/Places `calcite-radio-button` options and add unit test coverage - 2026-02-17
+- [x] Prevent transient "not supported" parameter warnings during shared-link hydration by deferring unsupported state until style catalog metadata load completes - 2026-02-17
+- [x] Add icons and ordering updates to Code Generator Step 3 CTA buttons; rename labels to `Create and configure an API key tutorial"` and `Intro to API key documentation` with video button second - 2026-02-17
+- [x] Update Code Generator Step 3 API key `Learn More` link to API key auth docs and add `Watch API Key Tutorial` button linking to YouTube setup video - 2026-02-17
+- [x] Show `Default (<value>)` in Code Generator step-4 summary for parameters excluded in step 1 - 2026-02-17
+- [x] Keep Step 2 selected client library visibly checked after navigating forward/back in Code Generator wizard - 2026-02-17
+- [x] Persist Code Generator in-memory wizard state across panel unmount/remount (library choice, step, API key, warning acknowledgment, export toggles) without localStorage token persistence - 2026-02-17
 - [x] Add MapLibre tiles-consumption HTML template (`src/templates/html/maplibre-tiles.html`) and wire Code Generator MapLibre export to placeholder-based template rendering with ArcGIS MapLibre plugin (`BasemapStyle.applyStyle`) - 2026-02-17
 - [x] Add zoom conversion from MapLibre viewport to export library scale (Leaflet offset) and apply live viewport center/zoom to both Leaflet and MapLibre generated templates - 2026-02-17
 - [x] Harden zoom conversion helper with target library profiles, optional strict/fallback handling, dedicated unit tests, and remove Leaflet export `minZoom` clamp that could override converted zoom parity - 2026-02-17
@@ -238,6 +247,8 @@
 - [x] Refactor Code Generator into a 4-step wizard (parameter inclusion toggles, library selection, API key step, and export step) including optional style/map-location export defaults - 2026-02-17
 - [x] Polish Code Generator wizard flow: enforce required step selections, add per-library tutorial CTA in step 4, and tighten panel spacing/overflow behavior - 2026-02-17
 - [x] Require API key security-warning acknowledgment checkbox in Step 3 before enabling Next - 2026-02-17
+- [x] Implement share configuration via URL end-to-end: generate/copy share link from Code Generator, restore style/parameters/viewport from `?config=`, and add share service tests - 2026-02-17
+- [x] Add dedicated `Share` tools action/panel with selective payload options, code-generator share presets (library/export toggles/API key opt-in), default open-panel dropdown, and step-aware restore/force-download behavior - 2026-02-17
 
 ---
 

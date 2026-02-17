@@ -1,0 +1,85 @@
+.share-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.share-panel-intro {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--calcite-color-text-1);
+}
+
+.share-panel-options,
+.share-panel-code-generator {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.share-panel-code-generator {
+  border: 1px solid var(--calcite-color-border-2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: var(--calcite-color-foreground-1);
+}
+
+.share-panel-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--calcite-color-text-1);
+}
+
+.share-panel-option input {
+  margin: 0;
+}
+
+.share-panel-dropdown-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.share-panel-dropdown-row label {
+  font-size: 0.85rem;
+  color: var(--calcite-color-text-2);
+}
+
+.share-panel-dropdown {
+  inline-size: 100%;
+  border: 1px solid var(--calcite-color-border-input);
+  border-radius: 0.35rem;
+  min-block-size: 2rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  background: var(--calcite-color-foreground-1);
+  color: var(--calcite-color-text-1);
+}
+
+.share-panel-code-generator-title {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--calcite-color-text-1);
+  font-weight: 600;
+}
+
+.share-panel-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--calcite-color-text-2);
+}
+
+.share-panel-toast {
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.85rem;
+}
+
+.share-panel-toast-success {
+  background: var(--calcite-color-status-success-weak);
+  color: var(--calcite-color-status-success);
+}
+
+.share-panel-toast-danger {
+  background: var(--calcite-color-status-danger-weak);
+  color: var(--calcite-color-status-danger);
+}

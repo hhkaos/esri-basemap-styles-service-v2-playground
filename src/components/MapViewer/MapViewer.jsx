@@ -9,13 +9,18 @@ import './MapViewer.css';
  * @param {string} [props.styleName]
  * @param {string} [props.token]
  * @param {{language?: string, worldview?: string, places?: string}} [props.parameters]
+ * @param {{center:[number,number], zoom:number}} [props.initialViewport]
  * @param {(loading: boolean) => void} [props.onLoadingChange]
  * @param {(viewport: {center:[number,number], zoom:number}) => void} [props.onViewportChange]
  */
-export function MapViewer({ styleName, token, parameters, onLoadingChange, onViewportChange }) {
+export function MapViewer({ styleName, token, parameters, initialViewport, onLoadingChange, onViewportChange }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const styleLoadOperationRef = useRef(0);
+  const initialViewportRef = useRef({
+    center: Array.isArray(initialViewport?.center) ? initialViewport.center : DEFAULT_MAP_CENTER,
+    zoom: Number.isFinite(initialViewport?.zoom) ? initialViewport.zoom : DEFAULT_MAP_ZOOM,
+  });
   const [mapError, setMapError] = useState('');
 
   const emitViewport = useCallback(
@@ -62,8 +67,8 @@ export function MapViewer({ styleName, token, parameters, onLoadingChange, onVie
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: styleUrl,
-        center: DEFAULT_MAP_CENTER,
-        zoom: DEFAULT_MAP_ZOOM,
+        center: initialViewportRef.current.center,
+        zoom: initialViewportRef.current.zoom,
         attributionControl: true,
       });
 

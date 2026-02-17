@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalciteButton,
   CalciteInput,
@@ -8,6 +8,7 @@ import {
   CalciteRadioButtonGroup,
 } from '@esri/calcite-components-react';
 import { convertZoomFromMapLibre } from '../../utils/zoom';
+import { generateAndCopyShareUrl } from '../../services/shareService';
 import maplibreIcon from '../../assets/icons/maplibre-icon-rounded.png';
 import leafletIcon from '../../assets/icons/leaflet-icon-rounded.png';
 import leafletTilesTemplate from '../../templates/html/leaflet-tiles.html?raw';
@@ -34,6 +35,65 @@ const EXPORT_STEPS = [
   { id: 3, title: 'Add API Key' },
   { id: 4, title: 'Export' },
 ];
+
+function createInitialCodeGeneratorMemory() {
+  return {
+    selectedLibrary: LIBRARIES[0].id,
+    hasLibrarySelection: false,
+    token: '',
+    showToken: false,
+    hasAcceptedTokenWarning: false,
+    currentStep: 1,
+    exportOptions: {
+      style: true,
+      language: true,
+      worldview: true,
+      places: true,
+      location: true,
+    },
+  };
+}
+
+let codeGeneratorMemory = createInitialCodeGeneratorMemory();
+
+function sanitizeSharedPreset(sharedPreset) {
+  if (!sharedPreset || typeof sharedPreset !== 'object') {
+    return null;
+  }
+
+  const preset = {};
+  if (sharedPreset.selectedLibrary === 'maplibre' || sharedPreset.selectedLibrary === 'leaflet') {
+    preset.selectedLibrary = sharedPreset.selectedLibrary;
+    preset.hasLibrarySelection = true;
+  }
+
+  if (sharedPreset.exportOptions && typeof sharedPreset.exportOptions === 'object') {
+    preset.exportOptions = {
+      style: sharedPreset.exportOptions.style !== false,
+      language: sharedPreset.exportOptions.language !== false,
+      worldview: sharedPreset.exportOptions.worldview !== false,
+      places: sharedPreset.exportOptions.places !== false,
+      location: sharedPreset.exportOptions.location !== false,
+    };
+  }
+
+  const token = typeof sharedPreset.token === 'string' ? sharedPreset.token.trim() : '';
+  if (token) {
+    preset.token = token;
+    preset.hasAcceptedTokenWarning = true;
+  }
+
+  if (sharedPreset.forceDownload === true) {
+    preset.forceDownload = true;
+  }
+
+  const step = Number(sharedPreset.currentStep);
+  if (Number.isInteger(step) && step >= 1 && step <= 4) {
+    preset.currentStep = step;
+  }
+
+  return Object.keys(preset).length ? preset : null;
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -153,21 +213,62 @@ function formatViewport(viewport) {
  * @param {string} [props.selectedStyleName]
  * @param {{language:string,worldview:string,places:string}} props.parameters
  * @param {{center:[number,number],zoom:number}} [props.viewport]
+ * @param {{
+ *  selectedLibrary?:string,
+ *  hasLibrarySelection?:boolean,
+ *  token?:string,
+ *  hasAcceptedTokenWarning?:boolean,
+ *  currentStep?:number,
+ *  exportOptions?:Object,
+ *  forceDownload?:boolean
+ * }} [props.sharedPreset]
+ * @param {() => void} [props.onSharedPresetConsumed]
+ * @param {(state: {
+ *  selectedLibrary:string,
+ *  hasLibrarySelection:boolean,
+ *  token:string,
+ *  exportOptions: Object,
+ *  currentStep:number
+ * }) => void} [props.onStateChange]
  */
-export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
-  const [selectedLibrary, setSelectedLibrary] = useState(LIBRARIES[0].id);
-  const [hasLibrarySelection, setHasLibrarySelection] = useState(false);
-  const [token, setToken] = useState('');
-  const [showToken, setShowToken] = useState(false);
-  const [hasAcceptedTokenWarning, setHasAcceptedTokenWarning] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [exportOptions, setExportOptions] = useState({
-    style: true,
-    language: true,
-    worldview: true,
-    places: true,
-    location: true,
-  });
+export function CodeGenerator({
+  selectedStyleName,
+  parameters,
+  viewport,
+  sharedPreset,
+  onSharedPresetConsumed,
+  onStateChange,
+}) {
+  const normalizedSharedPreset = useMemo(() => sanitizeSharedPreset(sharedPreset), [sharedPreset]);
+
+  const initialState = useMemo(() => {
+    if (!normalizedSharedPreset) {
+      return codeGeneratorMemory;
+    }
+
+    return {
+      ...codeGeneratorMemory,
+      ...normalizedSharedPreset,
+      exportOptions: normalizedSharedPreset.exportOptions || codeGeneratorMemory.exportOptions,
+      hasAcceptedTokenWarning:
+        normalizedSharedPreset.hasAcceptedTokenWarning ?? codeGeneratorMemory.hasAcceptedTokenWarning,
+      hasLibrarySelection: normalizedSharedPreset.hasLibrarySelection ?? codeGeneratorMemory.hasLibrarySelection,
+      forceDownload: normalizedSharedPreset.forceDownload === true,
+    };
+  }, [normalizedSharedPreset]);
+
+  const [selectedLibrary, setSelectedLibrary] = useState(() => initialState.selectedLibrary);
+  const [hasLibrarySelection, setHasLibrarySelection] = useState(() => initialState.hasLibrarySelection);
+  const [token, setToken] = useState(() => initialState.token);
+  const [showToken, setShowToken] = useState(() => initialState.showToken);
+  const [hasAcceptedTokenWarning, setHasAcceptedTokenWarning] = useState(() => initialState.hasAcceptedTokenWarning);
+  const [currentStep, setCurrentStep] = useState(() => initialState.currentStep);
+  const [shareStatus, setShareStatus] = useState({ kind: '', message: '' });
+  const [shareBusy, setShareBusy] = useState(false);
+  const [exportOptions, setExportOptions] = useState(() => initialState.exportOptions);
+  const [forceDownloadOnLoad] = useState(() => Boolean(initialState.forceDownload));
+  const shareToastTimeoutRef = useRef(0);
+  const hasTriggeredForceDownloadRef = useRef(false);
 
   const hasToken = token.length > 0;
   const selectedStyleForExport = exportOptions.style ? selectedStyleName || '' : DEFAULT_EXPORT_STYLE;
@@ -193,6 +294,7 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
 
   const hasSelectedStyle = Boolean(selectedStyleForExport);
   const canExport = hasToken && hasSelectedStyle;
+  const canShare = Boolean(selectedStyleName);
   const tokenToggleLabel = showToken ? 'Hide API key' : 'Show API key';
   const tokenToggleIcon = showToken ? 'view-hide' : 'view-visible';
 
@@ -219,19 +321,39 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
   const summaryRows = useMemo(
     () => [
       { label: 'Library', value: selectedLibraryLabel },
-      { label: 'Style', value: selectedStyleForExport || 'None selected' },
-      { label: 'Language', value: exportedParameters.language || 'global' },
-      { label: 'Worldview', value: exportedParameters.worldview || 'global' },
-      { label: 'Places', value: exportedParameters.places || 'none' },
-      { label: 'Map Location', value: formatViewport(exportedViewport) },
+      {
+        label: 'Style',
+        value: exportOptions.style ? selectedStyleForExport || 'None selected' : `Default (${DEFAULT_EXPORT_STYLE})`,
+      },
+      {
+        label: 'Language',
+        value: exportOptions.language ? parameters.language || 'global' : 'Default (global)',
+      },
+      {
+        label: 'Worldview',
+        value: exportOptions.worldview ? parameters.worldview || 'global' : 'Default (global)',
+      },
+      {
+        label: 'Places',
+        value: exportOptions.places ? parameters.places || 'none' : 'Default (none)',
+      },
+      {
+        label: 'Map Location',
+        value: exportOptions.location ? formatViewport(viewport) : `Default (${formatViewport(DEFAULT_EXPORT_VIEWPORT)})`,
+      },
     ],
     [
-      exportedParameters.language,
-      exportedParameters.places,
-      exportedParameters.worldview,
-      exportedViewport,
+      exportOptions.language,
+      exportOptions.location,
+      exportOptions.places,
+      exportOptions.style,
+      exportOptions.worldview,
+      parameters.language,
+      parameters.places,
+      parameters.worldview,
       selectedLibraryLabel,
       selectedStyleForExport,
+      viewport,
     ]
   );
 
@@ -239,6 +361,45 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
   const nextDisabled =
     (currentStep === 2 && !hasLibrarySelection) ||
     (currentStep === 3 && (!hasToken || !hasAcceptedTokenWarning));
+
+  useEffect(() => {
+    return () => {
+      if (shareToastTimeoutRef.current) {
+        window.clearTimeout(shareToastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!normalizedSharedPreset) {
+      return;
+    }
+
+    onSharedPresetConsumed?.();
+  }, [normalizedSharedPreset, onSharedPresetConsumed]);
+
+  useEffect(() => {
+    codeGeneratorMemory = {
+      selectedLibrary,
+      hasLibrarySelection,
+      token,
+      showToken,
+      hasAcceptedTokenWarning,
+      currentStep,
+      exportOptions,
+      forceDownload: false,
+    };
+  }, [currentStep, exportOptions, hasAcceptedTokenWarning, hasLibrarySelection, selectedLibrary, showToken, token]);
+
+  useEffect(() => {
+    onStateChange?.({
+      selectedLibrary,
+      hasLibrarySelection,
+      token,
+      exportOptions,
+      currentStep,
+    });
+  }, [currentStep, exportOptions, hasLibrarySelection, onStateChange, selectedLibrary, token]);
 
   const parameterRows = [
     {
@@ -282,6 +443,52 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
   function goToPreviousStep() {
     setCurrentStep((step) => Math.max(step - 1, 1));
   }
+
+  function showShareStatus(kind, message) {
+    if (shareToastTimeoutRef.current) {
+      window.clearTimeout(shareToastTimeoutRef.current);
+    }
+
+    setShareStatus({ kind, message });
+    shareToastTimeoutRef.current = window.setTimeout(() => {
+      setShareStatus({ kind: '', message: '' });
+      shareToastTimeoutRef.current = 0;
+    }, 3200);
+  }
+
+  async function handleShareLinkCopy() {
+    if (!selectedStyleName || shareBusy) {
+      return;
+    }
+
+    setShareBusy(true);
+    try {
+      await generateAndCopyShareUrl({
+        styleName: selectedStyleName,
+        parameters,
+        viewport,
+        baseUrl: window.location.origin + window.location.pathname,
+      });
+      showShareStatus('success', 'Share link copied to clipboard.');
+    } catch (error) {
+      showShareStatus('danger', error.message || 'Failed to create share link.');
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!forceDownloadOnLoad || hasTriggeredForceDownloadRef.current) {
+      return;
+    }
+
+    if (!canExport || currentStep !== 4) {
+      return;
+    }
+
+    downloadTemplate(templateHtml, selectedLibrary, selectedStyleForExport);
+    hasTriggeredForceDownloadRef.current = true;
+  }, [canExport, currentStep, forceDownloadOnLoad, selectedLibrary, selectedStyleForExport, templateHtml]);
 
   return (
     <div className="code-generator" aria-live="polite">
@@ -345,7 +552,18 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
             {LIBRARIES.map((library) => {
               return (
                 <CalciteLabel key={library.id} layout="inline" className="code-generator-library-option">
-                  <CalciteRadioButton value={library.id} />
+                  <CalciteRadioButton
+                    value={library.id}
+                    checked={selectedLibrary === library.id}
+                    onClick={() => {
+                      setSelectedLibrary(library.id);
+                      setHasLibrarySelection(true);
+                    }}
+                    onCalciteRadioButtonChange={() => {
+                      setSelectedLibrary(library.id);
+                      setHasLibrarySelection(true);
+                    }}
+                  />
                   <span className="code-generator-library-button-content">
                     <img className="code-generator-library-icon" src={library.icon} alt={library.iconAlt} />
                     <span>{library.label}</span>
@@ -400,17 +618,29 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
                   target="_blank"
                   rel="noreferrer"
                   width="full"
+                  iconStart="user"
                 >
                   Create Free Account
                 </CalciteButton>
                 <CalciteButton
-                  href="https://developers.arcgis.com/documentation/security-and-authentication/"
+                  href="https://www.youtube.com/watch?v=h68pd449wd4"
                   target="_blank"
                   rel="noreferrer"
                   width="full"
                   appearance="outline"
+                  iconStart="video"
                 >
-                  Learn More
+                  {'Create and configure an API key tutorial'}
+                </CalciteButton>
+                <CalciteButton
+                  href="https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/"
+                  target="_blank"
+                  rel="noreferrer"
+                  width="full"
+                  appearance="outline"
+                  iconStart="information"
+                >
+                  Intro to API key documentation
                 </CalciteButton>
               </div>
             </div>
@@ -475,10 +705,23 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
             >
               Download HTML
             </CalciteButton>
+            <CalciteButton
+              data-testid="codegen-share-copy"
+              disabled={!canShare || shareBusy}
+              width="full"
+              appearance="outline"
+              iconStart="share"
+              onClick={handleShareLinkCopy}
+            >
+              {shareBusy ? 'Copying Link...' : 'Copy Share Link'}
+            </CalciteButton>
           </div>
 
           {!selectedStyleName && exportOptions.style ? (
             <p className="code-generator-warning">Select a style (or uncheck Style in step 1) before exporting code.</p>
+          ) : null}
+          {!selectedStyleName ? (
+            <p className="code-generator-warning">Select a style before creating a share link.</p>
           ) : null}
         </div>
       ) : null}
@@ -508,6 +751,20 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
           </CalciteButton>
         ) : null}
       </div>
+
+      {shareStatus.message ? (
+        <div
+          className={`code-generator-toast code-generator-toast-${shareStatus.kind}`}
+          role="status"
+          aria-live="polite"
+        >
+          {shareStatus.message}
+        </div>
+      ) : null}
     </div>
   );
 }
+
+CodeGenerator.__resetMemoryForTests = () => {
+  codeGeneratorMemory = createInitialCodeGeneratorMemory();
+};

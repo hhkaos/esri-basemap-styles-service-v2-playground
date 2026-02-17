@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@esri/calcite-components-react', async () => {
   return {
@@ -41,7 +41,15 @@ vi.mock('@esri/calcite-components-react', async () => {
         </div>
       );
     },
-    CalciteRadioButton: (props) => <input type="radio" {...props} />,
+    CalciteRadioButton: ({ onCalciteRadioButtonChange, ...props }) => (
+      <input
+        type="radio"
+        {...props}
+        onChange={(event) => {
+          onCalciteRadioButtonChange?.(event);
+        }}
+      />
+    ),
     CalciteLabel: ({ children, ...props }) => <label {...props}>{children}</label>,
     CalciteLink: ({ children, ...props }) => <a {...props}>{children}</a>,
   };
@@ -66,6 +74,10 @@ function moveToStep3(libraryValue = 'maplibre') {
 }
 
 describe('CodeGenerator', () => {
+  beforeEach(() => {
+    CodeGenerator.__resetMemoryForTests?.();
+  });
+
   it('starts at step 1 and shows exported parameter checkboxes', () => {
     render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
 
@@ -106,6 +118,20 @@ describe('CodeGenerator', () => {
     expect(screen.getByTestId('codegen-step-next')).not.toHaveAttribute('disabled');
   });
 
+  it('keeps selected library checked when navigating to step 3 and back to step 2', () => {
+    render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
+
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    fireEvent.click(screen.getByDisplayValue('leaflet'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    expect(screen.getByText('Step 3 of 4')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('codegen-step-back'));
+    expect(screen.getByText('Step 2 of 4')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('leaflet')).toBeChecked();
+    expect(screen.getByDisplayValue('maplibre')).not.toBeChecked();
+  });
+
   it('requires entering an API key on step 3 before next is enabled', () => {
     render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
 
@@ -125,6 +151,28 @@ describe('CodeGenerator', () => {
 
     moveToStep3('maplibre');
     expect(screen.getByText('Need an API key?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create Free Account' })).toHaveAttribute(
+      'href',
+      'https://developers.arcgis.com/sign-up/'
+    );
+    expect(screen.getByRole('button', { name: 'Create and configure an API key tutorial' })).toHaveAttribute(
+      'href',
+      'https://www.youtube.com/watch?v=h68pd449wd4'
+    );
+    expect(screen.getByRole('button', { name: 'Intro to API key documentation' })).toHaveAttribute(
+      'href',
+      'https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/'
+    );
+
+    const ctaCard = screen.getByText('Need an API key?').closest('.code-generator-cta-card');
+    expect(ctaCard).not.toBeNull();
+    const ctaButtons = within(ctaCard).getAllByRole('button');
+    expect(ctaButtons.map((button) => button.textContent)).toEqual([
+      'Create Free Account',
+      'Create and configure an API key tutorial',
+      'Intro to API key documentation',
+    ]);
+
     expect(screen.getByTestId('codegen-step-next')).toHaveAttribute('disabled');
 
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
@@ -262,6 +310,26 @@ describe('CodeGenerator', () => {
     submitMock.mockRestore();
   });
 
+  it('shows "Default (...)" in summary for parameters excluded in step 1', () => {
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/navigation"
+        parameters={{ language: 'es', worldview: 'india', places: 'all' }}
+        viewport={{ center: [12.5, 41.9], zoom: 7 }}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Include Worldview'));
+    fireEvent.click(screen.getByLabelText('Include Current map location'));
+    moveToStep3('maplibre');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+
+    expect(screen.getByText('Default (global)')).toBeInTheDocument();
+    expect(screen.getByText('Default (Lng 0.0000, Lat 30.0000, Zoom 2.00)')).toBeInTheDocument();
+  });
+
   it('creates and revokes a blob URL when download is clicked', () => {
     const originalCreateObjectURL = URL.createObjectURL;
     const originalRevokeObjectURL = URL.revokeObjectURL;
@@ -279,6 +347,126 @@ describe('CodeGenerator', () => {
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     fireEvent.click(screen.getByTestId('codegen-export-download'));
 
+    expect(createObjectURLMock).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURLMock).toHaveBeenCalledTimes(1);
+
+    clickMock.mockRestore();
+    URL.createObjectURL = originalCreateObjectURL;
+    URL.revokeObjectURL = originalRevokeObjectURL;
+  });
+
+  it('copies a share link to clipboard from step 4', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const originalClipboard = navigator.clipboard;
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/navigation"
+        parameters={{ language: 'en', worldview: '', places: 'none' }}
+        viewport={{ center: [-3.7038, 40.4168], zoom: 9 }}
+      />
+    );
+
+    moveToStep3('maplibre');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    fireEvent.click(screen.getByTestId('codegen-share-copy'));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledTimes(1);
+    });
+    expect(writeText.mock.calls[0][0]).toContain('config=');
+    expect(screen.getByText('Share link copied to clipboard.')).toBeInTheDocument();
+
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: originalClipboard });
+  });
+
+  it('disables share action when no style is selected', () => {
+    render(<CodeGenerator selectedStyleName="" parameters={DEFAULT_PARAMETERS} />);
+
+    moveToStep3('maplibre');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+
+    expect(screen.getByTestId('codegen-share-copy')).toHaveAttribute('disabled');
+    expect(screen.getByText('Select a style before creating a share link.')).toBeInTheDocument();
+  });
+
+  it('preserves entered state across unmount and remount', () => {
+    const { unmount } = render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
+
+    moveToStep3('maplibre');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+
+    unmount();
+    render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
+
+    expect(screen.getByText('Step 3 of 4')).toBeInTheDocument();
+    expect(screen.getByTestId('codegen-token-input')).toHaveValue('abc123');
+    expect(screen.getByLabelText('I confirm I read and understood the API key security warning')).toBeChecked();
+  });
+
+  it('starts on step 3 when shared preset includes library but excludes API key', () => {
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/navigation"
+        parameters={DEFAULT_PARAMETERS}
+        sharedPreset={{
+          selectedLibrary: 'leaflet',
+          hasLibrarySelection: true,
+          exportOptions: {
+            style: true,
+            language: true,
+            worldview: true,
+            places: true,
+            location: true,
+          },
+          currentStep: 3,
+        }}
+      />
+    );
+
+    expect(screen.getByText('Step 3 of 4')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('codegen-step-back'));
+    expect(screen.getByText('Step 2 of 4')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('leaflet')).toBeChecked();
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    expect(screen.getByText('Step 3 of 4')).toBeInTheDocument();
+    expect(screen.getByTestId('codegen-token-input')).toHaveValue('');
+  });
+
+  it('forces download when shared preset requests it and export is ready', () => {
+    const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+    const createObjectURLMock = vi.fn(() => 'blob:test');
+    const revokeObjectURLMock = vi.fn();
+    const clickMock = vi.spyOn(window.HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    URL.createObjectURL = createObjectURLMock;
+    URL.revokeObjectURL = revokeObjectURLMock;
+
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/navigation"
+        parameters={DEFAULT_PARAMETERS}
+        sharedPreset={{
+          selectedLibrary: 'maplibre',
+          hasLibrarySelection: true,
+          token: 'abc123',
+          hasAcceptedTokenWarning: true,
+          currentStep: 4,
+          forceDownload: true,
+        }}
+      />
+    );
+
+    expect(screen.getByText('Step 4 of 4')).toBeInTheDocument();
     expect(createObjectURLMock).toHaveBeenCalledTimes(1);
     expect(revokeObjectURLMock).toHaveBeenCalledTimes(1);
 

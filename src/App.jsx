@@ -15,9 +15,11 @@ import { CodeGenerator } from './components/CodeGenerator/CodeGenerator';
 import { MapViewer } from './components/MapViewer/MapViewer';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from './config/mapDefaults';
 import { ParameterControls } from './components/ParameterControls/ParameterControls';
+import { SharePanel } from './components/SharePanel/SharePanel';
 import { StyleBrowser } from './components/StyleBrowser/StyleBrowser';
 import { DEFAULT_PLAYGROUND_TOKEN } from './config/playgroundToken';
 import { DEFAULT_STYLE_PARAMETERS, sanitizeStyleParameters } from './utils/styleCapabilities';
+import { parseSharedConfigFromUrl } from './services/shareService';
 
 const SIDEBAR_COLLAPSE_STORAGE_KEY = 'playground.sidebarCollapsed';
 
@@ -47,25 +49,55 @@ function getParameterDisplayValue(value, fallbackValue) {
   return normalized;
 }
 
+function getInitialSharedConfig() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return parseSharedConfigFromUrl(window.location.href);
+}
+
 function App() {
-  const [selectedStyleName, setSelectedStyleName] = useState('');
+  const [initialSharedConfig] = useState(getInitialSharedConfig);
+  const [sharedCodeGeneratorPreset, setSharedCodeGeneratorPreset] = useState(() => initialSharedConfig?.codeGenerator || null);
+  const [selectedStyleName, setSelectedStyleName] = useState(() => initialSharedConfig?.style || '');
   const [selectedStyle, setSelectedStyle] = useState(null);
-  const [parameters, setParameters] = useState(DEFAULT_STYLE_PARAMETERS);
+  const [styleCatalogLoaded, setStyleCatalogLoaded] = useState(false);
+  const [parameters, setParameters] = useState(() => ({
+    ...DEFAULT_STYLE_PARAMETERS,
+    ...(initialSharedConfig?.parameters || {}),
+  }));
   const [capabilities, setCapabilities] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(getInitialSidebarCollapsed);
-  const [activeToolPanel, setActiveToolPanel] = useState('style-selection');
+  const [activeToolPanel, setActiveToolPanel] = useState(() => initialSharedConfig?.ui?.panel || 'style-selection');
   const [actionBarExpanded, setActionBarExpanded] = useState(true);
   const [mapLoading, setMapLoading] = useState(false);
-  const [mapViewport, setMapViewport] = useState({
-    center: DEFAULT_MAP_CENTER,
-    zoom: DEFAULT_MAP_ZOOM,
+  const [codeGeneratorState, setCodeGeneratorState] = useState(() => {
+    if (!initialSharedConfig?.codeGenerator) {
+      return null;
+    }
+
+    return {
+      selectedLibrary: initialSharedConfig.codeGenerator.selectedLibrary || 'maplibre',
+      hasLibrarySelection: Boolean(initialSharedConfig.codeGenerator.hasLibrarySelection),
+      token: initialSharedConfig.codeGenerator.token || '',
+      exportOptions: initialSharedConfig.codeGenerator.exportOptions || null,
+    };
   });
+  const [mapViewport, setMapViewport] = useState(() => ({
+    center: initialSharedConfig?.viewport?.center || DEFAULT_MAP_CENTER,
+    zoom: initialSharedConfig?.viewport?.zoom ?? DEFAULT_MAP_ZOOM,
+  }));
 
   const handleCapabilitiesLoad = useCallback((caps) => {
     setCapabilities({ languages: caps.languages, worldviews: caps.worldviews, places: caps.places });
   }, []);
 
   useEffect(() => {
+    if (!selectedStyle) {
+      return;
+    }
+
     setParameters((current) => sanitizeStyleParameters(selectedStyle, current));
   }, [selectedStyle]);
 
@@ -173,6 +205,13 @@ function App() {
               onClick={() => setActiveToolPanel('code-generator')}
             />
             <CalciteAction
+              icon="share"
+              text="Share"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'share'}
+              onClick={() => setActiveToolPanel('share')}
+            />
+            <CalciteAction
               icon="information"
               text="Contact"
               textEnabled={actionBarExpanded}
@@ -181,26 +220,31 @@ function App() {
             />
           </CalciteActionBar>
 
-          {activeToolPanel === 'style-selection' ? (
-            <CalcitePanel heading="Style Selection" className="app-tools-panel-content app-style-panel">
-              <CalciteBlock open className="app-tools-block">
-                <div className="app-style-panel-content">
-                  <StyleBrowser
-                    selectedStyleName={selectedStyleName}
-                    onStyleSelect={setSelectedStyleName}
-                    onStyleMetaChange={setSelectedStyle}
-                    onCapabilitiesLoad={handleCapabilitiesLoad}
-                  />
-                </div>
-              </CalciteBlock>
-            </CalcitePanel>
-          ) : null}
+          <CalcitePanel
+            heading="Style Selection"
+            className="app-tools-panel-content app-style-panel"
+            hidden={activeToolPanel !== 'style-selection'}
+          >
+            <CalciteBlock open className="app-tools-block">
+              <div className="app-style-panel-content">
+                <StyleBrowser
+                  selectedStyleName={selectedStyleName}
+                  onStyleSelect={setSelectedStyleName}
+                  onStyleMetaChange={setSelectedStyle}
+                  onCapabilitiesLoad={handleCapabilitiesLoad}
+                  onCatalogLoadComplete={setStyleCatalogLoaded}
+                />
+              </div>
+            </CalciteBlock>
+          </CalcitePanel>
 
           {activeToolPanel === 'language' ? (
             <CalcitePanel heading="Language" className="app-tools-panel-content">
               <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
+                  selectedStyleName={selectedStyleName}
+                  styleCatalogLoaded={styleCatalogLoaded}
                   parameters={parameters}
                   onChange={setParameters}
                   capabilities={capabilities}
@@ -215,6 +259,8 @@ function App() {
               <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
+                  selectedStyleName={selectedStyleName}
+                  styleCatalogLoaded={styleCatalogLoaded}
                   parameters={parameters}
                   onChange={setParameters}
                   capabilities={capabilities}
@@ -229,6 +275,8 @@ function App() {
               <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
+                  selectedStyleName={selectedStyleName}
+                  styleCatalogLoaded={styleCatalogLoaded}
                   parameters={parameters}
                   onChange={setParameters}
                   capabilities={capabilities}
@@ -241,7 +289,27 @@ function App() {
           {activeToolPanel === 'code-generator' ? (
             <CalcitePanel heading="Code Generator" className="app-tools-panel-content">
               <CalciteBlock open className="app-tools-block">
-                <CodeGenerator selectedStyleName={selectedStyleName} parameters={parameters} viewport={mapViewport} />
+                <CodeGenerator
+                  selectedStyleName={selectedStyleName}
+                  parameters={parameters}
+                  viewport={mapViewport}
+                  sharedPreset={sharedCodeGeneratorPreset}
+                  onSharedPresetConsumed={() => setSharedCodeGeneratorPreset(null)}
+                  onStateChange={setCodeGeneratorState}
+                />
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'share' ? (
+            <CalcitePanel heading="Share" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <SharePanel
+                  selectedStyleName={selectedStyleName}
+                  parameters={parameters}
+                  viewport={mapViewport}
+                  codeGeneratorState={codeGeneratorState}
+                />
               </CalciteBlock>
             </CalcitePanel>
           ) : null}
@@ -313,6 +381,7 @@ function App() {
           styleName={selectedStyleName}
           token={DEFAULT_PLAYGROUND_TOKEN}
           parameters={parameters}
+          initialViewport={initialSharedConfig?.viewport}
           onLoadingChange={setMapLoading}
           onViewportChange={setMapViewport}
         />

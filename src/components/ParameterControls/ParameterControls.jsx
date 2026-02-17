@@ -120,15 +120,26 @@ function renderWorldviewLabel(option) {
 /**
  * @param {Object} props
  * @param {Object} [props.selectedStyle]
+ * @param {string} [props.selectedStyleName]
+ * @param {boolean} [props.styleCatalogLoaded]
  * @param {{language:string,worldview:string,places:string}} props.parameters
  * @param {(next: {language:string,worldview:string,places:string}) => void} props.onChange
  * @param {{languages?: Array, worldviews?: Array, places?: Array}} [props.capabilities]
  * @param {'all'|'language'|'worldview'|'places'} [props.section='all']
  */
-export function ParameterControls({ selectedStyle, parameters, onChange, capabilities, section = 'all' }) {
-  const languageEnabled = supportsLanguage(selectedStyle);
-  const worldviewEnabled = supportsWorldview(selectedStyle);
-  const placesEnabled = supportsPlaces(selectedStyle);
+export function ParameterControls({
+  selectedStyle,
+  selectedStyleName = '',
+  styleCatalogLoaded = true,
+  parameters,
+  onChange,
+  capabilities,
+  section = 'all',
+}) {
+  const awaitingStyleMetadata = Boolean(selectedStyleName) && !selectedStyle && !styleCatalogLoaded;
+  const languageEnabled = !awaitingStyleMetadata && supportsLanguage(selectedStyle);
+  const worldviewEnabled = !awaitingStyleMetadata && supportsWorldview(selectedStyle);
+  const placesEnabled = !awaitingStyleMetadata && supportsPlaces(selectedStyle);
 
   const languageOptions = useMemo(() => {
     const items = capabilities?.languages?.length > 0 ? capabilities.languages : FALLBACK_LANGUAGES;
@@ -151,14 +162,16 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
   }
 
   function renderLanguageControl() {
-    const languageTooltip = !languageEnabled
+    const languageTooltip = awaitingStyleMetadata
+      ? 'Loading style capabilities for selected style.'
+      : !languageEnabled
       ? 'This style does not support language changes.'
       : 'Choose label language.';
 
     return (
       <div className="parameter-control-row">
         <h4 id="language-parameter-label" className="parameter-heading">
-          Language {!languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          Language {!awaitingStyleMetadata && !languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
         </h4>
         <p className="parameter-description">
           Controls how map labels are displayed (global, local, or a specific language code).{' '}
@@ -178,26 +191,30 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
         >
           {languageOptions.map((option) => (
             <CalciteLabel key={option.value} layout="inline" className="parameter-radio-option">
-              <CalciteRadioButton value={option.value} />
+              <CalciteRadioButton value={option.value} checked={parameters.language === option.value} />
               {renderLanguageLabel(option)}
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
-        <CalciteTooltip referenceElement="language-parameter-label">Choose label language for supported styles.</CalciteTooltip>
+        <CalciteTooltip referenceElement="language-parameter-label">
+          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Choose label language for supported styles.'}
+        </CalciteTooltip>
         <CalciteTooltip referenceElement="language-parameter-group">{languageTooltip}</CalciteTooltip>
       </div>
     );
   }
 
   function renderWorldviewControl() {
-    const worldviewTooltip = !worldviewEnabled
+    const worldviewTooltip = awaitingStyleMetadata
+      ? 'Loading style capabilities for selected style.'
+      : !worldviewEnabled
       ? 'This style does not support worldview capability.'
       : 'Controls boundaries and labels in disputed areas. Does not reflect Esri\'s official position.';
 
     return (
       <div className="parameter-control-row">
         <h4 id="worldview-parameter-label" className="parameter-heading">
-          Worldview {!worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          Worldview {!awaitingStyleMetadata && !worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
         </h4>
         <p className="parameter-description">
           Controls boundaries and labels in disputed areas. Does not reflect Esri&apos;s official position.{' '}
@@ -217,13 +234,13 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
         >
           {worldviewOptions.map((option) => (
             <CalciteLabel key={option.value || 'default'} layout="inline" className="parameter-radio-option">
-              <CalciteRadioButton value={option.value} />
+              <CalciteRadioButton value={option.value} checked={parameters.worldview === option.value} />
               {renderWorldviewLabel(option)}
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
         <CalciteTooltip referenceElement="worldview-parameter-label">
-          Adjust disputed-boundary labeling when available.
+          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Adjust disputed-boundary labeling when available.'}
         </CalciteTooltip>
         <CalciteTooltip referenceElement="worldview-parameter-group">{worldviewTooltip}</CalciteTooltip>
       </div>
@@ -231,14 +248,16 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
   }
 
   function renderPlacesControl() {
-    const placesTooltip = !placesEnabled
+    const placesTooltip = awaitingStyleMetadata
+      ? 'Loading style capabilities for selected style.'
+      : !placesEnabled
       ? 'This style does not support places capability.'
       : 'Choose places display mode.';
 
     return (
       <div className="parameter-control-row">
         <h4 id="places-parameter-label" className="parameter-heading">
-          Places {!placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          Places {!awaitingStyleMetadata && !placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
         </h4>
         <p className="parameter-description">
           Controls point-of-interest visibility. All shows all available POIs, while Attributed shows only POIs with
@@ -259,13 +278,13 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
         >
           {placesOptions.map((option) => (
             <CalciteLabel key={option.value} layout="inline" className="parameter-radio-option">
-              <CalciteRadioButton value={option.value} />
+              <CalciteRadioButton value={option.value} checked={parameters.places === option.value} />
               <span>{option.label}</span>
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
         <CalciteTooltip referenceElement="places-parameter-label">
-          Toggle places display when supported by this style.
+          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Toggle places display when supported by this style.'}
         </CalciteTooltip>
         <CalciteTooltip referenceElement="places-parameter-group">{placesTooltip}</CalciteTooltip>
       </div>

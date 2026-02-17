@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTML export templates for MapLibre (`src/templates/html/maplibre-tiles.html`) and Leaflet (`src/templates/html/leaflet-tiles.html`)
 - Shared map defaults config (`src/config/mapDefaults.js`) and zoom conversion utility/tests (`src/utils/zoom.js`, `src/utils/zoom.test.js`)
 - Library icons for Code Generator options and tutorial links per selected library in the export step
+- App-level shared-link hydration regression test to verify deep links opening on Code Generator still restore selected Language/Worldview/Places radio states
+- ParameterControls unit coverage to verify hydrated radios render checked state for `language`, `worldview`, and `places`
 
 ### Changed
 - Reworked Language, Worldview, and Places parameter panels to use vertical radio-button groups instead of dropdowns
@@ -40,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Language flag mapping support for Catalan (`ca` → `es-ct`) and Greek (`el` → `gr`) plus hyphenated flag-icon validation
 - Leaflet export to use `L.esri.Vector.vectorBasemapLayer(..., { version: 2, ... })` with API-compatible options
 - Leaflet and MapLibre exports to include injected API key, active style parameters, and live center/zoom with cross-library zoom conversion
+- Shared-link hydration race where capabilities/style metadata were not loaded when opening directly on non-style panels by keeping `StyleBrowser` mounted while inactive
+- Parameter panel radio selection rendering where group values were restored from shared config but individual `calcite-radio-button` options did not render as checked
 
 ### Security
 

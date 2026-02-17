@@ -131,8 +131,15 @@ function renderCapabilityChip({
  * @param {(styleName: string) => void} [props.onStyleSelect]
  * @param {(style: Object) => void} [props.onStyleMetaChange]
  * @param {(capabilities: Object) => void} [props.onCapabilitiesLoad]
+ * @param {(loaded: boolean) => void} [props.onCatalogLoadComplete]
  */
-export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChange, onCapabilitiesLoad }) {
+export function StyleBrowser({
+  selectedStyleName,
+  onStyleSelect,
+  onStyleMetaChange,
+  onCapabilitiesLoad,
+  onCatalogLoadComplete,
+}) {
   const [filter, setFilter] = useState('');
   const [styles, setStyles] = useState([]);
   const [selectedFamily, setSelectedFamily] = useState('arcgis');
@@ -269,9 +276,10 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         setError(`Unable to load styles: ${err.message}`);
       } finally {
         setLoading(false);
+        onCatalogLoadComplete?.(true);
       }
     },
-    [selectedStyleName, selectStyle, onCapabilitiesLoad]
+    [selectedStyleName, selectStyle, onCapabilitiesLoad, onCatalogLoadComplete]
   );
 
   useEffect(() => {
@@ -282,6 +290,17 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
     autoLoadedRef.current = true;
     loadStyles();
   }, [loadStyles]);
+
+  useEffect(() => {
+    if (!selectedStyleName || !styles.length) {
+      return;
+    }
+
+    const matchedStyle = styles.find((style) => getStyleId(style) === selectedStyleName);
+    if (matchedStyle) {
+      onStyleMetaChange?.(matchedStyle);
+    }
+  }, [selectedStyleName, styles, onStyleMetaChange]);
 
   useEffect(() => {
     if (!styles.length) {
