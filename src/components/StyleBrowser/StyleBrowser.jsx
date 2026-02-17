@@ -45,16 +45,21 @@ const CAPABILITY_FILTERS = [
     key: 'baseLayer',
     icon: 'layers',
     label: 'Supports base layer',
-    appearance: 'outline',
     tooltipId: 'style-browser-legend-base-layer',
   },
   {
     key: 'labelLayer',
     icon: 'layer-annotation',
     label: 'Supports labels layer',
-    appearance: 'outline',
     tooltipId: 'style-browser-legend-labels-layer',
   },
+];
+const STYLE_CAPABILITY_DETAILS = [
+  { key: 'language', icon: 'language', label: 'Language' },
+  { key: 'worldview', icon: 'globe', label: 'Worldview' },
+  { key: 'places', icon: 'map-pin', label: 'Places' },
+  { key: 'baseLayer', icon: 'layers', label: 'Base layer' },
+  { key: 'labelLayer', icon: 'layer-annotation', label: 'Labels layer' },
 ];
 
 function getInputValue(event) {
@@ -195,6 +200,18 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
   const styleInfoContent = useMemo(
     () => resolveStyleInfoContent(activeStyleInfoStyle || {}, styleUseCases),
     [activeStyleInfoStyle]
+  );
+  const styleInfoCapabilities = useMemo(() => {
+    const badges = getStyleBadges(activeStyleInfoStyle || {});
+
+    return STYLE_CAPABILITY_DETAILS.map((capability) => ({
+      ...capability,
+      supported: Boolean(badges[capability.key]),
+    }));
+  }, [activeStyleInfoStyle]);
+  const supportedStyleInfoCapabilities = useMemo(
+    () => styleInfoCapabilities.filter((capability) => capability.supported),
+    [styleInfoCapabilities]
   );
 
   const selectStyle = useCallback(
@@ -576,6 +593,22 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
               <p>{styleInfoContent.fallbackDescription}</p>
             </section>
           ) : null}
+
+          <section className="style-browser-info-section">
+            <h4>Supported capabilities</h4>
+            <div className="style-browser-info-capabilities-grid">
+              <section>
+                <ul className="style-browser-info-capabilities-list" aria-label="Supported capabilities">
+                  {supportedStyleInfoCapabilities.map((capability) => (
+                    <li key={capability.key}>
+                      <CalciteIcon icon={capability.icon} scale="s" aria-hidden="true" />
+                      <span>{capability.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+          </section>
 
           {styleInfoContent.documentationUrl ? (
             <section className="style-browser-info-section">

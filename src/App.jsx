@@ -31,6 +31,20 @@ function getInitialSidebarCollapsed() {
   }
 }
 
+function getParameterDisplayValue(value, fallbackValue) {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+
+  if (!normalized) {
+    return `${fallbackValue} (default)`;
+  }
+
+  if (normalized === fallbackValue) {
+    return `${normalized} (default)`;
+  }
+
+  return normalized;
+}
+
 function App() {
   const [selectedStyleName, setSelectedStyleName] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(null);
@@ -81,6 +95,12 @@ function App() {
       }
     };
   }, [sidebarCollapsed]);
+
+  const viewerHeading = selectedStyle?.name || selectedStyleName || 'No style selected';
+  const languageDescription = getParameterDisplayValue(parameters.language, DEFAULT_STYLE_PARAMETERS.language);
+  const placesDescription = getParameterDisplayValue(parameters.places, DEFAULT_STYLE_PARAMETERS.places);
+  const worldviewDescription = getParameterDisplayValue(parameters.worldview, 'global');
+  const viewerDescription = `Language: ${languageDescription} • Places: ${placesDescription} • Worldview: ${worldviewDescription}`;
 
   return (
     <CalciteShell className="app-shell">
@@ -172,7 +192,7 @@ function App() {
 
           {activeToolPanel === 'language' ? (
             <CalcitePanel heading="Language" className="app-tools-panel-content">
-              <CalciteBlock open className="app-tools-block">
+              <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
                   parameters={parameters}
@@ -186,7 +206,7 @@ function App() {
 
           {activeToolPanel === 'worldview' ? (
             <CalcitePanel heading="Worldview" className="app-tools-panel-content">
-              <CalciteBlock open className="app-tools-block">
+              <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
                   parameters={parameters}
@@ -200,7 +220,7 @@ function App() {
 
           {activeToolPanel === 'places' ? (
             <CalcitePanel heading="Places" className="app-tools-panel-content">
-              <CalciteBlock open className="app-tools-block">
+              <CalciteBlock open className="app-tools-block app-parameter-block">
                 <ParameterControls
                   selectedStyle={selectedStyle}
                   parameters={parameters}
@@ -277,7 +297,12 @@ function App() {
         </CalciteShellPanel>
       ) : null}
 
-      <CalcitePanel className="app-viewer-panel" loading={mapLoading}>
+      <CalcitePanel
+        className="app-viewer-panel"
+        loading={mapLoading}
+        heading={viewerHeading}
+        description={viewerDescription}
+      >
         <MapViewer
           styleName={selectedStyleName}
           token={DEFAULT_PLAYGROUND_TOKEN}

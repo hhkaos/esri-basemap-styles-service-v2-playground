@@ -335,6 +335,27 @@ calcite-dialog .style-browser-item-title {
   color: var(--calcite-color-text-2);
 }
 
+.style-browser-info-capabilities-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.style-browser-info-capabilities-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.style-browser-info-capabilities-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--calcite-color-text-1);
+}
+
 .style-browser-info-links {
   margin: 0;
   padding-inline-start: 1.1rem;

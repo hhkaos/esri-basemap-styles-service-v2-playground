@@ -2,9 +2,11 @@ export const languageFlagPreferences = {
   ar: ['ae', 'sa'],
   bg: ['bg'],
   bs: ['ba'],
+  ca: ['es-ct'],
   cs: ['cz'],
   da: ['dk'],
   de: ['de', 'at'],
+  el: ['gr'],
   en: ['gb', 'us'],
   et: ['ee'],
   es: ['es', 'mx'],
@@ -62,7 +64,7 @@ export function getPreferredLanguageFlags(languageCode) {
     return [];
   }
 
-  return flags.filter((flagCode) => /^[a-z]{2}$/.test(flagCode));
+  return flags.filter((flagCode) => /^[a-z]{2}(?:-[a-z]{2,3})?$/.test(flagCode));
 }
 
 export function getPreferredWorldviewFlag(worldviewCode) {

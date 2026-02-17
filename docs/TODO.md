@@ -229,6 +229,11 @@
 - [x] Add repository fallback preview API key so deployed app works without env configuration - 2026-02-17
 - [x] Add `Contact` action in tools rail with friendly support/help panel and repo/direct contact links - 2026-02-17
 - [x] Extend `Contact` panel with unreviewed-description disclaimer and links to `docs/SPEC.md` + `docs/TODO.md` roadmap - 2026-02-17
+- [x] Show supported and not supported capabilities in per-style info modal - 2026-02-17
+- [x] Simplify style-info modal capabilities to show only supported capabilities under one heading - 2026-02-17
+- [x] Add map viewer panel heading + parameter summary description (language, places, worldview) - 2026-02-17
+- [x] Fix parameter panel scrolling in docked tools layout by constraining block content overflow - 2026-02-17
+- [x] Add Catalan/Greek language flag mappings and hyphenated flag-code validation with unit tests - 2026-02-17
 
 ---
 

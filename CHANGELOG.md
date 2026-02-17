@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Config-driven language flag preferences with optional multi-flag rendering via `flag-icons`
 - Config-driven worldview flag preferences with icon rendering fallback behavior
 - Expanded README with feature overview, setup steps, environment configuration, and flag-icon configuration guidance
+- Unit tests for language-flag config mappings and case normalization behavior
 
 ### Changed
 - Reworked Language, Worldview, and Places parameter panels to use vertical radio-button groups instead of dropdowns
@@ -18,12 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated worldview panel messaging to: "Controls boundaries and labels in disputed areas. Does not reflect Esri's official position."
 - Expanded Places panel help text to explain the difference between `All` and `Attributed`
 - Added `VITE_BASE_PATH` build-time override in Vite config to support custom-domain deployments while preserving GitHub Pages default path
+- Updated style-info modal capabilities section to show only supported capabilities under a single heading
+- Added dynamic map panel heading/description to show selected style and active parameter values
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Parameter panel scrolling/overflow behavior in docked tools panels by constraining `calcite-block` content regions
+- Language flag mapping support for Catalan (`ca` → `es-ct`) and Greek (`el` → `gr`) plus hyphenated flag-icon validation
 
 ### Security
 
