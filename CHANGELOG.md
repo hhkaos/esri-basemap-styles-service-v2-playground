@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2.0.0] - 2026-02-17
+
+### Added
 - Initial project setup with vibe coding structure
 - Comprehensive specification document (docs/SPEC.md)
 - Custom skills: /ship, /release, /review-spec
