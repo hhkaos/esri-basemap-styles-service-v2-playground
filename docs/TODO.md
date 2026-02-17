@@ -227,6 +227,8 @@
 - [x] Clarify worldview disclaimer copy and Places `All` vs `Attributed` behavior in parameter panel help text - 2026-02-17
 - [x] Write README.md (quick start, live demo link, contribute templates, deployment) - 2026-02-17
 - [x] Add repository fallback preview API key so deployed app works without env configuration - 2026-02-17
+- [x] Add `Contact` action in tools rail with friendly support/help panel and repo/direct contact links - 2026-02-17
+- [x] Extend `Contact` panel with unreviewed-description disclaimer and links to `docs/SPEC.md` + `docs/TODO.md` roadmap - 2026-02-17
 
 ---
 

@@ -359,6 +359,7 @@ Styles are organized into thematic groups:
 │                                       │ - Places        │
 │                                       │ - Code          │
 │                                       │   Generator     │
+│                                       │ - Contact       │
 └─────────────────────────────────────────────────────────┘
 │ Cookie Consent Banner (if not accepted)                 │
 └──────────────────────────────────────────────────────────┘
@@ -462,6 +463,8 @@ Styles are organized into thematic groups:
   - Docked tools rail is mounted in `calcite-shell-panel` `slot="panel-start"` with action-driven panel switching
   - Tool panel content is wrapped in `calcite-block` for consistent Calcite panel-body structure
   - Added a `Code Generator` action in the same tools rail with a placeholder `calcite-panel`
+  - Added a `Contact` action with friendly contribution/support copy, links to the GitHub repo and direct contact page, plus reference links to `docs/SPEC.md` and `docs/TODO.md`
+  - Contact copy clarifies that some generated style descriptions may still be pending manual review
 
 **Phase 2: Places Category Filter**
 - Dropdown with multi-select and autocomplete

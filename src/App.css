@@ -101,3 +101,15 @@ body,
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
+.app-contact-content {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-contact-content p {
+  margin: 0;
+  color: var(--calcite-color-text-1);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}

@@ -5,6 +5,7 @@ import {
   CalciteActionBar,
   CalciteBlock,
   CalciteButton,
+  CalciteLink,
   CalciteNavigation,
   CalcitePanel,
   CalciteShell,
@@ -145,6 +146,13 @@ function App() {
               active={activeToolPanel === 'code-generator'}
               onClick={() => setActiveToolPanel('code-generator')}
             />
+            <CalciteAction
+              icon="information"
+              text="Contact"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'contact'}
+              onClick={() => setActiveToolPanel('contact')}
+            />
           </CalciteActionBar>
 
           {activeToolPanel === 'style-selection' ? (
@@ -208,6 +216,61 @@ function App() {
             <CalcitePanel heading="Code Generator" className="app-tools-panel-content">
               <CalciteBlock open className="app-tools-block">
                 <p className="app-placeholder-message">Code generator controls will be added here.</p>
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'contact' ? (
+            <CalcitePanel heading="Contact" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <div className="app-contact-content">
+                  <p>Thanks a lot for trying this playground — you rock! 🚀</p>
+                  <p>
+                    Found a bug, got a question, or want a new feature? Please open an issue in the{' '}
+                    <CalciteLink
+                      href="https://github.com/hhkaos/esri-basemap-styles-service-v2-playground"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      GitHub repository
+                    </CalciteLink>
+                    .
+                  </p>
+                  <p>
+                    Not into GitHub workflows? No problem — you can contact me directly via{' '}
+                    <CalciteLink href="https://links.rauljimenez.info/" target="_blank" rel="noreferrer">
+                      links.rauljimenez.info
+                    </CalciteLink>
+                    .
+                  </p>
+                  <p>
+                    This project is open source and built to experiment with AI models, so expect a little chaos,
+                    a few rough edges, and plenty of learning along the way 😄.
+                  </p>
+                  <p>
+                    Also, heads up: not every style description has been fully reviewed yet, so if you spot anything
+                    odd, please let me know.
+                  </p>
+                  <p>
+                    Curious about plans and priorities? Check the{' '}
+                    <CalciteLink
+                      href="https://github.com/hhkaos/esri-basemap-styles-service-v2-playground/blob/main/docs/SPEC.md"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      SPEC.md
+                    </CalciteLink>{' '}
+                    (for PRD) and{' '}
+                    <CalciteLink
+                      href="https://github.com/hhkaos/esri-basemap-styles-service-v2-playground/blob/main/docs/TODO.md"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      TODO.md
+                    </CalciteLink> (for the roadmap)
+                    .
+                  </p>
+                </div>
               </CalciteBlock>
             </CalcitePanel>
           ) : null}
