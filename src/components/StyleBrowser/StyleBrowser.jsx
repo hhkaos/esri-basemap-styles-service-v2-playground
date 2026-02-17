@@ -26,10 +26,10 @@ import {
   sortStylesBySupport,
 } from '../../utils/styleBrowser';
 import { styleUseCases } from '../../config/styleInfoConfig';
+import { DEFAULT_PLAYGROUND_TOKEN } from '../../config/playgroundToken';
 import { resolveStyleInfoContent } from '../../utils/styleInfo';
 import './StyleBrowser.css';
 
-const DEFAULT_PLAYGROUND_TOKEN = (import.meta.env.VITE_DEFAULT_PLAYGROUND_API_KEY || '').trim();
 const THUMBNAIL_FALLBACK =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'%3E%3Crect width='320' height='180' fill='%23dde6ef'/%3E%3Ctext x='160' y='95' text-anchor='middle' fill='%235f6368' font-size='16' font-family='Arial'%3ENo Thumbnail%3C/text%3E%3C/svg%3E";
 const PRIMARY_STYLE_CATEGORIES = STYLE_CATEGORY_ORDER.slice(0, 5);
@@ -219,7 +219,7 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
   const loadStyles = useCallback(
     async ({ forceRefresh = false } = {}) => {
       if (!DEFAULT_PLAYGROUND_TOKEN) {
-        setError('Missing VITE_DEFAULT_PLAYGROUND_API_KEY. Add it to .env for playground preview.');
+        setError('Missing playground API key. Configure VITE_DEFAULT_PLAYGROUND_API_KEY or set src/config/playgroundToken.js.');
         return;
       }
 

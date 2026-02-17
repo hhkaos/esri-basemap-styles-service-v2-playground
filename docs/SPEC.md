@@ -844,7 +844,8 @@ Process for contributors:
 - **Where**: Code Generator Panel (NOT header)
 - **Why**: Keep export token handling near export actions and security messaging
 - **Playground Preview Key** (implementation note):
-  - The playground may use a default key from `VITE_DEFAULT_PLAYGROUND_API_KEY` for runtime preview requests (for example `/self` style discovery)
+  - The playground uses a repository-defined default preview key for runtime preview requests (for example `/self` style discovery)
+  - `VITE_DEFAULT_PLAYGROUND_API_KEY` can override that default at build time
   - Style Browser does not expose a token input and does not override the preview key
   - This preview key is separate from the user-provided export key used in generated code
 

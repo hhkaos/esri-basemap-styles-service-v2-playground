@@ -226,6 +226,7 @@
 - [x] Add configurable language/worldview flag-icon preferences with sensitivity-safe fallback behavior - 2026-02-17
 - [x] Clarify worldview disclaimer copy and Places `All` vs `Attributed` behavior in parameter panel help text - 2026-02-17
 - [x] Write README.md (quick start, live demo link, contribute templates, deployment) - 2026-02-17
+- [x] Add repository fallback preview API key so deployed app works without env configuration - 2026-02-17
 
 ---
 

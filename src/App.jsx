@@ -13,9 +13,9 @@ import {
 import { MapViewer } from './components/MapViewer/MapViewer';
 import { ParameterControls } from './components/ParameterControls/ParameterControls';
 import { StyleBrowser } from './components/StyleBrowser/StyleBrowser';
+import { DEFAULT_PLAYGROUND_TOKEN } from './config/playgroundToken';
 import { DEFAULT_STYLE_PARAMETERS, sanitizeStyleParameters } from './utils/styleCapabilities';
 
-const DEFAULT_PLAYGROUND_TOKEN = (import.meta.env.VITE_DEFAULT_PLAYGROUND_API_KEY || '').trim();
 const SIDEBAR_COLLAPSE_STORAGE_KEY = 'playground.sidebarCollapsed';
 
 function getInitialSidebarCollapsed() {

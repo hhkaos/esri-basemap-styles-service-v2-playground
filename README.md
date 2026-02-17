@@ -54,10 +54,11 @@ npm run preview
 
 ## Environment
 
-- Optional default playground key: set `VITE_DEFAULT_PLAYGROUND_API_KEY` in `.env.local`.
-- This key is used for in-app preview requests and is separate from the user-provided export key workflow.
+- The repo includes a default playground preview key in `src/config/playgroundToken.js` for deployed builds.
+- Optional override: set `VITE_DEFAULT_PLAYGROUND_API_KEY` in `.env.local`.
+- The preview key is used only for in-app preview requests and is separate from the user-provided export key workflow.
 
-Example:
+Example override:
 
 ```bash
 VITE_DEFAULT_PLAYGROUND_API_KEY=your_key_here
