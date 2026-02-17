@@ -87,6 +87,7 @@ describe('CodeGenerator', () => {
     expect(screen.getByText('Step 3 of 4')).toBeInTheDocument();
 
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     expect(screen.getByText('Step 4 of 4')).toBeInTheDocument();
 
@@ -113,10 +114,13 @@ describe('CodeGenerator', () => {
     expect(nextButton).toHaveAttribute('disabled');
 
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    expect(screen.getByTestId('codegen-step-next')).toHaveAttribute('disabled');
+
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     expect(screen.getByTestId('codegen-step-next')).not.toHaveAttribute('disabled');
   });
 
-  it('shows token CTA on step 3 and requires token before next is enabled', () => {
+  it('shows token CTA on step 3 and requires token acknowledgement before next is enabled', () => {
     render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
 
     moveToStep3('maplibre');
@@ -124,6 +128,9 @@ describe('CodeGenerator', () => {
     expect(screen.getByTestId('codegen-step-next')).toHaveAttribute('disabled');
 
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    expect(screen.getByTestId('codegen-step-next')).toHaveAttribute('disabled');
+
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     expect(screen.getByTestId('codegen-step-next')).not.toHaveAttribute('disabled');
   });
 
@@ -132,6 +139,7 @@ describe('CodeGenerator', () => {
 
     moveToStep3('maplibre');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
 
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     expect(screen.getByTestId('codegen-export-codepen')).not.toHaveAttribute('disabled');
@@ -143,6 +151,7 @@ describe('CodeGenerator', () => {
 
     moveToStep3('maplibre');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
 
     expect(screen.getByText('Select a style (or uncheck Style in step 1) before exporting code.')).toBeInTheDocument();
@@ -161,6 +170,7 @@ describe('CodeGenerator', () => {
     fireEvent.click(screen.getByLabelText('Include Style'));
     moveToStep3('maplibre');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
 
     fireEvent.click(screen.getByTestId('codegen-export-codepen'));
@@ -206,6 +216,7 @@ describe('CodeGenerator', () => {
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     moveFromStep2ToStep3WithLibrary('leaflet');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     fireEvent.click(screen.getByTestId('codegen-export-codepen'));
 
@@ -241,6 +252,7 @@ describe('CodeGenerator', () => {
     fireEvent.click(screen.getByLabelText('Include Current map location'));
     moveToStep3('maplibre');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     fireEvent.click(screen.getByTestId('codegen-export-codepen'));
 
@@ -263,6 +275,7 @@ describe('CodeGenerator', () => {
 
     moveToStep3('maplibre');
     fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     fireEvent.click(screen.getByTestId('codegen-export-download'));
 

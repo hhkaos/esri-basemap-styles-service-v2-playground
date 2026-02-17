@@ -159,6 +159,7 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
   const [hasLibrarySelection, setHasLibrarySelection] = useState(false);
   const [token, setToken] = useState('');
   const [showToken, setShowToken] = useState(false);
+  const [hasAcceptedTokenWarning, setHasAcceptedTokenWarning] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [exportOptions, setExportOptions] = useState({
     style: true,
@@ -235,7 +236,9 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
   );
 
   const stepHeading = EXPORT_STEPS.find((step) => step.id === currentStep)?.title || 'Export';
-  const nextDisabled = (currentStep === 2 && !hasLibrarySelection) || (currentStep === 3 && !hasToken);
+  const nextDisabled =
+    (currentStep === 2 && !hasLibrarySelection) ||
+    (currentStep === 3 && (!hasToken || !hasAcceptedTokenWarning));
 
   const parameterRows = [
     {
@@ -365,7 +368,13 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
                 value={token}
                 placeholder="Paste your API key"
                 icon="key"
-                onCalciteInputInput={(event) => setToken(getInputValue(event))}
+                onCalciteInputInput={(event) => {
+                  const value = getInputValue(event);
+                  setToken(value);
+                  if (!value) {
+                    setHasAcceptedTokenWarning(false);
+                  }
+                }}
               />
               <CalciteButton
                 data-testid="codegen-token-toggle"
@@ -408,7 +417,7 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
           ) : null}
 
           <p className="code-generator-note">
-            API keys are exposed in client-side code. Scope keys to allowed referrers and rotate them often.{' '}
+            API keys are exposed in client-side code. Scope keys to allowed referrers, apply least privilege principle, and rotate them often.{' '}
             <CalciteLink
               href="https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/#best-practices"
               target="_blank"
@@ -417,6 +426,21 @@ export function CodeGenerator({ selectedStyleName, parameters, viewport }) {
               Security best practices
             </CalciteLink>
           </p>
+
+          <label className="code-generator-parameter-item" data-testid="codegen-token-warning-checkbox-row">
+            <input
+              type="checkbox"
+              checked={hasAcceptedTokenWarning}
+              onChange={(event) => setHasAcceptedTokenWarning(Boolean(event?.target?.checked))}
+              aria-label="I confirm I read and understood the API key security warning"
+            />
+            <span className="code-generator-parameter-content">
+              <span className="code-generator-parameter-label">I read and understood the API key warning</span>
+              <span className="code-generator-parameter-value">
+                I will use a scoped key, avoid committing secrets, and rotate the key if frequently.
+              </span>
+            </span>
+          </label>
         </div>
       ) : null}
 

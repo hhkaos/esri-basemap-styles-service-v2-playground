@@ -4,11 +4,11 @@
 
 ### In Progress
 
-- [ ] Implement template system (MapLibre + Leaflet)
+- [ ] Implement share configuration via URL (base64-encoded JSON, clipboard copy, toast notification)
 
 ### Up Next
 
-- [ ] Add CodePen export with security warning modal
+- [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
 
 ## Backlog
 
@@ -38,13 +38,11 @@
 #### Code Generator Panel
 
 - [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", "Learn More")
-- [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
 - [ ] Add library tabs (MapLibre GL JS, Leaflet)
-- [ ] Add security warning modal before CodePen export
 
 #### Templates
 
-- [ ] Implement template system (MapLibre + Leaflet HTML templates with `{{placeholders}}`)
+- [x] Implement template system (MapLibre + Leaflet HTML templates with `{{placeholders}}`)
 - [ ] Create template config JSON files (`src/templates/config/maplibre.json`, `leaflet.json`)
 - [ ] Create template generator registry (`src/templates/index.js`)
 - [ ] Add security comments in generated code (API key scoping, rotation, repo link)
@@ -239,6 +237,7 @@
 - [x] Add MapLibre and Leaflet icons to Code Generator library tab buttons - 2026-02-17
 - [x] Refactor Code Generator into a 4-step wizard (parameter inclusion toggles, library selection, API key step, and export step) including optional style/map-location export defaults - 2026-02-17
 - [x] Polish Code Generator wizard flow: enforce required step selections, add per-library tutorial CTA in step 4, and tighten panel spacing/overflow behavior - 2026-02-17
+- [x] Require API key security-warning acknowledgment checkbox in Step 3 before enabling Next - 2026-02-17
 
 ---
 

@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added export-parameter toggles so generated code can omit selected style parameters and map viewport in favor of defaults
 - Updated map viewer integration to emit live viewport state into Code Generator exports
 - Added step gating in Code Generator: library selection required in step 2 and API key required in step 3 before advancing
+- Updated Code Generator step 3 to require explicit "read and understood" acknowledgment of API key security warning before advancing
 
 ### Deprecated
 
