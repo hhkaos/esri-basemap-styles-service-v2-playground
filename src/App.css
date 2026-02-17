@@ -15,19 +15,42 @@ body,
   font-family: 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
-.app-shell-side {
+.app-shell-tools {
   height: 100%;
   min-height: 0;
   min-width: 0;
-  /* Let CalciteShellPanel own width via `widthScale`; forcing 100% collapses main content. */
   inline-size: auto;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  justify-items: stretch;
-  gap: 0.45rem;
-  padding: 0.35rem;
-  overflow-x: hidden;
+}
+
+.app-shell-tools::part(panel) {
+  min-height: 0;
+}
+
+.app-shell-tools::part(content) {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-tools-panel-content {
+  height: 100%;
+  min-height: 0;
+}
+
+.app-tools-panel-content::part(content) {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-tools-block {
+  flex: 1;
+  min-height: 0;
+}
+
+.app-tools-block::part(content) {
+  min-height: 0;
+  overflow: auto;
 }
 
 .app-title {
@@ -44,40 +67,21 @@ body,
 }
 
 .app-viewer-panel {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   height: 100%;
 }
-
 .app-style-panel {
   display: block;
   min-height: 0;
   height: 100%;
-  inline-size: 100%;
-  justify-self: stretch;
-  max-inline-size: none;
 }
 
-.app-parameters-panel {
-  display: block;
-  min-height: 0;
-  inline-size: 100%;
-  justify-self: stretch;
-  max-inline-size: none;
-}
-
-.app-viewer-panel::part(content) {
-  min-height: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-codegen-placeholder {
-  font-size: 0.82rem;
-  color: var(--calcite-color-text-3);
-  padding: 0.4rem 0.6rem;
-  border-top: 1px solid var(--calcite-color-border-3);
-  background: var(--calcite-color-foreground-2);
+.app-placeholder-message {
+  margin: 0;
+  color: var(--calcite-color-text-2);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }

@@ -200,6 +200,13 @@
 - [x] Fix map viewer render area sizing (`flex: 1`, `height: 100%`, min-height) and remove stray debug text that interfered with viewer layout - 2026-02-16
 - [x] Fix viewer panel width collapse: remove `inline-size: 100%` from `.app-shell-side` so map/code area renders beside sidebar - 2026-02-16
 - [x] Keep deprecated OSM as a separate style family in selector and prevent mixing with Open family filtering - 2026-02-17
+- [x] Refactor controls into docked `panel-end` tools layout with `calcite-action-bar` and separate panels for style selection, language, worldview, and places - 2026-02-17
+- [x] Render only the active tools `calcite-panel` (instead of `hidden`) to prevent inactive panel controls from remaining exposed - 2026-02-17
+- [x] Move docked tools to `panel-start` and wrap each tool panel body in `calcite-block` - 2026-02-17
+- [x] Move Code Generator placeholder into the docked tools action bar and remove viewer footer placeholder for full-height map canvas - 2026-02-17
+- [x] Fix map height regression by replacing main viewer `calcite-panel` wrapper with a flex container so `.map-viewer` fills all available vertical space - 2026-02-17
+- [x] Control `calcite-action-bar` `expanded` via state and re-trigger after mount to ensure labels render on initial load - 2026-02-17
+- [x] Ensure action labels render on first load by explicitly binding `textEnabled` on each `calcite-action` to action bar expanded state - 2026-02-17
 
 ---
 

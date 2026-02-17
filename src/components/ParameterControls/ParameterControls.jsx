@@ -37,8 +37,9 @@ const PARAMETER_DOCS = {
  * @param {{language:string,worldview:string,places:string}} props.parameters
  * @param {(next: {language:string,worldview:string,places:string}) => void} props.onChange
  * @param {{languages?: Array, worldviews?: Array, places?: Array}} [props.capabilities]
+ * @param {'all'|'language'|'worldview'|'places'} [props.section='all']
  */
-export function ParameterControls({ selectedStyle, parameters, onChange, capabilities }) {
+export function ParameterControls({ selectedStyle, parameters, onChange, capabilities, section = 'all' }) {
   const languageEnabled = supportsLanguage(selectedStyle);
   const worldviewEnabled = supportsWorldview(selectedStyle);
   const placesEnabled = supportsPlaces(selectedStyle);
@@ -63,8 +64,8 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
     onChange({ ...parameters, [key]: value });
   }
 
-  return (
-    <div className="parameter-controls-grid">
+  function renderLanguageControl() {
+    return (
       <div className="parameter-control-row">
         <CalciteLabel layout="inline" className="parameter-control-label" title="Choose label language for supported styles.">
           Language {!languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
@@ -88,7 +89,11 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
           </a>
         </p>
       </div>
+    );
+  }
 
+  function renderWorldviewControl() {
+    return (
       <div className="parameter-control-row">
         <CalciteLabel layout="inline" className="parameter-control-label" title="Adjust disputed-boundary labeling when available.">
           Worldview {!worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
@@ -116,7 +121,11 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
           </a>
         </p>
       </div>
+    );
+  }
 
+  function renderPlacesControl() {
+    return (
       <div className="parameter-control-row">
         <CalciteLabel layout="inline" className="parameter-control-label" title="Toggle places display when supported by this style.">
           Places {!placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
@@ -140,6 +149,14 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
           </a>
         </p>
       </div>
+    );
+  }
+
+  return (
+    <div className="parameter-controls-grid">
+      {(section === 'all' || section === 'language') && renderLanguageControl()}
+      {(section === 'all' || section === 'worldview') && renderWorldviewControl()}
+      {(section === 'all' || section === 'places') && renderPlacesControl()}
     </div>
   );
 }

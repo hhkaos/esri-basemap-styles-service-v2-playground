@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Style family toggle (ArcGIS/Open), category tabs, grouped style sections, and capability legend badges
 - Style metadata normalization utilities and tests for family/category/path extraction and grouping behavior
 - Parameter help content with disabled-state warnings and direct documentation links
+- Code Generator entry in the docked tools action bar with placeholder panel content
 
 ### Changed
 - Simplified style browser controls by removing block wrappers and keeping refresh action error-only
@@ -32,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated style selection and filtering to use resolved style identifiers from `/self` metadata including `styleUrl` fallbacks
 - Added category tabs to the expanded style dialog and synchronized dialog/sidebar tab state
 - Exposed OSM as a distinct style family option instead of merging it into Open filtering
+- Refactored tools sidebar into a `panel-start` docked action-rail workflow with separate panels for style selection, language, worldview, and places
+- Wrapped active tools panel bodies in `calcite-block` for consistent Calcite panel content structure
 
 ### Deprecated
 - Marked OSM style family as deprecated in the family selector while retaining support for legacy styles
@@ -44,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Category tab filtering mismatches by normalizing category metadata with exact/fuzzy/path-based fallbacks
 - Horizontal overflow from category tabs and sidebar sizing conflicts that hid main map/code content
 - Incorrect family mixing where OSM styles appeared under ArcGIS/Open due to ambiguous family resolution
+- Action bar label visibility on first load by explicitly syncing action text visibility with expanded state
+- Map viewer vertical sizing by replacing the main viewer `calcite-panel` wrapper with a full-height flex container
 
 ### Security
 

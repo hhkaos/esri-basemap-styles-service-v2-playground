@@ -1,6 +1,15 @@
 import './App.css';
 import { useCallback, useEffect, useState } from 'react';
-import { CalciteButton, CalciteNavigation, CalcitePanel, CalciteShell, CalciteShellPanel } from '@esri/calcite-components-react';
+import {
+  CalciteAction,
+  CalciteActionBar,
+  CalciteBlock,
+  CalciteButton,
+  CalciteNavigation,
+  CalcitePanel,
+  CalciteShell,
+  CalciteShellPanel,
+} from '@esri/calcite-components-react';
 import { MapViewer } from './components/MapViewer/MapViewer';
 import { ParameterControls } from './components/ParameterControls/ParameterControls';
 import { StyleBrowser } from './components/StyleBrowser/StyleBrowser';
@@ -27,6 +36,8 @@ function App() {
   const [parameters, setParameters] = useState(DEFAULT_STYLE_PARAMETERS);
   const [capabilities, setCapabilities] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(getInitialSidebarCollapsed);
+  const [activeToolPanel, setActiveToolPanel] = useState('style-selection');
+  const [actionBarExpanded, setActionBarExpanded] = useState(true);
 
   const handleCapabilitiesLoad = useCallback((caps) => {
     setCapabilities({ languages: caps.languages, worldviews: caps.worldviews, places: caps.places });
@@ -48,6 +59,27 @@ function App() {
     }
   }, [sidebarCollapsed]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || sidebarCollapsed) {
+      return;
+    }
+
+    setActionBarExpanded(false);
+    let frameTwo = 0;
+    const frameOne = window.requestAnimationFrame(() => {
+      frameTwo = window.requestAnimationFrame(() => {
+        setActionBarExpanded(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameOne);
+      if (frameTwo) {
+        window.cancelAnimationFrame(frameTwo);
+      }
+    };
+  }, [sidebarCollapsed]);
+
   return (
     <CalciteShell className="app-shell">
       <CalciteNavigation slot="header">
@@ -62,27 +94,126 @@ function App() {
       </CalciteNavigation>
 
       {!sidebarCollapsed ? (
-        <CalciteShellPanel slot="panel-start" position="start" widthScale="m" className="app-shell-side">
-          <CalcitePanel className="app-style-panel">
-            <StyleBrowser
-              selectedStyleName={selectedStyleName}
-              onStyleSelect={setSelectedStyleName}
-              onStyleMetaChange={setSelectedStyle}
-              onCapabilitiesLoad={handleCapabilitiesLoad}
+        <CalciteShellPanel
+          slot="panel-start"
+          displayMode="dock"
+          layout="vertical"
+          position="start"
+          widthScale="m"
+          className="app-shell-tools"
+        >
+          <CalciteActionBar
+            slot="action-bar"
+            layout="vertical"
+            overlayPositioning="absolute"
+            scale="m"
+            expanded={actionBarExpanded}
+          >
+            <CalciteAction
+              icon="selection"
+              text="Style Selection"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'style-selection'}
+              onClick={() => setActiveToolPanel('style-selection')}
             />
-          </CalcitePanel>
-          <CalcitePanel heading="Parameters" className="app-parameters-panel">
-            <ParameterControls selectedStyle={selectedStyle} parameters={parameters} onChange={setParameters} capabilities={capabilities} />
-          </CalcitePanel>
+            <CalciteAction
+              icon="language"
+              text="Language"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'language'}
+              onClick={() => setActiveToolPanel('language')}
+            />
+            <CalciteAction
+              icon="globe"
+              text="Worldview"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'worldview'}
+              onClick={() => setActiveToolPanel('worldview')}
+            />
+            <CalciteAction
+              icon="pin-plus"
+              text="Places"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'places'}
+              onClick={() => setActiveToolPanel('places')}
+            />
+            <CalciteAction
+              icon="code"
+              text="Code Generator"
+              textEnabled={actionBarExpanded}
+              active={activeToolPanel === 'code-generator'}
+              onClick={() => setActiveToolPanel('code-generator')}
+            />
+          </CalciteActionBar>
+
+          {activeToolPanel === 'style-selection' ? (
+            <CalcitePanel heading="Style Selection" className="app-tools-panel-content app-style-panel">
+              <CalciteBlock open className="app-tools-block">
+                <StyleBrowser
+                  selectedStyleName={selectedStyleName}
+                  onStyleSelect={setSelectedStyleName}
+                  onStyleMetaChange={setSelectedStyle}
+                  onCapabilitiesLoad={handleCapabilitiesLoad}
+                />
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'language' ? (
+            <CalcitePanel heading="Language" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <ParameterControls
+                  selectedStyle={selectedStyle}
+                  parameters={parameters}
+                  onChange={setParameters}
+                  capabilities={capabilities}
+                  section="language"
+                />
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'worldview' ? (
+            <CalcitePanel heading="Worldview" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <ParameterControls
+                  selectedStyle={selectedStyle}
+                  parameters={parameters}
+                  onChange={setParameters}
+                  capabilities={capabilities}
+                  section="worldview"
+                />
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'places' ? (
+            <CalcitePanel heading="Places" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <ParameterControls
+                  selectedStyle={selectedStyle}
+                  parameters={parameters}
+                  onChange={setParameters}
+                  capabilities={capabilities}
+                  section="places"
+                />
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
+
+          {activeToolPanel === 'code-generator' ? (
+            <CalcitePanel heading="Code Generator" className="app-tools-panel-content">
+              <CalciteBlock open className="app-tools-block">
+                <p className="app-placeholder-message">Code generator controls will be added here.</p>
+              </CalciteBlock>
+            </CalcitePanel>
+          ) : null}
         </CalciteShellPanel>
       ) : null}
 
-      <CalcitePanel className="app-viewer-panel">
+      <div className="app-viewer-panel">
         <MapViewer styleName={selectedStyleName} token={DEFAULT_PLAYGROUND_TOKEN} parameters={parameters} />
-        <div slot="footer" className="app-codegen-placeholder">
-          Code generator panel (collapsible) will be placed here.
-        </div>
-      </CalcitePanel>
+      </div>
     </CalciteShell>
   );
 }

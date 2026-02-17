@@ -346,41 +346,28 @@ Styles are organized into thematic groups:
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Header: Logo, Title, [Collapse Sidebar Button]          │
-├───────────────┬─────────────────────────────────────────┤
-│               │  [Showcase Locations Dropdown] [Share]  │
-│  Left Sidebar │         Map Viewer                      │
-│  [Collapsible]│      (MapLibre v5.x)                    │
+├───────────────────────────────────────┬─────────────────┤
+│                                       │ Left Docked     │
+│                                       │ Tools Panel     │
+│          Map Viewer                   │ [Action Bar +   │
+│        (MapLibre v5.x)                │ panel content]  │
 │               │                                         │
-│  - Family     │                                         │
-│    Toggle     │                                         │
-│               │                                         │
-│  - Filter     │                                         │
-│    Chips      │                                         │
-│               │                                         │
-│  - Style Grid │                                         │
-│   (scrollable)│                                         │
-│    [Expand    │                                         │
-│     Button]   │                                         │
-│               │                                         │
-│  - Parameter  │                                         │
-│    Controls   │                                         │
-│    • Language │                                         │
-│    • Worldview│                                         │
-│    • Places   │                                         │
-│               ├─────────────────────────────────────────┤
-│               │  Code Generator Panel (hidden by default)│
-│               │  - Token input with empty state CTA     │
-│               │  - Library tabs                         │
-│               │  - [Open in CodePen] [Download HTML]    │
-└───────────────┴─────────────────────────────────────────┘
+│                                       │ - Style         │
+│                                       │   Selection     │
+│                                       │ - Language      │
+│                                       │ - Worldview     │
+│                                       │ - Places        │
+│                                       │ - Code          │
+│                                       │   Generator     │
+└─────────────────────────────────────────────────────────┘
 │ Cookie Consent Banner (if not accepted)                 │
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Style Browser (Left Sidebar)
+### 7.2 Style Browser (Docked Tools Panel)
 
-#### Sidebar Collapsibility
-- **Toggle button** in header to collapse/expand entire left sidebar
+#### Tools Panel Collapsibility
+- **Toggle button** in header to collapse/expand entire docked tools panel
 - **Purpose**: Maximize map view for focused exploration
 - **Behavior**: Smooth animation, persists state in session storage
 
@@ -431,7 +418,7 @@ Styles are organized into thematic groups:
   - Added internal scrollable style-grid container and an "Expand View" dialog for full-grid browsing
   - Updated layout CSS so app content stays within viewport height with internal panel scrolling and denser thumbnail cards
 
-### 7.3 Parameter Controls (Left Sidebar)
+### 7.3 Parameter Controls (Panel-Based)
 
 #### Language Dropdown
 - **Options**: "Default (global)", "Local", then all supported ISO codes with names
@@ -457,6 +444,10 @@ Styles are organized into thematic groups:
   - Added `src/components/ParameterControls/ParameterControls.jsx` with language, worldview, and places controls
   - Controls are capability-aware (disabled when unsupported by selected style)
   - Parameter values are sanitized on style changes and applied to MapLibre style URL updates
+  - Refactored to support single-section rendering so each control can live in its own docked `calcite-panel`
+  - Docked tools rail is mounted in `calcite-shell-panel` `slot="panel-start"` with action-driven panel switching
+  - Tool panel content is wrapped in `calcite-block` for consistent Calcite panel-body structure
+  - Added a `Code Generator` action in the same tools rail with a placeholder `calcite-panel`
 
 **Phase 2: Places Category Filter**
 - Dropdown with multi-select and autocomplete
@@ -1261,6 +1252,9 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.14 | 2026-02-17 | Codex + User | Moved main map wrapper from `calcite-panel` to a flex container to ensure the MapLibre viewer consumes full available vertical space in the shell content area. |
+| 3.13 | 2026-02-17 | Codex + User | Moved docked tools shell panel to `panel-start` and wrapped each active tool panel body in `calcite-block` for consistent Calcite panel content structure. |
+| 3.12 | 2026-02-17 | Codex + User | Refactored layout to a docked `panel-end` tools area with `calcite-action-bar` navigation and separate panels for style selection, language, worldview, and places. |
 | 3.11 | 2026-02-16 | Codex + User | Replaced category filter chips with `calcite-tabs` (`All` + primary categories) in the Style Browser. |
 | 3.10 | 2026-02-16 | Codex + User | Enhanced UI/UX with sidebar collapse persistence, ArcGIS/Open family toggle, category chips, grouped style sections, capability legend/badges, and improved parameter help/warning affordances. |
 | 3.9 | 2026-02-16 | Codex + User | Replaced app header with `calcite-navigation`, removed map viewer internal header, and wrapped viewer area in `calcite-panel` with footer placeholder for future collapsible code generation section. |
