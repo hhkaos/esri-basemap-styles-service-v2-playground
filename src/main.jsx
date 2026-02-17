@@ -8,6 +8,9 @@ import '@esri/calcite-components/main.css';
 // Import MapLibre GL CSS
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+// Import country flag icons
+import 'flag-icons/css/flag-icons.min.css';
+
 // Initialize Calcite Components
 import { setAssetPath } from '@esri/calcite-components/dist/components';
 import { defineCustomElements } from '@esri/calcite-components/dist/loader';

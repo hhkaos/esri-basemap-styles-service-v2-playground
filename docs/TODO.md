@@ -222,6 +222,10 @@
 - [x] Ensure every style has guidance + docs URL via generated style descriptions and documentation fallback links - 2026-02-17
 - [x] Scope style-card info icon styling to thumbnail overlay control and preserve legend icon behavior - 2026-02-17
 - [x] Set active legend capability icon background to brand blue - 2026-02-17
+- [x] Replace parameter dropdown controls with vertical radio-button groups for Language, Worldview, and Places panels - 2026-02-17
+- [x] Add per-panel explanatory copy and documentation links for Language, Worldview, and Places - 2026-02-17
+- [x] Add configurable language/worldview flag-icon preferences with sensitivity-safe fallback behavior - 2026-02-17
+- [x] Clarify worldview disclaimer copy and Places `All` vs `Attributed` behavior in parameter panel help text - 2026-02-17
 
 ---
 

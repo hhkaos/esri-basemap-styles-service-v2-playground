@@ -8,8 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Config-driven language flag preferences with optional multi-flag rendering via `flag-icons`
+- Config-driven worldview flag preferences with icon rendering fallback behavior
 
 ### Changed
+- Reworked Language, Worldview, and Places parameter panels to use vertical radio-button groups instead of dropdowns
+- Added short per-panel explanatory copy with documentation links for Language, Worldview, and Places
+- Updated worldview panel messaging to: "Controls boundaries and labels in disputed areas. Does not reflect Esri's official position."
+- Expanded Places panel help text to explain the difference between `All` and `Attributed`
 
 ### Deprecated
 

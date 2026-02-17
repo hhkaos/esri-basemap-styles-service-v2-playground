@@ -1,17 +1,18 @@
-.parameter-controls-grid {
-  display: grid;
-  gap: 0.45rem;
+.parameter-controls {
+  display: block;
   padding: 0.5rem;
 }
 
 .parameter-control-row {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 
-.parameter-control-label {
-  display: grid;
-  gap: 0.4rem;
+.parameter-heading {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .parameter-warning-icon {
@@ -19,21 +20,36 @@
   font-size: 0.85rem;
 }
 
-.parameter-help {
+.parameter-description {
   margin: 0;
   font-size: 0.73rem;
   color: var(--calcite-color-text-2);
+}
+
+.parameter-radio-group {
+  overflow: visible;
+}
+
+.parameter-radio-option {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.parameter-help-link {
-  color: var(--calcite-color-brand);
-  text-decoration: none;
-  white-space: nowrap;
+.parameter-radio-option span {
+  line-height: 1.3;
 }
 
-.parameter-help-link:hover {
-  text-decoration: underline;
+.parameter-radio-option .fi {
+  width: 1.1rem;
+  height: 0.85rem;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.parameter-flag-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
 }
