@@ -159,6 +159,8 @@ Document known pitfalls or bugs to prevent Claude from repeating them:
 - **CSS Import**: Use `@esri/calcite-components/main.css` (exported in package.json), NOT `@esri/calcite-components/dist/calcite/calcite.css` or `dist/cdn/main.css`
 - **Asset Path**: Use CDN for assets: `https://cdn.jsdelivr.net/npm/@esri/calcite-components@5.0.1/dist/components/assets` (works in both dev and production), NOT local node_modules path
 - **Latest Version**: Always use latest stable version (5.0.1 as of Feb 2026), check npm for updates
+- **Host Layout Rules**: Do NOT override `calcite-panel`/`calcite-block` host `display` behavior (for example `display: block` on a panel host). This breaks Calcite's internal flex sizing and causes scroll containers to expand to content height.
+- **Scrollable Regions**: Keep one dedicated inner scroll container (`overflow-y: auto`) and ensure every ancestor in the chain has `min-height: 0` with constrained height (grid/flex `1fr` patterns). Validate in DevTools by confirming `scrollHeight > clientHeight` on the intended container.
 
 **Vite Configuration**:
 - **Base Path**: Must be conditional for dev vs production to prevent WebSocket HMR errors:

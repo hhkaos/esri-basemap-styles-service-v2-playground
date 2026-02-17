@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exposed OSM as a distinct style family option instead of merging it into Open filtering
 - Refactored tools sidebar into a `panel-start` docked action-rail workflow with separate panels for style selection, language, worldview, and places
 - Wrapped active tools panel bodies in `calcite-block` for consistent Calcite panel content structure
+- Updated style-selection panel body to use a constrained container instead of `calcite-block` so the style browser can own a single inner scroll region
+- Expanded project guidance in `AGENTS.md`, `CLAUDE.md`, and `CONTRIBUTING.md` with Calcite layout/scrolling guardrails
 
 ### Deprecated
 - Marked OSM style family as deprecated in the family selector while retaining support for legacy styles
@@ -49,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Incorrect family mixing where OSM styles appeared under ArcGIS/Open due to ambiguous family resolution
 - Action bar label visibility on first load by explicitly syncing action text visibility with expanded state
 - Map viewer vertical sizing by replacing the main viewer `calcite-panel` wrapper with a full-height flex container
+- Style browser scrolling regression caused by overriding Calcite panel host layout behavior and unconstrained scroll ancestry
 
 ### Security
 

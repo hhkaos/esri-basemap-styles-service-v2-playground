@@ -108,7 +108,10 @@
 
 .style-browser-list-container {
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding-right: 0.25rem;
 }
 

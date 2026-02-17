@@ -148,14 +148,14 @@ function App() {
 
           {activeToolPanel === 'style-selection' ? (
             <CalcitePanel heading="Style Selection" className="app-tools-panel-content app-style-panel">
-              <CalciteBlock open className="app-tools-block">
+              <div className="app-style-panel-content">
                 <StyleBrowser
                   selectedStyleName={selectedStyleName}
                   onStyleSelect={setSelectedStyleName}
                   onStyleMetaChange={setSelectedStyle}
                   onCapabilitiesLoad={handleCapabilitiesLoad}
                 />
-              </CalciteBlock>
+              </div>
             </CalcitePanel>
           ) : null}
 

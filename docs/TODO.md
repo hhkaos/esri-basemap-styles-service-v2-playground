@@ -207,10 +207,18 @@
 - [x] Fix map height regression by replacing main viewer `calcite-panel` wrapper with a flex container so `.map-viewer` fills all available vertical space - 2026-02-17
 - [x] Control `calcite-action-bar` `expanded` via state and re-trigger after mount to ensure labels render on initial load - 2026-02-17
 - [x] Ensure action labels render on first load by explicitly binding `textEnabled` on each `calcite-action` to action bar expanded state - 2026-02-17
+- [x] Fix style browser scroll regression by preserving Calcite panel host flex behavior (no custom `display` override) and validating inner scroll container constraints in DevTools - 2026-02-17
 
 ---
 
 **Notes**:
+
+**Calcite Layout Debugging Checklist**:
+- Do not override host `display` for Calcite layout components (`calcite-panel`, `calcite-block`, `calcite-shell-panel`).
+- Keep a single intended scroll container (`overflow-y: auto`) inside the panel body.
+- Ensure each ancestor in the scroll chain has constrained height and `min-height: 0`.
+- Prefer grid/flex `1fr` patterns to create bounded scroll regions instead of viewport hardcoding.
+- Validate with DevTools: target container must have `scrollHeight > clientHeight`.
 
 - Move completed tasks to Done section with completion date
 - Use `/ship` to automatically update this file when committing

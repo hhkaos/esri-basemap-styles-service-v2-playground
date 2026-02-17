@@ -61,6 +61,16 @@ docs: update template contribution guide
 - Use React functional components and hooks
 - Prefer Calcite Design System components
 
+### Calcite Layout and Scrolling
+
+When working with Calcite layout components (`calcite-panel`, `calcite-block`, `calcite-shell-panel`):
+
+- Do **not** override host `display` behavior (for example, forcing `display: block` on a Calcite panel host)
+- Keep a single intended inner scroll container with `overflow-y: auto`
+- Ensure every ancestor in the scroll chain has constrained height and `min-height: 0`
+- Prefer grid/flex `1fr` patterns for bounded scroll regions instead of viewport hardcoding
+- Validate in DevTools that the intended scroll container has `scrollHeight > clientHeight`
+
 ### Testing
 
 - Write tests for new features

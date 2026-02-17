@@ -41,6 +41,7 @@ body,
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-tools-block {
@@ -51,6 +52,19 @@ body,
 .app-tools-block::part(content) {
   min-height: 0;
   overflow: auto;
+}
+
+.app-style-panel {
+  min-height: 0;
+  height: 100%;
+}
+
+.app-style-panel-content {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
 }
 
 .app-title {
@@ -70,11 +84,6 @@ body,
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 0;
-  height: 100%;
-}
-.app-style-panel {
-  display: block;
   min-height: 0;
   height: 100%;
 }
