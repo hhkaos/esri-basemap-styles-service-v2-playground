@@ -214,6 +214,10 @@
 - [x] Wrap style selection panel content in `calcite-block` while preserving style browser scrolling - 2026-02-17
 - [x] Hide capability chips in sidebar style cards and keep chips visible in expanded modal cards - 2026-02-17
 - [x] Overlay style titles on thumbnails with translucent white background and remove thumbnail/title gap - 2026-02-17
+- [x] Wrap map viewer in `calcite-panel` and show panel loading state while style changes are loading - 2026-02-17
+- [x] Restyle style browser filter control as a full-width search bar with left filter icon and placeholder-only labeling - 2026-02-17
+- [x] Make capability legend chips toggleable filters that exclude styles missing active capabilities (default off) - 2026-02-17
+- [x] Order style lists by capability support so higher-support styles appear first (with `/base` and `/labels` tie-break ordering preserved) - 2026-02-17
 
 ---
 

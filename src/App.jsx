@@ -38,6 +38,7 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(getInitialSidebarCollapsed);
   const [activeToolPanel, setActiveToolPanel] = useState('style-selection');
   const [actionBarExpanded, setActionBarExpanded] = useState(true);
+  const [mapLoading, setMapLoading] = useState(false);
 
   const handleCapabilitiesLoad = useCallback((caps) => {
     setCapabilities({ languages: caps.languages, worldviews: caps.worldviews, places: caps.places });
@@ -213,9 +214,14 @@ function App() {
         </CalciteShellPanel>
       ) : null}
 
-      <div className="app-viewer-panel">
-        <MapViewer styleName={selectedStyleName} token={DEFAULT_PLAYGROUND_TOKEN} parameters={parameters} />
-      </div>
+      <CalcitePanel className="app-viewer-panel" loading={mapLoading}>
+        <MapViewer
+          styleName={selectedStyleName}
+          token={DEFAULT_PLAYGROUND_TOKEN}
+          parameters={parameters}
+          onLoadingChange={setMapLoading}
+        />
+      </CalcitePanel>
     </CalciteShell>
   );
 }

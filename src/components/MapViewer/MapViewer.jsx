@@ -11,10 +11,12 @@ const DEFAULT_ZOOM = 2;
  * @param {string} [props.styleName]
  * @param {string} [props.token]
  * @param {{language?: string, worldview?: string, places?: string}} [props.parameters]
+ * @param {(loading: boolean) => void} [props.onLoadingChange]
  */
-export function MapViewer({ styleName, token, parameters }) {
+export function MapViewer({ styleName, token, parameters, onLoadingChange }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
+  const styleLoadOperationRef = useRef(0);
   const [mapError, setMapError] = useState('');
 
   const styleUrl = useMemo(() => {
@@ -37,6 +39,10 @@ export function MapViewer({ styleName, token, parameters }) {
       return;
     }
 
+    const operationId = styleLoadOperationRef.current + 1;
+    styleLoadOperationRef.current = operationId;
+    onLoadingChange?.(true);
+
     // No map yet — create one
     if (!mapRef.current) {
       const map = new maplibregl.Map({
@@ -51,8 +57,16 @@ export function MapViewer({ styleName, token, parameters }) {
       map.on('error', (event) => {
         const message = event?.error?.message || 'Map rendering error';
         setMapError(message);
+        if (operationId === styleLoadOperationRef.current) {
+          onLoadingChange?.(false);
+        }
       });
-      map.on('load', () => map.resize());
+      map.once('load', () => {
+        map.resize();
+        if (operationId === styleLoadOperationRef.current) {
+          onLoadingChange?.(false);
+        }
+      });
 
       mapRef.current = map;
       return;
@@ -71,9 +85,20 @@ export function MapViewer({ styleName, token, parameters }) {
         return;
       }
       mapRef.current.jumpTo({ center, zoom, bearing, pitch });
+      if (operationId === styleLoadOperationRef.current) {
+        onLoadingChange?.(false);
+      }
     });
     setMapError('');
-  }, [styleUrl]);
+  }, [styleUrl, onLoadingChange]);
+
+  useEffect(() => {
+    if (styleUrl) {
+      return;
+    }
+
+    onLoadingChange?.(false);
+  }, [styleUrl, onLoadingChange]);
 
   // Resize observer
   useEffect(() => {
@@ -97,12 +122,13 @@ export function MapViewer({ styleName, token, parameters }) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      onLoadingChange?.(false);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [onLoadingChange]);
 
   return (
     <section className="map-viewer" aria-label="Map viewer">

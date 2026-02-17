@@ -198,6 +198,34 @@ function getSortRank(styleName = '') {
   return 0;
 }
 
+function getCapabilitySupportScore(style) {
+  const badges = getStyleBadges(style);
+
+  return [badges.language, badges.worldview, badges.places].filter(Boolean).length;
+}
+
+export function compareStylesBySupport(left, right) {
+  const leftScore = getCapabilitySupportScore(left);
+  const rightScore = getCapabilitySupportScore(right);
+  const capabilityDiff = rightScore - leftScore;
+  if (capabilityDiff !== 0) {
+    return capabilityDiff;
+  }
+
+  const leftName = getStylePath(left);
+  const rightName = getStylePath(right);
+  const rankDiff = getSortRank(leftName) - getSortRank(rightName);
+  if (rankDiff !== 0) {
+    return rankDiff;
+  }
+
+  return leftName.localeCompare(rightName);
+}
+
+export function sortStylesBySupport(styles = []) {
+  return [...styles].sort(compareStylesBySupport);
+}
+
 export function getStyleBadges(style) {
   const styleName = getStylePath(style);
 
@@ -227,16 +255,7 @@ export function groupStylesByCategory(styles) {
       return null;
     }
 
-    const sorted = [...group].sort((left, right) => {
-      const leftName = getStylePath(left);
-      const rightName = getStylePath(right);
-      const rankDiff = getSortRank(leftName) - getSortRank(rightName);
-      if (rankDiff !== 0) {
-        return rankDiff;
-      }
-
-      return leftName.localeCompare(rightName);
-    });
+    const sorted = sortStylesBySupport(group);
 
     return { category, styles: sorted };
   }).filter(Boolean);

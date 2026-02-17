@@ -15,17 +15,19 @@
 }
 
 .style-browser-family-toggle {
-  /* margin: 0;
-  padding: 0; */
-  /* border: 0; */
-  /* display: flex;
-  align-items: center;
-  gap: 0.35rem; */
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: space-between;
+  row-gap: 0.45rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .style-browser-family-legend {
   margin: 0;
   padding: 0;
+  grid-column: 1 / -1;
   font-size: 0.82rem;
   color: var(--calcite-color-text-2);
 }
@@ -53,6 +55,15 @@
   gap: 0.45rem;
 }
 
+.style-browser-searchbar {
+  width: 100%;
+  min-width: 0;
+}
+
+.style-browser-searchbar calcite-input-text {
+  width: 100%;
+}
+
 .style-browser-category-tabs {
   margin: 0;
   inline-size: 100%;
@@ -69,7 +80,18 @@
 .style-browser-legend {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.3rem;
+}
+
+.style-browser-legend-label {
+  font-size: 0.82rem;
+  color: var(--calcite-color-text-2);
+}
+
+.style-browser-capability-chip-active {
+  --calcite-chip-background-color: var(--calcite-color-brand);
+  --calcite-chip-icon-color: white;
 }
 
 .style-browser-actions {
@@ -118,14 +140,6 @@
 .style-browser-list-groups {
   display: grid;
   gap: 0.5rem;
-}
-
-.style-browser-group-title {
-  margin: 0 0 0.3rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--calcite-color-text-2);
 }
 
 .style-browser-list {
@@ -199,6 +213,10 @@
 
 .style-browser-thumbnail-large {
   aspect-ratio: 16 / 9;
+}
+
+calcite-dialog .style-browser-item-title {
+  font-size: 1rem;
 }
 
 .style-browser-item-title {

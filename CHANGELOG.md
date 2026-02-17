@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated style browser cards to hide capability chips in the sidebar while keeping capability chips visible in the expanded modal
 - Moved style card titles onto thumbnail overlays using translucent white backgrounds for compact sidebar presentation
 - Replaced native `title` attributes in parameter controls and style cards with `calcite-tooltip` for consistent Calcite UX
+- Wrapped the main map viewer in a loading-enabled `calcite-panel` and wired style-load progress from `MapViewer`
+- Restyled style browser filtering with a full-width icon search input and toggleable capability chips in the legend
+- Updated style list ordering to rank higher capability support first while preserving `/base` and `/labels` tie-break placement
 
 ### Deprecated
 - Marked OSM style family as deprecated in the family selector while retaining support for legacy styles
@@ -56,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Map viewer vertical sizing by replacing the main viewer `calcite-panel` wrapper with a full-height flex container
 - Style browser scrolling regression caused by overriding Calcite panel host layout behavior and unconstrained scroll ancestry
 - Style card thumbnail/title spacing by eliminating inline-image baseline gaps and removing residual whitespace under thumbnail overlays
+- Inconsistent style ordering between grouped and All views by applying shared capability-aware sorting across both
 
 ### Security
 

@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalciteButton,
   CalciteCard,
   CalciteChip,
   CalciteDialog,
   CalciteInputText,
-  CalciteLabel,
   CalciteLoader,
   CalciteNotice,
   CalciteTab,
@@ -23,6 +22,7 @@ import {
   getStyleFamily,
   getStylePath,
   groupStylesByCategory,
+  sortStylesBySupport,
 } from '../../utils/styleBrowser';
 import './StyleBrowser.css';
 
@@ -33,6 +33,25 @@ const PRIMARY_STYLE_CATEGORIES = STYLE_CATEGORY_ORDER.slice(0, 5);
 const STYLE_CATEGORY_TABS = [
   { value: 'all', label: 'All' },
   ...PRIMARY_STYLE_CATEGORIES.map((category) => ({ value: category, label: category })),
+];
+const CAPABILITY_FILTERS = [
+  { key: 'language', icon: 'language', label: 'Supports language', tooltipId: 'style-browser-legend-language' },
+  { key: 'worldview', icon: 'globe', label: 'Supports worldview', tooltipId: 'style-browser-legend-worldview' },
+  { key: 'places', icon: 'map-pin', label: 'Supports places', tooltipId: 'style-browser-legend-places' },
+  {
+    key: 'baseLayer',
+    icon: 'layers',
+    label: 'Supports base layer',
+    appearance: 'outline',
+    tooltipId: 'style-browser-legend-base-layer',
+  },
+  {
+    key: 'labelLayer',
+    icon: 'layer-annotation',
+    label: 'Supports labels layer',
+    appearance: 'outline',
+    tooltipId: 'style-browser-legend-labels-layer',
+  },
 ];
 
 function getInputValue(event) {
@@ -63,13 +82,23 @@ function toIdPart(value = '') {
     .replace(/^-+|-+$/g, '');
 }
 
-function renderCapabilityChip({ show, icon, label, appearance = 'solid', tooltipId }) {
+function renderCapabilityChip({
+  show,
+  icon,
+  label,
+  appearance = 'solid',
+  tooltipId,
+  chipKey,
+  selected = false,
+  onClick,
+  tooltipLabel,
+}) {
   if (!show) {
     return null;
   }
 
   return (
-    <>
+    <Fragment key={chipKey}>
       <CalciteChip
         id={tooltipId}
         scale="s"
@@ -77,10 +106,14 @@ function renderCapabilityChip({ show, icon, label, appearance = 'solid', tooltip
         appearance={appearance}
         label={label}
         aria-label={label}
-        className="style-browser-capability-chip"
+        selected={selected}
+        onClick={onClick}
+        className={`style-browser-capability-chip ${selected ? 'style-browser-capability-chip-active' : ''}`}
       />
-      <CalciteTooltip referenceElement={tooltipId}>{label}</CalciteTooltip>
-    </>
+      <CalciteTooltip referenceElement={tooltipId} placement="bottom">
+        {tooltipLabel || label}
+      </CalciteTooltip>
+    </Fragment>
   );
 }
 
@@ -99,18 +132,41 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const [activeCapabilityFilters, setActiveCapabilityFilters] = useState({
+    language: false,
+    worldview: false,
+    places: false,
+    baseLayer: false,
+    labelLayer: false,
+  });
   const autoLoadedRef = useRef(false);
+
+  const toggleCapabilityFilter = useCallback((filterKey) => {
+    setActiveCapabilityFilters((previous) => ({
+      ...previous,
+      [filterKey]: !previous[filterKey],
+    }));
+  }, []);
 
   const filteredStyles = useMemo(() => {
     const query = filter.trim().toLowerCase();
 
-    return styles.filter((style) => {
+    const matchingStyles = styles.filter((style) => {
       const styleId = getStyleId(style);
       const styleFamily = getStyleFamily(styleId, style?.styleUrl || '');
       const category = getStyleCategory(style);
       const matchesCategory = selectedCategory === 'all' ? true : category === selectedCategory;
 
       if ((styleFamily !== 'unknown' && styleFamily !== selectedFamily) || !matchesCategory) {
+        return false;
+      }
+
+      const styleBadges = getStyleBadges(style);
+      const matchesActiveCapabilityFilters = Object.entries(activeCapabilityFilters).every(
+        ([capability, isActive]) => !isActive || Boolean(styleBadges[capability])
+      );
+
+      if (!matchesActiveCapabilityFilters) {
         return false;
       }
 
@@ -125,7 +181,9 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
 
       return haystack.includes(query);
     });
-  }, [styles, filter, selectedFamily, selectedCategory]);
+
+    return sortStylesBySupport(matchingStyles);
+  }, [styles, filter, selectedFamily, selectedCategory, activeCapabilityFilters]);
 
   const groupedStyles = useMemo(() => groupStylesByCategory(filteredStyles), [filteredStyles]);
 
@@ -298,6 +356,14 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
   }
 
   function renderStyleItems({ inDialog = false } = {}) {
+    if (selectedCategory === 'all') {
+      return (
+        <div className={`style-browser-list ${inDialog ? 'style-browser-list-dialog' : ''}`}>
+          {filteredStyles.map((style, index) => renderStyleItem(style, index, { inDialog }))}
+        </div>
+      );
+    }
+
     return groupedStyles.map((group) => (
       <section key={group.category} className="style-browser-group" aria-label={`${group.category} styles`}>
         <div className={`style-browser-list ${inDialog ? 'style-browser-list-dialog' : ''}`}>
@@ -367,52 +433,32 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
           </label>
         </fieldset>
 
-        <CalciteLabel className="style-browser-inline-label" layout="inline">
-          Filter
+        <div className="style-browser-searchbar">
           <CalciteInputText
             id="filter-input"
             name="filter-input"
+            aria-label="Filter styles"
+            icon="filter"
             placeholder="Filter by name, provider, or category"
             value={filter}
             onCalciteInputTextInput={(event) => setFilter(getInputValue(event))}
           />
-        </CalciteLabel>
+        </div>
 
         {renderCategoryTabs()}
 
         <div className="style-browser-legend" aria-label="Capability legend">
-          {renderCapabilityChip({
-            show: true,
-            icon: 'language',
-            label: 'Supports language',
-            tooltipId: 'style-browser-legend-language',
-          })}
-          {renderCapabilityChip({
-            show: true,
-            icon: 'globe',
-            label: 'Supports worldview',
-            tooltipId: 'style-browser-legend-worldview',
-          })}
-          {renderCapabilityChip({
-            show: true,
-            icon: 'map-pin',
-            label: 'Supports places',
-            tooltipId: 'style-browser-legend-places',
-          })}
-          {renderCapabilityChip({
-            show: true,
-            icon: 'layers',
-            label: 'Supports base layer',
-            appearance: 'outline',
-            tooltipId: 'style-browser-legend-base-layer',
-          })}
-          {renderCapabilityChip({
-            show: true,
-            icon: 'layer-annotation',
-            label: 'Supports labels layer',
-            appearance: 'outline',
-            tooltipId: 'style-browser-legend-labels-layer',
-          })}
+          <span className="style-browser-legend-label">Filter:</span>
+          {CAPABILITY_FILTERS.map((capabilityFilter) =>
+            renderCapabilityChip({
+              ...capabilityFilter,
+              chipKey: capabilityFilter.key,
+              show: true,
+              selected: activeCapabilityFilters[capabilityFilter.key],
+              onClick: () => toggleCapabilityFilter(capabilityFilter.key),
+              tooltipLabel: `${capabilityFilter.label} filter (${activeCapabilityFilters[capabilityFilter.key] ? 'on' : 'off'})`,
+            })
+          )}
         </div>
 
         {error ? (

@@ -7,6 +7,7 @@ import {
   groupStylesByCategory,
   isBaseLayerStyle,
   isLabelLayerStyle,
+  sortStylesBySupport,
 } from './styleBrowser';
 
 describe('styleBrowser utilities', () => {
@@ -84,6 +85,22 @@ describe('styleBrowser utilities', () => {
       'arcgis/light-gray/base',
       'arcgis/light-gray/labels',
     ]);
+  });
+
+  it('sorts styles by capability support before path ranking', () => {
+    const sorted = sortStylesBySupport([
+      { path: 'arcgis/imagery', styleUrl: 'https://example.com/styles/arcgis/imagery' },
+      {
+        path: 'arcgis/navigation',
+        styleUrl: 'https://example.com/styles/arcgis/navigation{?language}{?worldview}{?places}',
+      },
+      {
+        path: 'arcgis/topographic',
+        styleUrl: 'https://example.com/styles/arcgis/topographic{?language}{?worldview}',
+      },
+    ]);
+
+    expect(sorted.map((item) => item.path)).toEqual(['arcgis/navigation', 'arcgis/topographic', 'arcgis/imagery']);
   });
 
   it('resolves category from non-exact metadata labels and fallback fields', () => {
