@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2.1.0] - 2026-02-18
+
+### Added
 - Config-driven language flag preferences with optional multi-flag rendering via `flag-icons`
 - Config-driven worldview flag preferences with icon rendering fallback behavior
 - Expanded README with feature overview, setup steps, environment configuration, and flag-icon configuration guidance
@@ -18,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library icons for Code Generator options and tutorial links per selected library in the export step
 - App-level shared-link hydration regression test to verify deep links opening on Code Generator still restore selected Language/Worldview/Places radio states
 - ParameterControls unit coverage to verify hydrated radios render checked state for `language`, `worldview`, and `places`
+- ArcGIS Maps SDK for JavaScript export option in Code Generator (with ArcGIS template and icon)
+- ArcGIS JS SDK template support note linking to Map Components "Display a map" tutorial when `places` is not enabled
+- OpenLayers export option in Code Generator (with OpenLayers template and icon)
 
 ### Changed
 - Reworked Language, Worldview, and Places parameter panels to use vertical radio-button groups instead of dropdowns
@@ -32,10 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated map viewer integration to emit live viewport state into Code Generator exports
 - Added step gating in Code Generator: library selection required in step 2 and API key required in step 3 before advancing
 - Updated Code Generator step 3 to require explicit "read and understood" acknowledgment of API key security warning before advancing
-
-### Deprecated
-
-### Removed
+- Replaced ArcGIS JS template `map-components-note` UI banner with inline code-comment guidance for `places = none` (including tutorial link)
 
 ### Fixed
 - Parameter panel scrolling/overflow behavior in docked tools panels by constraining `calcite-block` content regions
@@ -44,8 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Leaflet and MapLibre exports to include injected API key, active style parameters, and live center/zoom with cross-library zoom conversion
 - Shared-link hydration race where capabilities/style metadata were not loaded when opening directly on non-style panels by keeping `StyleBrowser` mounted while inactive
 - Parameter panel radio selection rendering where group values were restored from shared config but individual `calcite-radio-button` options did not render as checked
-
-### Security
+- Share config library validation to accept `arcgis-js-sdk` as a code-generator export library
+- Share config library validation to accept `openlayers` as a code-generator export library
+- Temporarily disabled CesiumJS selection in Code Generator and added a "coming soon" tooltip message until static basemap tiles are fully supported by the playground
 
 ## [2.0.0] - 2026-02-17
 

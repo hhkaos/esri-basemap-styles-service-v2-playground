@@ -1,6 +1,6 @@
 {
   "name": "esri-basemap-styles-service-v2-playground",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Interactive playground for exploring ArcGIS Location Platform Basemap Styles Service v2",
   "type": "module",
   "scripts": {
