@@ -129,6 +129,10 @@ Style Service (/self API) → Cache (localStorage) → UI Update
 - Template will include Esri attribution (required for CesiumJS and OpenLayers), the others should include it by default
 - Include security comments about API key scoping and rotation
 - Link to documentation and examples
+- For generated exports, inject the API key from the Code Generator input (never leave `YOUR_ACCESS_TOKEN` placeholders in CodePen/download output)
+- Include full live playground state in generated templates: selected style, language, worldview, places, center, and zoom
+- Validate library-specific API usage against official docs before implementing template code
+- Apply cross-library zoom conversion when exporting from MapLibre viewport state (library scales may differ)
 
 **Testing Strategy**:
 - Unit tests for utilities and services (URL generation, cache logic, template generation)
@@ -188,6 +192,15 @@ Document known pitfalls or bugs to prevent Codex from repeating them:
 - **Missing Globals**: Add browser APIs to globals: `btoa`, `atob`, `URLSearchParams`
 - **Unused Variables**: Remove unused catch parameters or use underscore prefix
 - **Library Versions**: Always verify latest stable versions before adding dependencies
+
+## Lessons Learned (2026-02-17) - Template Export Pitfalls
+
+- **Leaflet API choice matters**: Use `L.esri.Vector.vectorBasemapLayer(styleId, options)` for Basemap Styles integration (with `version: 2` and style params in options), not ad-hoc URL plumbing unless docs explicitly require it.
+- **Attribution behavior differs by library**: Do not force manual attribution in Leaflet Esri Vector templates when plugin attribution is already handled automatically.
+- **Do not hardcode template runtime values**: Avoid fixed center/zoom defaults in exports once live map state is available; propagate viewport from `MapViewer` to `CodeGenerator`.
+- **Token injection must be end-to-end**: Ensure exported HTML/CodePen payload includes the user-entered token value and never stores it in localStorage.
+- **Parameter parity is required**: Exported code must reflect active `language`, `worldview`, and `places`; template output should match playground behavior.
+- **Protect zoom parity across libraries**: Convert MapLibre zoom to target-library zoom when exporting (Leaflet currently requires offset handling).
 
 ## Workflow Automation
 
