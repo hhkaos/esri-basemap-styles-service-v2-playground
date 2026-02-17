@@ -4,6 +4,7 @@ import {
   CalciteCard,
   CalciteChip,
   CalciteDialog,
+  CalciteIcon,
   CalciteInputText,
   CalciteLoader,
   CalciteNotice,
@@ -24,6 +25,8 @@ import {
   groupStylesByCategory,
   sortStylesBySupport,
 } from '../../utils/styleBrowser';
+import { styleUseCases } from '../../config/styleInfoConfig';
+import { resolveStyleInfoContent } from '../../utils/styleInfo';
 import './StyleBrowser.css';
 
 const DEFAULT_PLAYGROUND_TOKEN = (import.meta.env.VITE_DEFAULT_PLAYGROUND_API_KEY || '').trim();
@@ -132,6 +135,8 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const [styleInfoOpen, setStyleInfoOpen] = useState(false);
+  const [activeStyleInfoStyle, setActiveStyleInfoStyle] = useState(null);
   const [activeCapabilityFilters, setActiveCapabilityFilters] = useState({
     language: false,
     worldview: false,
@@ -187,6 +192,11 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
 
   const groupedStyles = useMemo(() => groupStylesByCategory(filteredStyles), [filteredStyles]);
 
+  const styleInfoContent = useMemo(
+    () => resolveStyleInfoContent(activeStyleInfoStyle || {}, styleUseCases),
+    [activeStyleInfoStyle]
+  );
+
   const selectStyle = useCallback(
     (style) => {
       const styleName = getStyleId(style);
@@ -194,11 +204,17 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         return;
       }
 
+      setStyleInfoOpen(false);
       onStyleSelect?.(styleName);
       onStyleMetaChange?.(style);
     },
     [onStyleSelect, onStyleMetaChange]
   );
+
+  const openStyleInfo = useCallback((style) => {
+    setActiveStyleInfoStyle(style);
+    setStyleInfoOpen(true);
+  }, []);
 
   const loadStyles = useCallback(
     async ({ forceRefresh = false } = {}) => {
@@ -276,6 +292,7 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
     const badges = getStyleBadges(style);
     const idBase = `${inDialog ? 'dialog' : 'grid'}-${toIdPart(styleId || `style-${index}`)}`;
     const titleId = `${idBase}-title`;
+    const infoButtonId = `${idBase}-info`;
 
     const cardClasses = [
       'style-browser-item',
@@ -301,6 +318,24 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         }}
       >
         <div slot="thumbnail" className="style-browser-thumbnail-wrap">
+          <button
+            id={infoButtonId}
+            type="button"
+            className="style-browser-info-button"
+            aria-label={`Style information for ${styleLabel}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              openStyleInfo(style);
+            }}
+            onKeyDown={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <CalciteIcon icon="information" scale="s" className="style-browser-info-icon" />
+          </button>
+          <CalciteTooltip referenceElement={infoButtonId} placement="bottom">
+            When to use this style
+          </CalciteTooltip>
           <img
             className={`style-browser-thumbnail ${inDialog ? 'style-browser-thumbnail-large' : ''}`}
             src={getStyleThumbnail(style)}
@@ -511,6 +546,62 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         {renderCategoryTabs('style-browser-dialog-tabs')}
         <div className="style-browser-dialog-grid">{renderStyleItems({ inDialog: true })}</div>
         <CalciteButton slot="footer-end" onClick={() => setExpanded(false)}>
+          Close
+        </CalciteButton>
+      </CalciteDialog>
+
+      <CalciteDialog
+        heading={`When to use ${getStyleLabel(activeStyleInfoStyle || {})}`}
+        open={styleInfoOpen}
+        onCalciteDialogClose={() => setStyleInfoOpen(false)}
+      >
+        <div className="style-browser-info-dialog-content">
+          {styleInfoContent.styleDescription ? (
+            <section className="style-browser-info-section">
+              <h4>About the style</h4>
+              <p>{styleInfoContent.styleDescription}</p>
+            </section>
+          ) : null}
+
+          {styleInfoContent.categoryDescription ? (
+            <section className="style-browser-info-section">
+              <h4>Category: {styleInfoContent.category + " styles"|| 'Other'}</h4>
+              <p>{styleInfoContent.categoryDescription}</p>
+            </section>
+          ) : null}
+
+          {styleInfoContent.shouldShowFallback ? (
+            <section className="style-browser-info-section">
+              <h4>Guidance</h4>
+              <p>{styleInfoContent.fallbackDescription}</p>
+            </section>
+          ) : null}
+
+          {styleInfoContent.documentationUrl ? (
+            <section className="style-browser-info-section">
+              <h4>Documentation</h4>
+              <a href={styleInfoContent.documentationUrl} target="_blank" rel="noreferrer noopener">
+                {`${getStyleLabel(activeStyleInfoStyle || {}) || 'Selected'} style API reference documentation`}
+              </a>
+            </section>
+          ) : null}
+
+          {styleInfoContent.sampleApps.length ? (
+            <section className="style-browser-info-section">
+              <h4>Sample apps</h4>
+              <ul className="style-browser-info-links">
+                {styleInfoContent.sampleApps.map((sampleApp) => (
+                  <li key={sampleApp.url}>
+                    <a href={sampleApp.url} target="_blank" rel="noreferrer noopener">
+                      {sampleApp.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+        <CalciteButton slot="footer-end" onClick={() => setStyleInfoOpen(false)}>
           Close
         </CalciteButton>
       </CalciteDialog>

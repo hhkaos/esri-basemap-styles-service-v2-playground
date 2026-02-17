@@ -94,6 +94,11 @@
   --calcite-chip-icon-color: white;
 }
 
+.style-browser-capability-chip-active::part(icon) {
+  background: var(--calcite-color-brand);
+  border-radius: 50%;
+}
+
 .style-browser-actions {
   display: flex;
   gap: 0.45rem;
@@ -211,6 +216,40 @@
   overflow: hidden;
 }
 
+.style-browser-info-button {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.style-browser-info-button:focus-visible {
+  outline: 2px solid var(--calcite-color-brand);
+  outline-offset: 2px;
+}
+
+.style-browser-info-icon {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  padding: 0.15rem;
+  box-sizing: content-box;
+}
+
+.style-browser-info-button:hover .style-browser-info-icon,
+.style-browser-info-button:focus-visible .style-browser-info-icon {
+  background: var(--calcite-color-foreground-1);
+}
+
+.style-browser-info-button:active .style-browser-info-icon {
+  background: var(--calcite-color-foreground-2);
+}
+
 .style-browser-thumbnail-large {
   aspect-ratio: 16 / 9;
 }
@@ -279,4 +318,26 @@ calcite-dialog .style-browser-item-title {
 
 .style-browser-dialog-tabs calcite-tab {
   display: none;
+}
+
+.style-browser-info-dialog-content {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.style-browser-info-section h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+}
+
+.style-browser-info-section p {
+  margin: 0;
+  color: var(--calcite-color-text-2);
+}
+
+.style-browser-info-links {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: grid;
+  gap: 0.2rem;
 }

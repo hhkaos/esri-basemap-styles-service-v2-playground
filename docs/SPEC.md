@@ -404,6 +404,20 @@ Styles are organized into thematic groups:
   - **Card Design**:
   - **Thumbnail**: From `thumbnail` field in `/self` response (lazy loaded)
   - **Title**: Human-readable style name (e.g., "Navigation" not "arcgis/navigation")
+  - **Info Icon Overlay**: Show an info icon over the thumbnail in the top-right corner of each style card
+    - **Interaction**: Click opens a modal with "When to use this style" guidance and practical use cases
+    - **Content Source**: Use editable app config so text is easy to customize without changing component logic (for example, `src/config/styleUseCases.js`)
+    - **Content Model**:
+      - Style-specific description keyed by full style id (for example, `arcgis/navigation`, `open/osm-style`)
+      - Category description keyed by category name (for example, `Streets`, `Topography`, `Satellite`, `Reference`, `Creative`)
+      - Optional sample app links per style and/or category for "real app" inspiration
+      - Style documentation link per full style id, with fallback to ArcGIS basemap styles docs when a style-specific URL is not configured
+    - **Modal Content Order**:
+      1. Style-specific description (configured per-style when available, otherwise generated from style id/category to ensure guidance always exists)
+      2. Category description (when available for the selected style category)
+      3. Style documentation link section (always shown via configured URL or fallback)
+      4. Optional "Sample apps" links section (only when links exist)
+    - **Fallback**: If a style-specific entry is missing, generate practical developer guidance from style id/category and include docs fallback URL
   - **Capability Badges**: Small colored icons/chips on or near thumbnail
     - **MVP**: Hide unsupported badges (only show applicable ones)
     - **Config**: Allow future toggle to "show all grayed out" for visual consistency
@@ -962,6 +976,7 @@ Process for contributors:
 - ✅ Dynamic style loading from `/self` with TTL cache + localStorage fallback
 - ✅ Family toggle (ArcGIS / Open) with parameter preservation
 - ✅ Style browser with grid layout, scroll, expand modal
+- ✅ Style card info icon overlay (top-right thumbnail) opening a use-case modal with configurable style-id + category descriptions, optional style docs link, and optional sample-app links
 - ✅ Category tabs (single-select + all)
 - ✅ Capability badges (hide unsupported)
 - ✅ Parameter controls (language, worldview, places) with disabled states
@@ -1252,6 +1267,9 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.17 | 2026-02-17 | Codex + User | Added optional style-specific documentation links to the Phase 1 style-info modal content model and modal display order. |
+| 3.16 | 2026-02-17 | Codex + User | Refined Phase 1 style-info modal requirements: full style-id keyed descriptions, category descriptions, ordered modal content (style then category), fallback behavior, and optional sample-app links. |
+| 3.15 | 2026-02-17 | Codex + User | Added Phase 1 requirement for per-style info icon overlay on thumbnails that opens a use-case modal with configurable text and fallback behavior. |
 | 3.14 | 2026-02-17 | Codex + User | Moved main map wrapper from `calcite-panel` to a flex container to ensure the MapLibre viewer consumes full available vertical space in the shell content area. |
 | 3.13 | 2026-02-17 | Codex + User | Moved docked tools shell panel to `panel-start` and wrapped each active tool panel body in `calcite-block` for consistent Calcite panel content structure. |
 | 3.12 | 2026-02-17 | Codex + User | Refactored layout to a docked `panel-end` tools area with `calcite-action-bar` navigation and separate panels for style selection, language, worldview, and places. |

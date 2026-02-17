@@ -218,6 +218,10 @@
 - [x] Restyle style browser filter control as a full-width search bar with left filter icon and placeholder-only labeling - 2026-02-17
 - [x] Make capability legend chips toggleable filters that exclude styles missing active capabilities (default off) - 2026-02-17
 - [x] Order style lists by capability support so higher-support styles appear first (with `/base` and `/labels` tie-break ordering preserved) - 2026-02-17
+- [x] Add style-card info icon overlay with use-case modal, configurable style/category descriptions, optional docs link, and optional sample-app links - 2026-02-17
+- [x] Ensure every style has guidance + docs URL via generated style descriptions and documentation fallback links - 2026-02-17
+- [x] Scope style-card info icon styling to thumbnail overlay control and preserve legend icon behavior - 2026-02-17
+- [x] Set active legend capability icon background to brand blue - 2026-02-17
 
 ---
 

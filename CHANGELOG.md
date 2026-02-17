@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Style metadata normalization utilities and tests for family/category/path extraction and grouping behavior
 - Parameter help content with disabled-state warnings and direct documentation links
 - Code Generator entry in the docked tools action bar with placeholder panel content
+- Style card info overlay button and "When to use this style" modal with configurable style/category guidance, docs links, and sample app links
+- Style info resolution utility with generated guidance and documentation URL fallbacks for uncovered styles
 
 ### Changed
 - Simplified style browser controls by removing block wrappers and keeping refresh action error-only
@@ -43,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Wrapped the main map viewer in a loading-enabled `calcite-panel` and wired style-load progress from `MapViewer`
 - Restyled style browser filtering with a full-width icon search input and toggleable capability chips in the legend
 - Updated style list ordering to rank higher capability support first while preserving `/base` and `/labels` tie-break placement
+- Refined thumbnail info overlay interaction to use a dedicated icon button with a circular, icon-only background treatment
+- Updated active legend capability icon visuals to use brand-blue icon background while active
 
 ### Deprecated
 - Marked OSM style family as deprecated in the family selector while retaining support for legacy styles
@@ -60,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Style browser scrolling regression caused by overriding Calcite panel host layout behavior and unconstrained scroll ancestry
 - Style card thumbnail/title spacing by eliminating inline-image baseline gaps and removing residual whitespace under thumbnail overlays
 - Inconsistent style ordering between grouped and All views by applying shared capability-aware sorting across both
+- Style-browser icon styling leakage by scoping overlay icon styles to the thumbnail info control instead of shared Calcite icon parts
 
 ### Security
 
