@@ -15,12 +15,12 @@
 }
 
 .style-browser-family-toggle {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  display: flex;
+  /* margin: 0;
+  padding: 0; */
+  /* border: 0; */
+  /* display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.35rem; */
 }
 
 .style-browser-family-legend {
@@ -153,12 +153,20 @@
 .style-browser-item {
   display: block;
   width: 100%;
-  text-align: left;
   border: 1px solid var(--calcite-color-border-3);
   border-radius: var(--calcite-corner-radius-round);
-  padding: 0.4rem;
   background: var(--calcite-color-foreground-1);
   cursor: pointer;
+  overflow: hidden;
+  --calcite-card-border-color: transparent;
+}
+
+.style-browser-item::part(content) {
+  padding: 0;
+}
+
+.style-browser-item-sidebar::part(content) {
+  display: none;
 }
 
 .style-browser-item:hover {
@@ -170,30 +178,62 @@
   box-shadow: inset 0 0 0 1px var(--calcite-color-brand-press);
 }
 
+.style-browser-item:focus-visible {
+  outline: 2px solid var(--calcite-color-brand);
+  outline-offset: 2px;
+}
+
 .style-browser-thumbnail {
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: var(--calcite-corner-radius-round);
-  margin-bottom: 0.35rem;
   background: var(--calcite-color-foreground-3);
+}
+
+.style-browser-thumbnail-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
 }
 
 .style-browser-thumbnail-large {
   aspect-ratio: 16 / 9;
 }
 
-.style-browser-item h3 {
-  margin: 0 0 0.35rem;
-  font-size: 0.84rem;
+.style-browser-item-title {
+  margin: 0;
+  padding: 0.12rem 0.3rem;
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 0.7rem;
   line-height: 1.2;
   color: var(--calcite-color-text-1);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 400;
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  border-radius: 0;
+  background: rgb(255 255 255 / 80%);
 }
 
 .style-browser-meta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.25rem;
+  margin: 0 0 calc(5px - var(--calcite-spacing-md));
+  padding: 0 0.35rem 0.06rem;
+  box-sizing: border-box;
+}
+
+.style-browser-capability-chip {
+  inline-size: 1.35rem;
+  min-inline-size: 1.35rem;
 }
 
 .style-browser-empty {

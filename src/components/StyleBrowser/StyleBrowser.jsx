@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalciteButton,
+  CalciteCard,
   CalciteChip,
   CalciteDialog,
   CalciteInputText,
@@ -11,6 +12,7 @@ import {
   CalciteTabNav,
   CalciteTabs,
   CalciteTabTitle,
+  CalciteTooltip,
 } from '@esri/calcite-components-react';
 import { getCapabilities } from '../../services/capabilitiesService';
 import { getStyleCatalog } from '../../services/styleService';
@@ -41,12 +43,45 @@ function getStyleId(style) {
   return getStylePath(style) || style?.path || style?.id || style?.name || '';
 }
 
+function stripStylePrefix(label = '') {
+  return label.replace(/^(ArcGIS|Open|OSM)\s+/i, '').trim();
+}
+
 function getStyleLabel(style) {
-  return style?.name || style?.path || style?.id || 'Unnamed style';
+  const rawLabel = style?.name || style?.path || style?.id || 'Unnamed style';
+  return stripStylePrefix(rawLabel);
 }
 
 function getStyleThumbnail(style) {
   return style?.thumbnailUrl || style?.thumbnail || THUMBNAIL_FALLBACK;
+}
+
+function toIdPart(value = '') {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function renderCapabilityChip({ show, icon, label, appearance = 'solid', tooltipId }) {
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <>
+      <CalciteChip
+        id={tooltipId}
+        scale="s"
+        icon={icon}
+        appearance={appearance}
+        label={label}
+        aria-label={label}
+        className="style-browser-capability-chip"
+      />
+      <CalciteTooltip referenceElement={tooltipId}>{label}</CalciteTooltip>
+    </>
+  );
 }
 
 /**
@@ -181,40 +216,84 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
     const styleLabel = getStyleLabel(style);
     const selected = styleId === selectedStyleName;
     const badges = getStyleBadges(style);
+    const idBase = `${inDialog ? 'dialog' : 'grid'}-${toIdPart(styleId || `style-${index}`)}`;
+    const titleId = `${idBase}-title`;
+
+    const cardClasses = [
+      'style-browser-item',
+      selected ? 'style-browser-item-selected' : '',
+      !inDialog ? 'style-browser-item-sidebar' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return (
-      <button
+      <CalciteCard
         key={styleId || `style-${index}`}
-        type="button"
-        className={`style-browser-item ${selected ? 'style-browser-item-selected' : ''}`}
+        className={cardClasses}
+        role="button"
+        tabIndex={0}
+        aria-label={`Select ${styleLabel}`}
         onClick={() => selectStyle(style)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectStyle(style);
+          }
+        }}
       >
-        <img
-          className={`style-browser-thumbnail ${inDialog ? 'style-browser-thumbnail-large' : ''}`}
-          src={getStyleThumbnail(style)}
-          alt={`${styleLabel} thumbnail`}
-          loading="lazy"
-          onError={(event) => {
-            event.currentTarget.src = THUMBNAIL_FALLBACK;
-          }}
-        />
-        <h3>{styleLabel}</h3>
-        <div className="style-browser-meta">
-          {badges.language ? <CalciteChip scale="s">Language</CalciteChip> : null}
-          {badges.worldview ? <CalciteChip scale="s">Worldview</CalciteChip> : null}
-          {badges.places ? <CalciteChip scale="s">Places</CalciteChip> : null}
-          {badges.baseLayer ? (
-            <CalciteChip scale="s" appearance="outline">
-              Base Layer
-            </CalciteChip>
-          ) : null}
-          {badges.labelLayer ? (
-            <CalciteChip scale="s" appearance="outline">
-              Labels Layer
-            </CalciteChip>
-          ) : null}
+        <div slot="thumbnail" className="style-browser-thumbnail-wrap">
+          <img
+            className={`style-browser-thumbnail ${inDialog ? 'style-browser-thumbnail-large' : ''}`}
+            src={getStyleThumbnail(style)}
+            alt={`${styleLabel} thumbnail`}
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.src = THUMBNAIL_FALLBACK;
+            }}
+          />
+          <h3 id={titleId} className="style-browser-item-title" aria-label={styleLabel}>
+            {styleLabel}
+          </h3>
         </div>
-      </button>
+        {inDialog ? <CalciteTooltip referenceElement={titleId}>{styleLabel}</CalciteTooltip> : null}
+        {inDialog ? (
+          <div className="style-browser-meta" aria-label="Supported style features">
+            {renderCapabilityChip({
+              show: badges.language,
+              icon: 'language',
+              label: 'Supports language',
+              tooltipId: `${idBase}-language`,
+            })}
+            {renderCapabilityChip({
+              show: badges.worldview,
+              icon: 'globe',
+              label: 'Supports worldview',
+              tooltipId: `${idBase}-worldview`,
+            })}
+            {renderCapabilityChip({
+              show: badges.places,
+              icon: 'map-pin',
+              label: 'Supports places',
+              tooltipId: `${idBase}-places`,
+            })}
+            {renderCapabilityChip({
+              show: badges.baseLayer,
+              icon: 'layers',
+              label: 'Supports base layer',
+              appearance: 'outline',
+              tooltipId: `${idBase}-base-layer`,
+            })}
+            {renderCapabilityChip({
+              show: badges.labelLayer,
+              icon: 'layer-annotation',
+              label: 'Supports labels layer',
+              appearance: 'outline',
+              tooltipId: `${idBase}-labels-layer`,
+            })}
+          </div>
+        ) : null}
+      </CalciteCard>
     );
   }
 
@@ -302,15 +381,38 @@ export function StyleBrowser({ selectedStyleName, onStyleSelect, onStyleMetaChan
         {renderCategoryTabs()}
 
         <div className="style-browser-legend" aria-label="Capability legend">
-          <CalciteChip scale="s">Language</CalciteChip>
-          <CalciteChip scale="s">Worldview</CalciteChip>
-          <CalciteChip scale="s">Places</CalciteChip>
-          <CalciteChip scale="s" appearance="outline">
-            Base Layer
-          </CalciteChip>
-          <CalciteChip scale="s" appearance="outline">
-            Labels Layer
-          </CalciteChip>
+          {renderCapabilityChip({
+            show: true,
+            icon: 'language',
+            label: 'Supports language',
+            tooltipId: 'style-browser-legend-language',
+          })}
+          {renderCapabilityChip({
+            show: true,
+            icon: 'globe',
+            label: 'Supports worldview',
+            tooltipId: 'style-browser-legend-worldview',
+          })}
+          {renderCapabilityChip({
+            show: true,
+            icon: 'map-pin',
+            label: 'Supports places',
+            tooltipId: 'style-browser-legend-places',
+          })}
+          {renderCapabilityChip({
+            show: true,
+            icon: 'layers',
+            label: 'Supports base layer',
+            appearance: 'outline',
+            tooltipId: 'style-browser-legend-base-layer',
+          })}
+          {renderCapabilityChip({
+            show: true,
+            icon: 'layer-annotation',
+            label: 'Supports labels layer',
+            appearance: 'outline',
+            tooltipId: 'style-browser-legend-labels-layer',
+          })}
         </div>
 
         {error ? (

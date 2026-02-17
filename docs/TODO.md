@@ -104,7 +104,6 @@
 
 - [ ] Write README.md (quick start, live demo link, contribute templates, deployment)
 - [ ] Write CONTRIBUTING.md (add templates, suggest improvements, report bugs, PR process)
-- [ ] Add in-app tooltips on all controls
 
 #### Deployment
 
@@ -208,6 +207,13 @@
 - [x] Control `calcite-action-bar` `expanded` via state and re-trigger after mount to ensure labels render on initial load - 2026-02-17
 - [x] Ensure action labels render on first load by explicitly binding `textEnabled` on each `calcite-action` to action bar expanded state - 2026-02-17
 - [x] Fix style browser scroll regression by preserving Calcite panel host flex behavior (no custom `display` override) and validating inner scroll container constraints in DevTools - 2026-02-17
+- [x] Refactor style browser list items from buttons to compact `calcite-card` with single-line ellipsis titles + tooltip and icon-only capability chips - 2026-02-17
+- [x] Remove style family prefixes (`ArcGIS`, `Open`, `OSM`) from style card titles so cards show concise names - 2026-02-17
+- [x] Fix missing labels-layer capability chip icon by switching `calcite-chip` icon token from `annotation` to `layer-annotation` - 2026-02-17
+- [x] Replace native `title` tooltips with `calcite-tooltip` in Style Browser and Parameter Controls - 2026-02-17
+- [x] Wrap style selection panel content in `calcite-block` while preserving style browser scrolling - 2026-02-17
+- [x] Hide capability chips in sidebar style cards and keep chips visible in expanded modal cards - 2026-02-17
+- [x] Overlay style titles on thumbnails with translucent white background and remove thumbnail/title gap - 2026-02-17
 
 ---
 
