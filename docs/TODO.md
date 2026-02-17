@@ -18,22 +18,13 @@
 
 #### Style Browser
 
-- [ ] Add family toggle (ArcGIS / Open) with parameter preservation on switch
-- [ ] Add filter chips (Streets, Topography, Satellite, Reference, Creative) with multi-select
-- [ ] Add capability badges with legend (Language, Worldview, Places, Labels, Base)
-- [ ] Group styles visually by category with subtle headers
-- [ ] Position `/labels` and `/base` styles at end of each group with badges
 - [ ] Add lazy-loaded thumbnails with Intersection Observer
 
 #### Sidebar
 
-- [ ] Add sidebar collapse/expand toggle in header (smooth animation, session storage persistence)
 
 #### Parameter Controls
 
-- [ ] Add tooltips on all parameter controls (language, worldview, places)
-- [ ] Add "Learn More" info icons linking to documentation URLs
-- [ ] Add warning icon + tooltip on disabled parameter controls
 
 #### Showcase Locations
 
@@ -196,6 +187,19 @@
 - [x] Fetch global capabilities from `/v2/self` (languages, worldviews, places) with cache - 2026-02-16
 - [x] Replace hardcoded parameter options with dynamic data from `/v2/self` API - 2026-02-16
 - [x] Create Codex `ship` skill from template in `~/.codex/skills/ship/SKILL.md` - 2026-02-16
+- [x] Add style family toggle (ArcGIS/Open), category grouping tabs, and grouped style sections in Style Browser - 2026-02-16
+- [x] Add style capability legend/badges and sort `/base` + `/labels` styles to end of each category - 2026-02-16
+- [x] Add sidebar collapse/expand toggle in header with session storage persistence - 2026-02-16
+- [x] Add parameter control tooltips, disabled warnings, and "Learn more" documentation links - 2026-02-16
+- [x] Fix horizontal scrollbar on `app-shell-side` by constraining shell panel overflow sizing - 2026-02-16
+- [x] Fix sidebar panel stretch: use `widthScale` for shell width and force child `calcite-panel` to `inline-size: 100%` - 2026-02-16
+- [x] Prevent category `calcite-tabs` from outgrowing sidebar panel via min-width constraints and local x-overflow containment - 2026-02-16
+- [x] Fix category tabs returning zero styles by normalizing `/self` category metadata (exact, fuzzy, fallback fields, and path-based fallback) - 2026-02-16
+- [x] Fix map display regression by resolving style ids from `/self` `styleUrl` when `path` is missing and using that id for selection/filtering - 2026-02-16
+- [x] Fix map panel zero-height behavior by forcing `app-viewer-panel` content part to full height and adding `ResizeObserver`-based `map.resize()` handling - 2026-02-16
+- [x] Fix map viewer render area sizing (`flex: 1`, `height: 100%`, min-height) and remove stray debug text that interfered with viewer layout - 2026-02-16
+- [x] Fix viewer panel width collapse: remove `inline-size: 100%` from `.app-shell-side` so map/code area renders beside sidebar - 2026-02-16
+- [x] Keep deprecated OSM as a separate style family in selector and prevent mixing with Open family filtering - 2026-02-17
 
 ---
 

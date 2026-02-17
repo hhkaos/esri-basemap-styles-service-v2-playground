@@ -31,28 +31,70 @@ export function MapViewer({ styleName, token, parameters }) {
     });
   }, [styleName, token, parameters]);
 
+  // Create or update map
   useEffect(() => {
-    if (!containerRef.current || !styleUrl || mapRef.current) {
+    if (!containerRef.current || !styleUrl) {
       return;
     }
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: styleUrl,
-      center: DEFAULT_CENTER,
-      zoom: DEFAULT_ZOOM,
-      attributionControl: true,
-    });
+    // No map yet — create one
+    if (!mapRef.current) {
+      const map = new maplibregl.Map({
+        container: containerRef.current,
+        style: styleUrl,
+        center: DEFAULT_CENTER,
+        zoom: DEFAULT_ZOOM,
+        attributionControl: true,
+      });
 
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
-    map.on('error', (event) => {
-      const message = event?.error?.message || 'Map rendering error';
-      setMapError(message);
-    });
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+      map.on('error', (event) => {
+        const message = event?.error?.message || 'Map rendering error';
+        setMapError(message);
+      });
+      map.on('load', () => map.resize());
 
-    mapRef.current = map;
+      mapRef.current = map;
+      return;
+    }
+
+    // Map exists — update its style
+    const map = mapRef.current;
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    const bearing = map.getBearing();
+    const pitch = map.getPitch();
+
+    map.setStyle(styleUrl);
+    map.once('style.load', () => {
+      if (!mapRef.current) {
+        return;
+      }
+      mapRef.current.jumpTo({ center, zoom, bearing, pitch });
+    });
+    setMapError('');
   }, [styleUrl]);
 
+  // Resize observer
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const resizeMap = () => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    };
+
+    const observer = new ResizeObserver(resizeMap);
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (mapRef.current) {
@@ -62,39 +104,15 @@ export function MapViewer({ styleName, token, parameters }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!mapRef.current || !styleUrl) {
-      return;
-    }
-
-    const center = mapRef.current.getCenter();
-    const zoom = mapRef.current.getZoom();
-    const bearing = mapRef.current.getBearing();
-    const pitch = mapRef.current.getPitch();
-
-    mapRef.current.setStyle(styleUrl);
-    mapRef.current.once('style.load', () => {
-      if (!mapRef.current) {
-        return;
-      }
-      mapRef.current.jumpTo({
-        center,
-        zoom,
-        bearing,
-        pitch,
-      });
-    });
-
-    setMapError('');
-  }, [styleUrl]);
-
   return (
     <section className="map-viewer" aria-label="Map viewer">
       {mapError ? <p className="map-viewer-error">Map error: {mapError}</p> : null}
-
-      {styleUrl ? (
-        <div ref={containerRef} className="map-viewer-canvas" />
-      ) : (
+      <div
+        ref={containerRef}
+        className="map-viewer-canvas"
+        style={styleUrl ? undefined : { display: 'none' }}
+      />
+      {!styleUrl && (
         <div className="map-viewer-empty">Load styles and select one to initialize MapLibre.</div>
       )}
     </section>

@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
 import { CalciteLabel, CalciteOption, CalciteSelect } from '@esri/calcite-components-react';
-import {
-  supportsLanguage,
-  supportsPlaces,
-  supportsWorldview,
-} from '../../utils/styleCapabilities';
+import { supportsLanguage, supportsPlaces, supportsWorldview } from '../../utils/styleCapabilities';
 import './ParameterControls.css';
 
 const FALLBACK_LANGUAGES = [
@@ -28,6 +24,13 @@ const FALLBACK_PLACES = [
   { code: 'none', name: 'None' },
 ];
 
+const PARAMETER_DOCS = {
+  language: 'https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#language',
+  worldview: 'https://developers.arcgis.com/rest/basemap-styles/arcgis-navigation-style-get/#worldview',
+  places:
+    'https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/basemaps/basemap-places/',
+};
+
 /**
  * @param {Object} props
  * @param {Object} [props.selectedStyle]
@@ -47,10 +50,7 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
 
   const worldviewOptions = useMemo(() => {
     const items = capabilities?.worldviews?.length > 0 ? capabilities.worldviews : FALLBACK_WORLDVIEWS;
-    return [
-      { value: '', label: 'Global (default)' },
-      ...items.map((item) => ({ value: item.code, label: item.name })),
-    ];
+    return [{ value: '', label: 'Global (default)' }, ...items.map((item) => ({ value: item.code, label: item.name }))];
   }, [capabilities]);
 
   const placesOptions = useMemo(() => {
@@ -65,50 +65,81 @@ export function ParameterControls({ selectedStyle, parameters, onChange, capabil
 
   return (
     <div className="parameter-controls-grid">
-      <CalciteLabel layout="inline">
-        Language
-        <CalciteSelect
-          label="Language"
-          value={parameters.language}
-          onCalciteSelectChange={(event) => handleParamChange('language', event)}
-          disabled={!languageEnabled || undefined}
-          scale="s"
-        >
-          {languageOptions.map((option) => (
-            <CalciteOption key={option.value} value={option.value} label={option.label} />
-          ))}
-        </CalciteSelect>
-      </CalciteLabel>
+      <div className="parameter-control-row">
+        <CalciteLabel layout="inline" className="parameter-control-label" title="Choose label language for supported styles.">
+          Language {!languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          <CalciteSelect
+            label="Language"
+            value={parameters.language}
+            onCalciteSelectChange={(event) => handleParamChange('language', event)}
+            disabled={!languageEnabled || undefined}
+            scale="s"
+            title={!languageEnabled ? 'This style does not support language changes.' : 'Choose label language.'}
+          >
+            {languageOptions.map((option) => (
+              <CalciteOption key={option.value} value={option.value} label={option.label} />
+            ))}
+          </CalciteSelect>
+        </CalciteLabel>
+        <p className="parameter-help">
+          Label language settings for this style.
+          <a className="parameter-help-link" href={PARAMETER_DOCS.language} target="_blank" rel="noreferrer">
+            ℹ Learn more
+          </a>
+        </p>
+      </div>
 
-      <CalciteLabel layout="inline">
-        Worldview
-        <CalciteSelect
-          label="Worldview"
-          value={parameters.worldview}
-          onCalciteSelectChange={(event) => handleParamChange('worldview', event)}
-          disabled={!worldviewEnabled || undefined}
-          scale="s"
-        >
-          {worldviewOptions.map((option) => (
-            <CalciteOption key={option.value || 'default'} value={option.value} label={option.label} />
-          ))}
-        </CalciteSelect>
-      </CalciteLabel>
+      <div className="parameter-control-row">
+        <CalciteLabel layout="inline" className="parameter-control-label" title="Adjust disputed-boundary labeling when available.">
+          Worldview {!worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          <CalciteSelect
+            label="Worldview"
+            value={parameters.worldview}
+            onCalciteSelectChange={(event) => handleParamChange('worldview', event)}
+            disabled={!worldviewEnabled || undefined}
+            scale="s"
+            title={
+              !worldviewEnabled
+                ? 'This style does not support worldview capability.'
+                : 'Controls boundaries and labels in disputed areas.'
+            }
+          >
+            {worldviewOptions.map((option) => (
+              <CalciteOption key={option.value || 'default'} value={option.value} label={option.label} />
+            ))}
+          </CalciteSelect>
+        </CalciteLabel>
+        <p className="parameter-help">
+          Boundary and disputed-area labeling behavior.
+          <a className="parameter-help-link" href={PARAMETER_DOCS.worldview} target="_blank" rel="noreferrer">
+            ℹ Learn more
+          </a>
+        </p>
+      </div>
 
-      <CalciteLabel layout="inline">
-        Places
-        <CalciteSelect
-          label="Places"
-          value={parameters.places}
-          onCalciteSelectChange={(event) => handleParamChange('places', event)}
-          disabled={!placesEnabled || undefined}
-          scale="s"
-        >
-          {placesOptions.map((option) => (
-            <CalciteOption key={option.value} value={option.value} label={option.label} />
-          ))}
-        </CalciteSelect>
-      </CalciteLabel>
+      <div className="parameter-control-row">
+        <CalciteLabel layout="inline" className="parameter-control-label" title="Toggle places display when supported by this style.">
+          Places {!placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          <CalciteSelect
+            label="Places"
+            value={parameters.places}
+            onCalciteSelectChange={(event) => handleParamChange('places', event)}
+            disabled={!placesEnabled || undefined}
+            scale="s"
+            title={!placesEnabled ? 'This style does not support places capability.' : 'Choose places display mode.'}
+          >
+            {placesOptions.map((option) => (
+              <CalciteOption key={option.value} value={option.value} label={option.label} />
+            ))}
+          </CalciteSelect>
+        </CalciteLabel>
+        <p className="parameter-help">
+          POI rendering controls for supported styles.
+          <a className="parameter-help-link" href={PARAMETER_DOCS.places} target="_blank" rel="noreferrer">
+            ℹ Learn more
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@
 ### 1.1 Purpose
 An interactive browser-based playground for developers to explore and experiment with the **ArcGIS Location Platform Basemap Styles Service v2**. The tool enables users to:
 
-- Browse and filter available basemap styles (ArcGIS and Open families) organized by thematic groups
+- Browse and filter available basemap styles (ArcGIS, Open, and deprecated OSM families) organized by thematic groups
 - Configure style parameters (`language`, `worldview`, `places`) and see results in real-time
 - Generate ready-to-use code snippets for multiple mapping libraries
 - Export working examples to CodePen or download as standalone HTML files
@@ -124,7 +124,7 @@ https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/{style_respo
 **Path Parameters:**
 - **style_response**: `styles` (returns Mapbox Style JSON v8) or `webmaps` (returns ArcGIS web map)
   - **Playground use**: Use `styles` for compatibility with libraries expecting Mapbox Style Spec
-- **style_family**: `arcgis` or `open`
+- **style_family**: `arcgis`, `open`, or `osm`
 - **style_name**: e.g., `navigation`, `light-gray/labels`, etc.
 
 ### 3.2 Style Families
@@ -133,6 +133,7 @@ https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/{style_respo
 |--------|-------------|---------------------|-------|
 | **arcgis** | Esri and authoritative providers | `language`, `worldview`, `places` (varies by style) | More features, richer metadata |
 | **open** | Overture Maps, OpenStreetMap | `language` only | Community data, supports fewer options than ArcGIS family |
+| **osm** | OpenStreetMap legacy styles | `language` only | Deprecated family shown separately in UI for backwards compatibility |
 
 ### 3.3 Style Groups (Categories)
 Styles are organized into thematic groups:
@@ -390,14 +391,14 @@ Styles are organized into thematic groups:
   - Example: `language=es` remains if new family supports it
   - Reset only incompatible parameters (e.g., `worldview` when switching to Open)
 
-#### Filter Chips (Above Grid)
-- **Chips**: "Streets", "Topography", "Satellite", "Reference", "Creative"
-- **Behavior**: Multi-select filter (can select multiple categories simultaneously)
-- **Active State**: Highlighted chip shows filtered styles
-- **Default**: All selected (show all styles)
+#### Category Tabs (Above Grid)
+- **Tabs**: "All", "Streets", "Topography", "Satellite", "Reference", "Creative"
+- **Behavior**: Single-select filter via `calcite-tabs`
+- **Active State**: Active tab shows filtered styles
+- **Default**: `All` selected (show all styles)
 
 #### Capability Legend
-- **Position**: Above or below filter chips
+- **Position**: Above or below category tabs
 - **Content**: Small legend explaining badge icons with tooltips
 - **Badges**:
   - 🌐 **Language** - Supports language parameter
@@ -970,7 +971,7 @@ Process for contributors:
 - ✅ Dynamic style loading from `/self` with TTL cache + localStorage fallback
 - ✅ Family toggle (ArcGIS / Open) with parameter preservation
 - ✅ Style browser with grid layout, scroll, expand modal
-- ✅ Filter chips (category multi-select)
+- ✅ Category tabs (single-select + all)
 - ✅ Capability badges (hide unsupported)
 - ✅ Parameter controls (language, worldview, places) with disabled states
 - ✅ MapLibre GL JS v5.x map viewer with real-time updates
@@ -1260,6 +1261,8 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.11 | 2026-02-16 | Codex + User | Replaced category filter chips with `calcite-tabs` (`All` + primary categories) in the Style Browser. |
+| 3.10 | 2026-02-16 | Codex + User | Enhanced UI/UX with sidebar collapse persistence, ArcGIS/Open family toggle, category chips, grouped style sections, capability legend/badges, and improved parameter help/warning affordances. |
 | 3.9 | 2026-02-16 | Codex + User | Replaced app header with `calcite-navigation`, removed map viewer internal header, and wrapped viewer area in `calcite-panel` with footer placeholder for future collapsible code generation section. |
 | 3.8 | 2026-02-16 | Codex + User | Refactored main app layout to use `calcite-shell` and `calcite-shell-panel`, simplifying sidebar/main structure and viewport height handling. |
 | 3.7 | 2026-02-16 | Codex + User | Refined vertical-space layout: compact header, inline labels, sidebar token input removal, thumbnail-first 3-column style grid, and error-only refresh visibility. |

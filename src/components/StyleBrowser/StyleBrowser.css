@@ -1,6 +1,7 @@
 .style-browser-panel {
   width: 100%;
   height: 100%;
+  min-width: 0;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);
   min-height: 0;
@@ -9,13 +10,66 @@
 
 .style-browser-controls {
   display: grid;
-  gap: 0.5rem;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.style-browser-family-toggle {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.style-browser-family-legend {
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+  color: var(--calcite-color-text-2);
+}
+
+.style-browser-family-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--calcite-color-text-1);
+}
+
+.style-browser-family-deprecated {
+  color: var(--calcite-color-status-warning);
+  font-size: 0.75rem;
+}
+
+.style-browser-family-option input {
+  margin: 0;
 }
 
 .style-browser-inline-label {
   display: grid;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.style-browser-category-tabs {
+  margin: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.style-browser-category-tabs calcite-tab {
+  display: none;
+}
+
+.style-browser-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
 .style-browser-actions {
@@ -28,7 +82,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.4rem 0 0.6rem;
+  margin: 0.3rem 0 0.4rem;
 }
 
 .style-browser-grid-block {
@@ -58,10 +112,27 @@
   padding-right: 0.25rem;
 }
 
+.style-browser-list-groups {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.style-browser-group-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--calcite-color-text-2);
+}
+
 .style-browser-list {
   display: grid;
   gap: 0.45rem;
   grid-template-columns: 1fr;
+}
+
+.style-browser-list-dialog {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 @media (min-width: 840px) {
@@ -111,7 +182,7 @@
 
 .style-browser-item h3 {
   margin: 0 0 0.35rem;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.2;
   color: var(--calcite-color-text-1);
 }
@@ -131,8 +202,20 @@
 .style-browser-dialog-grid {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   max-height: 70vh;
   overflow: auto;
   padding-right: 0.25rem;
+}
+
+.style-browser-dialog-tabs {
+  margin: 0 0 0.65rem;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.style-browser-dialog-tabs calcite-tab {
+  display: none;
 }
