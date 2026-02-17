@@ -102,7 +102,6 @@
 
 #### Documentation
 
-- [ ] Write README.md (quick start, live demo link, contribute templates, deployment)
 - [ ] Write CONTRIBUTING.md (add templates, suggest improvements, report bugs, PR process)
 
 #### Deployment
@@ -226,6 +225,7 @@
 - [x] Add per-panel explanatory copy and documentation links for Language, Worldview, and Places - 2026-02-17
 - [x] Add configurable language/worldview flag-icon preferences with sensitivity-safe fallback behavior - 2026-02-17
 - [x] Clarify worldview disclaimer copy and Places `All` vs `Attributed` behavior in parameter panel help text - 2026-02-17
+- [x] Write README.md (quick start, live demo link, contribute templates, deployment) - 2026-02-17
 
 ---
 
