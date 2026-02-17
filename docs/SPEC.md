@@ -104,6 +104,8 @@ src/
 
 **Template Dev Mode** (Phase 2): Separate dev server with file watcher to preview template changes without playground export step. If too complex for MVP, defer.
 
+**Current Implementation Note (2026-02-17)**: Leaflet export now renders from `src/templates/html/leaflet-tiles.html` (raw template + placeholder replacement) in `CodeGenerator`, including injected API key, language/worldview/places, and live map center/zoom from the current playground viewport. MapLibre export is still generated inline. The full `src/templates/*` registry/config architecture remains planned work.
+
 ### 2.4 Build and Development
 - **Development**: `npm run dev` (Vite dev server with HMR)
 - **Testing**: `npm run test` (Vitest + React Testing Library)
@@ -553,63 +555,42 @@ Styles are organized into thematic groups:
   - Wired style selection from Style Browser into map updates via `map.setStyle()`
   - Map initializes only when both style and token are available, with inline error display
 
-### 7.6 Code Generator Panel (Bottom)
+### 7.6 Code Generator Panel
 
-#### Visibility
-- **Default**: Hidden (collapsed)
-- **Toggle**: Button to show/hide panel
-- **Position**: Docked at bottom of viewport, above cookie banner if present
-
-#### Code Display
-- **MVP**: NO code viewer (removed completely)
-  - Just export buttons and token input
-  - **Future Enhancement**: Add optional simple code snippet preview
+#### Workflow
+- **Current UX (2026-02-17)**: A guided 4-step wizard in the Code Generator panel
+  1. **Select exported parameters**: Style, Language, Worldview, Places, and Current map location are shown with checkboxes (all enabled by default)
+  2. **Select a client library**: MapLibre GL JS or Leaflet
+  3. **Add API key**: Password-style key input with show/hide toggle plus create-account CTA
+  4. **Export**: Open in CodePen or Download HTML
+- **Parameter exclusion behavior**:
+  - Unchecked values are omitted from export intent and replaced by template defaults
+  - If `Style` is unchecked, exports use fallback style `arcgis/navigation`
+  - If `Current map location` is unchecked, exports use default world view (`[0, 30]`, zoom `2`)
+- **Code display**: No inline code viewer in MVP; export-only actions remain the primary UX
 
 #### Token Input Section
-- **Location**: Within code generator panel (not header)
-- **Empty State** (no token entered):
-  ```
-  🔑 API Key Required
-
-  To generate code samples, you need an ArcGIS Location Platform API key.
-
-  [Create Free Account] [Learn More]
-
-  Already have a key?
-  [Enter API Key]
-  ```
-  - Track "Create Account" clicks in analytics
-  - "Learn More" links to [Get API Key tutorial](https://developers.arcgis.com/documentation/security-and-authentication/)
-
-- **With Token**:
+- **Location**: Step 3 of the Code Generator wizard (not header)
+- **Empty state CTA**:
+  - `Need an API key?`
+  - `Create Free Account`
+  - `Learn More` (ArcGIS security/auth docs)
+- **With token**:
   - Password-style input with show/hide toggle
-  - Placeholder: "Paste your API key"
-  - Helper text: "Your key is used only in generated code, not by the playground"
-  - Security note icon with tooltip about scoping and rotation
+  - Placeholder: `Paste your API key`
+  - Token is used only in generated output (never persisted to localStorage)
 
-#### Library Tabs
+#### Library Selection
 - **Phase 1**: MapLibre GL JS, Leaflet
 - **Phase 2+**: ArcGIS Maps SDK for JavaScript (v5.0+), CesiumJS, OpenLayers
-- **Tab Content**: Just library name and icon (no code display in MVP)
+- **Implementation status (2026-02-17)**:
+  - Added MapLibre and Leaflet icon buttons using local assets in `src/assets/icons/`
+  - Library step is independent from token step to reduce user friction
 
-#### Export Buttons
+#### Export Actions (Step 4)
 - **"Open in CodePen"**:
   - **Enabled**: Only when token is present
-  - **Click**: Show security warning modal first
-    ```
-    ⚠️ Security Notice
-
-    Your API key will be visible in the CodePen URL and to anyone who views the pen.
-
-    This is normal for basemap keys. To keep your key secure:
-    • Set HTTP referrer restrictions in your dashboard
-    • Rotate keys frequently
-
-    Learn more: https://developers.arcgis.com/documentation/security-and-authentication/security-best-practices/#api-key-authentication
-
-    [Cancel] [I Understand, Continue]
-    ```
-  - **On Confirm**: POST to CodePen with generated code, open in new tab
+  - **On click**: POST to CodePen with generated code, open in new tab
   - **Generated Code**: Uses user's token (not playground token)
 
 - **"Download HTML"**:

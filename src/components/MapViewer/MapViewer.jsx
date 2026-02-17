@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../../config/mapDefaults';
 import { buildStyleUrl } from '../../utils/urlGenerator';
 import './MapViewer.css';
-
-const DEFAULT_CENTER = [0, 30];
-const DEFAULT_ZOOM = 2;
 
 /**
  * @param {Object} props
@@ -12,12 +10,28 @@ const DEFAULT_ZOOM = 2;
  * @param {string} [props.token]
  * @param {{language?: string, worldview?: string, places?: string}} [props.parameters]
  * @param {(loading: boolean) => void} [props.onLoadingChange]
+ * @param {(viewport: {center:[number,number], zoom:number}) => void} [props.onViewportChange]
  */
-export function MapViewer({ styleName, token, parameters, onLoadingChange }) {
+export function MapViewer({ styleName, token, parameters, onLoadingChange, onViewportChange }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const styleLoadOperationRef = useRef(0);
   const [mapError, setMapError] = useState('');
+
+  const emitViewport = useCallback(
+    (map) => {
+      if (!map) {
+        return;
+      }
+
+      const center = map.getCenter();
+      onViewportChange?.({
+        center: [center.lng, center.lat],
+        zoom: map.getZoom(),
+      });
+    },
+    [onViewportChange]
+  );
 
   const styleUrl = useMemo(() => {
     if (!styleName || !token) {
@@ -48,8 +62,8 @@ export function MapViewer({ styleName, token, parameters, onLoadingChange }) {
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: styleUrl,
-        center: DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
+        center: DEFAULT_MAP_CENTER,
+        zoom: DEFAULT_MAP_ZOOM,
         attributionControl: true,
       });
 
@@ -63,10 +77,12 @@ export function MapViewer({ styleName, token, parameters, onLoadingChange }) {
       });
       map.once('load', () => {
         map.resize();
+        emitViewport(map);
         if (operationId === styleLoadOperationRef.current) {
           onLoadingChange?.(false);
         }
       });
+      map.on('moveend', () => emitViewport(map));
 
       mapRef.current = map;
       return;
@@ -85,12 +101,13 @@ export function MapViewer({ styleName, token, parameters, onLoadingChange }) {
         return;
       }
       mapRef.current.jumpTo({ center, zoom, bearing, pitch });
+      emitViewport(mapRef.current);
       if (operationId === styleLoadOperationRef.current) {
         onLoadingChange?.(false);
       }
     });
     setMapError('');
-  }, [styleUrl, onLoadingChange]);
+  }, [styleUrl, onLoadingChange, emitViewport]);
 
   useEffect(() => {
     if (styleUrl) {

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>{{pageTitle}}</title>
+
+    <!--
+      API key is injected from the playground input.
+      Scope keys by referrer and rotate regularly:
+      https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/#best-practices
+    -->
+
+    <!-- Load MapLibre GL JS from CDN -->
+    <script src="https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@5.18.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <!-- Load ArcGIS MapLibre plugin from CDN -->
+    <script src="https://unpkg.com/@esri/maplibre-arcgis@1.1.0/dist/umd/maplibre-arcgis.min.js"></script>
+
+    <style>
+      html,
+      body,
+      #map {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        color: #323232;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // Use API key authentication.
+      const accessToken = '{{accessToken}}';
+      const basemapStyleId = '{{basemapEnum}}';
+      const language = '{{language}}';
+      const worldview = '{{worldview}}';
+      const places = '{{places}}';
+
+      const map = new maplibregl.Map({
+        container: 'map',
+        center: [{{centerLng}}, {{centerLat}}],
+        zoom: {{zoom}},
+      });
+
+      const preferences = {};
+
+      if (language && language !== 'global') {
+        preferences.language = language;
+      }
+
+      if (worldview) {
+        preferences.worldview = worldview;
+      }
+
+      if (places && places !== 'none') {
+        preferences.places = places;
+      }
+
+      const styleOptions = {
+        style: basemapStyleId,
+        token: accessToken,
+      };
+
+      if (Object.keys(preferences).length > 0) {
+        styleOptions.preferences = preferences;
+      }
+
+      maplibreArcGIS.BasemapStyle.applyStyle(map, styleOptions);
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+      maplibregl.setRTLTextPlugin(
+        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.js'
+      );
+    </script>
+  </body>
+</html>

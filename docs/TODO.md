@@ -8,9 +8,7 @@
 
 ### Up Next
 
-- [ ] Build code generator panel UI (bottom-docked, collapsible)
 - [ ] Add CodePen export with security warning modal
-- [ ] Add HTML download option
 
 ## Backlog
 
@@ -39,8 +37,6 @@
 
 #### Code Generator Panel
 
-- [ ] Build code generator panel UI (bottom-docked, hidden by default, toggle button)
-- [ ] Add token input with password show/hide toggle
 - [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", "Learn More")
 - [ ] Add token failure handling modal (troubleshooting steps, tutorial links, docs)
 - [ ] Add library tabs (MapLibre GL JS, Leaflet)
@@ -53,8 +49,6 @@
 - [ ] Create template generator registry (`src/templates/index.js`)
 - [ ] Add security comments in generated code (API key scoping, rotation, repo link)
 - [ ] Ensure Esri attribution in all templates (Leaflet requires Esri Leaflet plugin)
-- [ ] Add CodePen POST export functionality
-- [ ] Add HTML download with filename convention (`{library}-{styleName}-{timestamp}.html`)
 
 #### Share
 
@@ -156,6 +150,12 @@
 
 ## Done
 
+- [x] Add MapLibre tiles-consumption HTML template (`src/templates/html/maplibre-tiles.html`) and wire Code Generator MapLibre export to placeholder-based template rendering with ArcGIS MapLibre plugin (`BasemapStyle.applyStyle`) - 2026-02-17
+- [x] Add zoom conversion from MapLibre viewport to export library scale (Leaflet offset) and apply live viewport center/zoom to both Leaflet and MapLibre generated templates - 2026-02-17
+- [x] Harden zoom conversion helper with target library profiles, optional strict/fallback handling, dedicated unit tests, and remove Leaflet export `minZoom` clamp that could override converted zoom parity - 2026-02-17
+- [x] Align Leaflet template with Esri Leaflet Vector Basemap API (`vectorBasemapLayer` + options) and remove ad-hoc vectorTileLayer URL construction - 2026-02-17
+- [x] Include full playground state in Leaflet export template: API key, language/worldview/places, and live map center/zoom via MapViewer viewport callback - 2026-02-17
+- [x] Add Leaflet tiles-consumption HTML template (`src/templates/html/leaflet-tiles.html`) and wire Code Generator Leaflet export to placeholder-based template rendering - 2026-02-17
 - [x] Project initialization with /init skill - 2026-02-13
 - [x] Create comprehensive specification (docs/SPEC.md) - 2026-02-13
 - [x] Set up React + Vite project with Node 25 - 2026-02-13
@@ -234,6 +234,11 @@
 - [x] Add map viewer panel heading + parameter summary description (language, places, worldview) - 2026-02-17
 - [x] Fix parameter panel scrolling in docked tools layout by constraining block content overflow - 2026-02-17
 - [x] Add Catalan/Greek language flag mappings and hyphenated flag-code validation with unit tests - 2026-02-17
+- [x] Build Code Generator panel UI foundation (tabs, token input show/hide, CTA card, export actions scaffold) - 2026-02-17
+- [x] Implement Code Generator export actions (CodePen POST + HTML download), align token toggle control, and switch toggle to visibility icons - 2026-02-17
+- [x] Add MapLibre and Leaflet icons to Code Generator library tab buttons - 2026-02-17
+- [x] Refactor Code Generator into a 4-step wizard (parameter inclusion toggles, library selection, API key step, and export step) including optional style/map-location export defaults - 2026-02-17
+- [x] Polish Code Generator wizard flow: enforce required step selections, add per-library tutorial CTA in step 4, and tighten panel spacing/overflow behavior - 2026-02-17
 
 ---
 

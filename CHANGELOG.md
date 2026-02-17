@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Config-driven worldview flag preferences with icon rendering fallback behavior
 - Expanded README with feature overview, setup steps, environment configuration, and flag-icon configuration guidance
 - Unit tests for language-flag config mappings and case normalization behavior
+- Code Generator panel implementation with MapLibre and Leaflet support, API key entry, and export actions
+- HTML export templates for MapLibre (`src/templates/html/maplibre-tiles.html`) and Leaflet (`src/templates/html/leaflet-tiles.html`)
+- Shared map defaults config (`src/config/mapDefaults.js`) and zoom conversion utility/tests (`src/utils/zoom.js`, `src/utils/zoom.test.js`)
+- Library icons for Code Generator options and tutorial links per selected library in the export step
 
 ### Changed
 - Reworked Language, Worldview, and Places parameter panels to use vertical radio-button groups instead of dropdowns
@@ -21,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `VITE_BASE_PATH` build-time override in Vite config to support custom-domain deployments while preserving GitHub Pages default path
 - Updated style-info modal capabilities section to show only supported capabilities under a single heading
 - Added dynamic map panel heading/description to show selected style and active parameter values
+- Replaced Code Generator placeholder with a guided 4-step wizard (parameter selection, library selection, API key, export)
+- Added export-parameter toggles so generated code can omit selected style parameters and map viewport in favor of defaults
+- Updated map viewer integration to emit live viewport state into Code Generator exports
+- Added step gating in Code Generator: library selection required in step 2 and API key required in step 3 before advancing
 
 ### Deprecated
 
@@ -29,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Parameter panel scrolling/overflow behavior in docked tools panels by constraining `calcite-block` content regions
 - Language flag mapping support for Catalan (`ca` → `es-ct`) and Greek (`el` → `gr`) plus hyphenated flag-icon validation
+- Leaflet export to use `L.esri.Vector.vectorBasemapLayer(..., { version: 2, ... })` with API-compatible options
+- Leaflet and MapLibre exports to include injected API key, active style parameters, and live center/zoom with cross-library zoom conversion
 
 ### Security
 

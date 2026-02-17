@@ -11,7 +11,9 @@ import {
   CalciteShell,
   CalciteShellPanel,
 } from '@esri/calcite-components-react';
+import { CodeGenerator } from './components/CodeGenerator/CodeGenerator';
 import { MapViewer } from './components/MapViewer/MapViewer';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from './config/mapDefaults';
 import { ParameterControls } from './components/ParameterControls/ParameterControls';
 import { StyleBrowser } from './components/StyleBrowser/StyleBrowser';
 import { DEFAULT_PLAYGROUND_TOKEN } from './config/playgroundToken';
@@ -54,6 +56,10 @@ function App() {
   const [activeToolPanel, setActiveToolPanel] = useState('style-selection');
   const [actionBarExpanded, setActionBarExpanded] = useState(true);
   const [mapLoading, setMapLoading] = useState(false);
+  const [mapViewport, setMapViewport] = useState({
+    center: DEFAULT_MAP_CENTER,
+    zoom: DEFAULT_MAP_ZOOM,
+  });
 
   const handleCapabilitiesLoad = useCallback((caps) => {
     setCapabilities({ languages: caps.languages, worldviews: caps.worldviews, places: caps.places });
@@ -235,7 +241,7 @@ function App() {
           {activeToolPanel === 'code-generator' ? (
             <CalcitePanel heading="Code Generator" className="app-tools-panel-content">
               <CalciteBlock open className="app-tools-block">
-                <p className="app-placeholder-message">Code generator controls will be added here.</p>
+                <CodeGenerator selectedStyleName={selectedStyleName} parameters={parameters} viewport={mapViewport} />
               </CalciteBlock>
             </CalcitePanel>
           ) : null}
@@ -308,6 +314,7 @@ function App() {
           token={DEFAULT_PLAYGROUND_TOKEN}
           parameters={parameters}
           onLoadingChange={setMapLoading}
+          onViewportChange={setMapViewport}
         />
       </CalcitePanel>
     </CalciteShell>
