@@ -137,6 +137,7 @@ export function ParameterControls({
   section = 'all',
 }) {
   const awaitingStyleMetadata = Boolean(selectedStyleName) && !selectedStyle && !styleCatalogLoaded;
+  const showSectionHeading = section === 'all';
   const languageEnabled = !awaitingStyleMetadata && supportsLanguage(selectedStyle);
   const worldviewEnabled = !awaitingStyleMetadata && supportsWorldview(selectedStyle);
   const placesEnabled = !awaitingStyleMetadata && supportsPlaces(selectedStyle);
@@ -170,9 +171,11 @@ export function ParameterControls({
 
     return (
       <div className="parameter-control-row">
-        <h4 id="language-parameter-label" className="parameter-heading">
-          Language {!awaitingStyleMetadata && !languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
-        </h4>
+        {showSectionHeading ? (
+          <h4 id="language-parameter-label" className="parameter-heading">
+            Language {!awaitingStyleMetadata && !languageEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          </h4>
+        ) : null}
         <p className="parameter-description">
           Controls how map labels are displayed (global, local, or a specific language code).{' '}
           <CalciteLink href={PARAMETER_DOCS.language} target="_blank" rel="noreferrer">
@@ -196,9 +199,11 @@ export function ParameterControls({
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
-        <CalciteTooltip referenceElement="language-parameter-label">
-          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Choose label language for supported styles.'}
-        </CalciteTooltip>
+        {showSectionHeading ? (
+          <CalciteTooltip referenceElement="language-parameter-label">
+            {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Choose label language for supported styles.'}
+          </CalciteTooltip>
+        ) : null}
         <CalciteTooltip referenceElement="language-parameter-group">{languageTooltip}</CalciteTooltip>
       </div>
     );
@@ -213,9 +218,11 @@ export function ParameterControls({
 
     return (
       <div className="parameter-control-row">
-        <h4 id="worldview-parameter-label" className="parameter-heading">
-          Worldview {!awaitingStyleMetadata && !worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
-        </h4>
+        {showSectionHeading ? (
+          <h4 id="worldview-parameter-label" className="parameter-heading">
+            Worldview {!awaitingStyleMetadata && !worldviewEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          </h4>
+        ) : null}
         <p className="parameter-description">
           Controls boundaries and labels in disputed areas. Does not reflect Esri&apos;s official position.{' '}
           <CalciteLink href={PARAMETER_DOCS.worldview} target="_blank" rel="noreferrer">
@@ -239,9 +246,11 @@ export function ParameterControls({
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
-        <CalciteTooltip referenceElement="worldview-parameter-label">
-          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Adjust disputed-boundary labeling when available.'}
-        </CalciteTooltip>
+        {showSectionHeading ? (
+          <CalciteTooltip referenceElement="worldview-parameter-label">
+            {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Adjust disputed-boundary labeling when available.'}
+          </CalciteTooltip>
+        ) : null}
         <CalciteTooltip referenceElement="worldview-parameter-group">{worldviewTooltip}</CalciteTooltip>
       </div>
     );
@@ -256,12 +265,13 @@ export function ParameterControls({
 
     return (
       <div className="parameter-control-row">
-        <h4 id="places-parameter-label" className="parameter-heading">
-          Places {!awaitingStyleMetadata && !placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
-        </h4>
+        {showSectionHeading ? (
+          <h4 id="places-parameter-label" className="parameter-heading">
+            Places {!awaitingStyleMetadata && !placesEnabled ? <span className="parameter-warning-icon">⚠</span> : null}
+          </h4>
+        ) : null}
         <p className="parameter-description">
-          Controls point-of-interest visibility. All shows all available POIs, while Attributed shows only POIs with
-          attribution fields (like esri_place_id and name) for Places API workflows.{' '}
+          Controls point-of-interest visibility.{' '}
           <CalciteLink href={PARAMETER_DOCS.places} target="_blank" rel="noreferrer">
             Learn more
           </CalciteLink>
@@ -283,9 +293,14 @@ export function ParameterControls({
             </CalciteLabel>
           ))}
         </CalciteRadioButtonGroup>
-        <CalciteTooltip referenceElement="places-parameter-label">
-          {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Toggle places display when supported by this style.'}
-        </CalciteTooltip>
+        <p className="parameter-description small">
+          &quot;All&quot; shows all available POIs, while &quot;Attributed&quot; shows only POIs with
+          attribution fields (like esri_place_id and name) for Places API workflows</p>
+        {showSectionHeading ? (
+          <CalciteTooltip referenceElement="places-parameter-label">
+            {awaitingStyleMetadata ? 'Loading capability support for this style.' : 'Toggle places display when supported by this style.'}
+          </CalciteTooltip>
+        ) : null}
         <CalciteTooltip referenceElement="places-parameter-group">{placesTooltip}</CalciteTooltip>
       </div>
     );

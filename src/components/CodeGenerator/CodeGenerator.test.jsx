@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@esri/calcite-components-react', async () => {
@@ -283,6 +283,93 @@ describe('CodeGenerator', () => {
     submitMock.mockRestore();
   });
 
+  it('uses ArcGIS JS SDK template and includes map components recommendation comment when places is none', () => {
+    let submittedData = '';
+    const submitMock = vi.spyOn(window.HTMLFormElement.prototype, 'submit').mockImplementation(function submit() {
+      submittedData = this.querySelector('input[name="data"]')?.value || '';
+    });
+
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/imagery"
+        parameters={{ language: 'ca', worldview: 'china', places: 'none' }}
+        viewport={{ center: [37.8, 30.3], zoom: 6.84 }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    moveFromStep2ToStep3WithLibrary('arcgis-js-sdk');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    fireEvent.click(screen.getByTestId('codegen-export-codepen'));
+
+    const payload = JSON.parse(submittedData);
+    const html = payload.html;
+
+    expect(html).toContain('@arcgis/core/Map.js');
+    expect(html).toContain("esriConfig.apiKey = 'abc123';");
+    expect(html).toContain("id: 'arcgis/imagery'");
+    expect(html).toContain("const places = 'none';");
+    expect(html).not.toContain('id="map-components-note"');
+    expect(html).toContain('If places is "none" and you only need map display');
+    expect(html).toContain('tutorials/display-a-map/');
+
+    submitMock.mockRestore();
+  });
+
+  it('uses OpenLayers template with style URL parameters and Esri attribution', () => {
+    let submittedData = '';
+    const submitMock = vi.spyOn(window.HTMLFormElement.prototype, 'submit').mockImplementation(function submit() {
+      submittedData = this.querySelector('input[name="data"]')?.value || '';
+    });
+
+    render(
+      <CodeGenerator
+        selectedStyleName="arcgis/navigation"
+        parameters={{ language: 'ca', worldview: 'china', places: 'all' }}
+        viewport={{ center: [48.879, 35.7088], zoom: 3 }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    moveFromStep2ToStep3WithLibrary('openlayers');
+    fireEvent.input(screen.getByTestId('codegen-token-input'), { target: { value: 'abc123' } });
+    fireEvent.click(screen.getByLabelText('I confirm I read and understood the API key security warning'));
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    fireEvent.click(screen.getByTestId('codegen-export-codepen'));
+
+    const payload = JSON.parse(submittedData);
+    const html = payload.html;
+
+    expect(html).toContain('cdn.jsdelivr.net/npm/ol@v10.8.0');
+    expect(html).toContain('ol-mapbox-style@13.2.1');
+    expect(html).toContain("const basemapStyle = 'arcgis/navigation';");
+    expect(html).toContain("styleUrl.searchParams.set('token', accessToken);");
+    expect(html).toContain("styleUrl.searchParams.set('language', language);");
+    expect(html).toContain("styleUrl.searchParams.set('worldview', worldview);");
+    expect(html).toContain("styleUrl.searchParams.set('places', places);");
+    expect(html).toContain('olms.apply(map, styleUrl.toString())');
+    expect(html).toContain('Powered by <a href=');
+    expect(html).toContain('center: ol.proj.fromLonLat([48.879, 35.7088])');
+
+    submitMock.mockRestore();
+  });
+
+  it('shows CesiumJS as disabled with a coming-soon tooltip', () => {
+    render(<CodeGenerator selectedStyleName="arcgis/navigation" parameters={DEFAULT_PARAMETERS} />);
+
+    fireEvent.click(screen.getByTestId('codegen-step-next'));
+    const cesiumRadio = screen.getByDisplayValue('cesium-js');
+
+    expect(cesiumRadio).toHaveAttribute('disabled');
+    expect(screen.getByText('CesiumJS (Coming soon)')).toBeInTheDocument();
+    expect(screen.getByText('CesiumJS (Coming soon)').closest('label')).toHaveAttribute(
+      'title',
+      'Available soon when static basemap tiles are fully supported by the playground.'
+    );
+  });
+
   it('uses default viewport when current map location is unchecked', () => {
     let submittedData = '';
     const submitMock = vi.spyOn(window.HTMLFormElement.prototype, 'submit').mockImplementation(function submit() {
@@ -355,19 +442,14 @@ describe('CodeGenerator', () => {
     URL.revokeObjectURL = originalRevokeObjectURL;
   });
 
-  it('copies a share link to clipboard from step 4', async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    const originalClipboard = navigator.clipboard;
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    });
-
+  it('opens share panel flow from step 4', () => {
+    const onOpenSharePanel = vi.fn();
     render(
       <CodeGenerator
         selectedStyleName="arcgis/navigation"
         parameters={{ language: 'en', worldview: '', places: 'none' }}
         viewport={{ center: [-3.7038, 40.4168], zoom: 9 }}
+        onOpenSharePanel={onOpenSharePanel}
       />
     );
 
@@ -377,13 +459,7 @@ describe('CodeGenerator', () => {
     fireEvent.click(screen.getByTestId('codegen-step-next'));
     fireEvent.click(screen.getByTestId('codegen-share-copy'));
 
-    await waitFor(() => {
-      expect(writeText).toHaveBeenCalledTimes(1);
-    });
-    expect(writeText.mock.calls[0][0]).toContain('config=');
-    expect(screen.getByText('Share link copied to clipboard.')).toBeInTheDocument();
-
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: originalClipboard });
+    expect(onOpenSharePanel).toHaveBeenCalledTimes(1);
   });
 
   it('disables share action when no style is selected', () => {

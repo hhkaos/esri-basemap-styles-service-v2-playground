@@ -11,7 +11,7 @@ const TOOL_PANELS = new Set([
   'share',
   'contact',
 ]);
-const CODE_GENERATOR_LIBRARIES = new Set(['maplibre', 'leaflet']);
+const CODE_GENERATOR_LIBRARIES = new Set(['maplibre', 'leaflet', 'arcgis-js-sdk', 'openlayers']);
 const DEFAULT_CODE_GENERATOR_EXPORT_OPTIONS = {
   style: true,
   language: true,

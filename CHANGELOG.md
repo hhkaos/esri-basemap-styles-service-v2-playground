@@ -8,14 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- ArcGIS Maps SDK and OpenLayers Code Generator library options with dedicated icons/templates, plus CesiumJS template/icon scaffolding marked as coming soon
+- Selective share support for Code Generator state, including library/export-option persistence and default-panel open behavior
 
 ### Changed
+- Refined Code Generator wizard flow, styling, and tests for expanded library handling and export/share interactions
+- Updated parameter panel rendering to avoid duplicate section headings when Language/Worldview/Places are opened in dedicated panels
+- Improved Share panel guidance copy to clarify that links restore playground state
+- Added explicit agent instructions in `AGENTS.md` and `CLAUDE.md` to protect user manual HTML/CSS edits and require confirmation before broader style/markup changes
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- Share config normalization/tests to allow newly supported libraries in shared URLs and preserve expected hydration behavior
+- ParameterControls test expectations to align with single-panel heading removal behavior
 
 ### Security
 

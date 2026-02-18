@@ -26,9 +26,12 @@
 }
 
 .parameter-description {
-  margin: 0;
-  font-size: 0.73rem;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
   color: var(--calcite-color-text-2);
+}
+.parameter-description.small{
+  font-size: 0.8rem;
 }
 
 .parameter-radio-group {

@@ -19,6 +19,7 @@ vi.mock('@esri/calcite-components-react', async () => {
         {children}
       </button>
     ),
+    CalciteIcon: () => <span aria-hidden="true" />,
     CalciteLink: ({ children, ...props }) => <a {...props}>{children}</a>,
     CalciteNavigation: ({ children }) => <div>{children}</div>,
     CalcitePanel: ({ children, heading, hidden }) => (

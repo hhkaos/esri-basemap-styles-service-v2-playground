@@ -51,8 +51,17 @@ function normalizeOpenPanel(value) {
  *  token?:string,
  *  exportOptions?:Object
  * } | null} [props.codeGeneratorState]
+ * @param {{includeDefaultPanel?:boolean,defaultPanel?:string} | null} [props.panelPreset]
+ * @param {() => void} [props.onPanelPresetConsumed]
  */
-export function SharePanel({ selectedStyleName, parameters, viewport, codeGeneratorState }) {
+export function SharePanel({
+  selectedStyleName,
+  parameters,
+  viewport,
+  codeGeneratorState,
+  panelPreset,
+  onPanelPresetConsumed,
+}) {
   const [shareOptions, setShareOptions] = useState(() => sharePanelMemory.shareOptions);
   const [defaultPanel, setDefaultPanel] = useState(() => sharePanelMemory.defaultPanel);
   const [codeGeneratorShareOptions, setCodeGeneratorShareOptions] = useState(() => sharePanelMemory.codeGeneratorShareOptions);
@@ -129,6 +138,28 @@ export function SharePanel({ selectedStyleName, parameters, viewport, codeGenera
   }, [codeGeneratorShareOptions, defaultPanel, shareOptions]);
 
   useEffect(() => {
+    if (!panelPreset) {
+      return;
+    }
+
+    const hasIncludeDefaultPanel = typeof panelPreset.includeDefaultPanel === 'boolean';
+    const hasDefaultPanel = typeof panelPreset.defaultPanel === 'string';
+
+    if (hasIncludeDefaultPanel || hasDefaultPanel) {
+      setShareOptions((current) => ({
+        ...current,
+        includeDefaultPanel: hasIncludeDefaultPanel ? panelPreset.includeDefaultPanel : true,
+      }));
+    }
+
+    if (hasDefaultPanel) {
+      setDefaultPanel(normalizeOpenPanel(panelPreset.defaultPanel));
+    }
+
+    onPanelPresetConsumed?.();
+  }, [onPanelPresetConsumed, panelPreset]);
+
+  useEffect(() => {
     if (hasExportedParameters && hasSelectedLibrary) {
       return;
     }
@@ -198,7 +229,7 @@ export function SharePanel({ selectedStyleName, parameters, viewport, codeGenera
 
   return (
     <div className="share-panel" aria-live="polite">
-      <p className="share-panel-intro">Choose what to include in the share link.</p>
+      <p className="share-panel-intro">Create a link that reopens the playground with your selected style, settings, and panel state.</p>
 
       <div className="share-panel-options" role="group" aria-label="Share options">
         <label className="share-panel-option">

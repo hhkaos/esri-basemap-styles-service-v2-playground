@@ -58,7 +58,7 @@ describe('ParameterControls', () => {
     );
 
     expect(screen.getByText('This style does not support worldview capability.')).toBeInTheDocument();
-    expect(screen.getByText('⚠')).toBeInTheDocument();
+    expect(screen.queryByText('⚠')).not.toBeInTheDocument();
   });
 
   it('marks hydrated language/worldview/places radios as checked', () => {

@@ -540,6 +540,11 @@ Styles are organized into thematic groups:
 - **Zoom display**: Current zoom level shown between +/- buttons
 - **Attribution**: MapLibre default attribution control
 
+#### Viewer Header Summary
+- The center `calcite-panel` header shows selected style name.
+- Header content includes compact parameter chips for Language, Places, and Worldview.
+- Each parameter chip uses the same Calcite icon tokens as the tools action bar (`language`, `pin-plus`, `globe`), bold parameter labels, and resolved display names from capabilities when available (for example, full language names).
+
 #### Interactions
 - **Standard**: Pan, zoom, rotate (with keyboard shortcuts)
 - **Places Hover** (when `places=attributed`):
@@ -560,7 +565,7 @@ Styles are organized into thematic groups:
 #### Workflow
 - **Current UX (2026-02-17)**: A guided 4-step wizard in the Code Generator panel
   1. **Select exported parameters**: Style, Language, Worldview, Places, and Current map location are shown with checkboxes (all enabled by default)
-  2. **Select a client library**: MapLibre GL JS or Leaflet
+  2. **Select a client library**: MapLibre GL JS, Leaflet, ArcGIS Maps SDK for JavaScript, or OpenLayers (CesiumJS shown as coming soon)
   3. **Add API key**: Password-style key input with show/hide toggle plus create-account CTA
   4. **Export**: Open in CodePen or Download HTML
 - **Parameter exclusion behavior**:
@@ -582,11 +587,15 @@ Styles are organized into thematic groups:
   - Token is used only in generated output (never persisted to localStorage)
 
 #### Library Selection
-- **Phase 1**: MapLibre GL JS, Leaflet
-- **Phase 2+**: ArcGIS Maps SDK for JavaScript (v5.0+), CesiumJS, OpenLayers
+- **Current**: MapLibre GL JS, Leaflet, ArcGIS Maps SDK for JavaScript, OpenLayers
+- **Coming soon**: CesiumJS (disabled in library selector with tooltip)
 - **Implementation status (2026-02-17)**:
-  - Added MapLibre and Leaflet icon buttons using local assets in `src/assets/icons/`
+  - Added MapLibre, Leaflet, ArcGIS Maps SDK, OpenLayers, and CesiumJS icon buttons using local assets in `src/assets/icons/`
   - Library step is independent from token step to reduce user friction
+  - ArcGIS Maps SDK export uses `Map` + `MapView` with basemap style autocasting and supports `language`, `worldview`, and `places` in the style payload
+  - ArcGIS template includes an inline code comment linking to the ArcGIS Map Components "Display a map" tutorial for cases where `places` is not enabled (`none`)
+  - OpenLayers export uses `olms.apply(...)` against Basemap Styles API URLs and injects Esri attribution text in the resulting layer source attribution chain
+  - CesiumJS is currently disabled in the selector and will be re-enabled when static basemap tiles are fully supported in playground exports
 
 #### Export Actions (Step 4)
 - **"Open in CodePen"**:
@@ -1269,6 +1278,7 @@ Include these throughout the UI:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 3.19 | 2026-02-17 | Codex + User | Improved the map viewer panel header summary styling with Calcite icons, bold parameter labels, and capability-resolved display names (full language names when available). |
 | 3.18 | 2026-02-17 | Codex + User | Implemented Phase 1 share URL flow end-to-end: copy share link in Code Generator, restore style/parameters/viewport from `?config=`, and added share service tests. |
 | 3.17 | 2026-02-17 | Codex + User | Added optional style-specific documentation links to the Phase 1 style-info modal content model and modal display order. |
 | 3.16 | 2026-02-17 | Codex + User | Refined Phase 1 style-info modal requirements: full style-id keyed descriptions, category descriptions, ordered modal content (style then category), fallback behavior, and optional sample-app links. |

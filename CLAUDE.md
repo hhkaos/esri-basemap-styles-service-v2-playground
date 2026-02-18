@@ -115,6 +115,7 @@ Style Service (/self API) → Cache (localStorage) → UI Update
 - Use React hooks and functional components
 - Keep components small and focused
 - Separate presentation from logic
+- Treat user manual HTML/CSS edits as protected: do not overwrite broad markup/style changes; if broader HTML/CSS edits are needed, ask the user first and only patch the exact requested lines.
 
 **Component Guidelines**:
 - Use Calcite Design System components where possible

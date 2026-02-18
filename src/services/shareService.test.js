@@ -56,6 +56,38 @@ describe('shareService', () => {
     });
   });
 
+  it('parseSharedConfigFromUrl should accept arcgis-js-sdk as code generator library', () => {
+    const url =
+      'https://example.com/playground?config=eyJ1aSI6eyJwYW5lbCI6ImNvZGUtZ2VuZXJhdG9yIn0sImNvZGVHZW5lcmF0b3IiOnsic2VsZWN0ZWRMaWJyYXJ5IjoiYXJjZ2lzLWpzLXNkayJ9fQ';
+    const parsed = parseSharedConfigFromUrl(url);
+
+    expect(parsed?.codeGenerator).toEqual({
+      selectedLibrary: 'arcgis-js-sdk',
+      hasLibrarySelection: true,
+      currentStep: 3,
+    });
+  });
+
+  it('parseSharedConfigFromUrl should accept openlayers as code generator library', () => {
+    const url =
+      'https://example.com/playground?config=eyJ1aSI6eyJwYW5lbCI6ImNvZGUtZ2VuZXJhdG9yIn0sImNvZGVHZW5lcmF0b3IiOnsic2VsZWN0ZWRMaWJyYXJ5Ijoib3BlbmxheWVycyJ9fQ';
+    const parsed = parseSharedConfigFromUrl(url);
+
+    expect(parsed?.codeGenerator).toEqual({
+      selectedLibrary: 'openlayers',
+      hasLibrarySelection: true,
+      currentStep: 3,
+    });
+  });
+
+  it('parseSharedConfigFromUrl should ignore unsupported code generator libraries', () => {
+    const url =
+      'https://example.com/playground?config=eyJ1aSI6eyJwYW5lbCI6ImNvZGUtZ2VuZXJhdG9yIn0sImNvZGVHZW5lcmF0b3IiOnsic2VsZWN0ZWRMaWJyYXJ5IjoiY2VzaXVtLWpzIn19';
+    const parsed = parseSharedConfigFromUrl(url);
+
+    expect(parsed?.codeGenerator).toBeNull();
+  });
+
   it('parseSharedConfigFromUrl should return null for invalid payload', () => {
     const parsed = parseSharedConfigFromUrl('https://example.com/playground?config=badpayload');
     expect(parsed).toBeNull();

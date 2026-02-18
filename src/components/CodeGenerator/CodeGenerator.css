@@ -13,7 +13,7 @@
 .code-generator-intro {
   margin: 0 0 1rem;
   color: var(--calcite-color-text-2);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.4;
 }
 
@@ -179,6 +179,10 @@
   gap: 0.4rem;
 }
 
+.code-generator-share-panel-link-button {
+  --calcite-button-background-color: #35ac46;
+}
+
 .code-generator-step-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -196,25 +200,4 @@
   color: var(--calcite-color-text-3);
   font-size: 0.74rem;
   line-height: 1.4;
-}
-
-.code-generator-toast {
-  margin-top: 0.25rem;
-  border-radius: 0.4rem;
-  border: 1px solid var(--calcite-color-border-3);
-  padding: 0.45rem 0.55rem;
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.code-generator-toast-success {
-  border-color: var(--calcite-color-status-success);
-  color: var(--calcite-color-status-success-press);
-  background: var(--calcite-color-status-success-hover);
-}
-
-.code-generator-toast-danger {
-  border-color: var(--calcite-color-status-danger);
-  color: var(--calcite-color-status-danger-press);
-  background: var(--calcite-color-status-danger-hover);
 }

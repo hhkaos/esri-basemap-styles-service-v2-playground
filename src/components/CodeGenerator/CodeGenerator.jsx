@@ -8,20 +8,38 @@ import {
   CalciteRadioButtonGroup,
 } from '@esri/calcite-components-react';
 import { convertZoomFromMapLibre } from '../../utils/zoom';
-import { generateAndCopyShareUrl } from '../../services/shareService';
 import maplibreIcon from '../../assets/icons/maplibre-icon-rounded.png';
 import leafletIcon from '../../assets/icons/leaflet-icon-rounded.png';
+import arcgisJsSdkIcon from '../../assets/icons/arcgis-js-sdk-icon-rounded.png';
+import openlayersIcon from '../../assets/icons/openlayers-icon-rounded.png';
+import cesiumJsIcon from '../../assets/icons/cesium-js-icon-rounded.png';
+import arcgisJsSdkTemplate from '../../templates/html/arcgis-js-sdk-tiles.html?raw';
+import cesiumJsTemplate from '../../templates/html/cesium-js-tiles.html?raw';
 import leafletTilesTemplate from '../../templates/html/leaflet-tiles.html?raw';
 import maplibreTilesTemplate from '../../templates/html/maplibre-tiles.html?raw';
+import openlayersTemplate from '../../templates/html/openlayers-tiles.html?raw';
 import './CodeGenerator.css';
 
 const LIBRARIES = [
+  { id: 'arcgis-js-sdk', label: 'ArcGIS Maps SDK for JavaScript', icon: arcgisJsSdkIcon, iconAlt: 'ArcGIS JS SDK logo' },
   { id: 'maplibre', label: 'MapLibre GL JS', icon: maplibreIcon, iconAlt: 'MapLibre logo' },
   { id: 'leaflet', label: 'Leaflet', icon: leafletIcon, iconAlt: 'Leaflet logo' },
+  { id: 'openlayers', label: 'OpenLayers', icon: openlayersIcon, iconAlt: 'OpenLayers logo' },
+  {
+    id: 'cesium-js',
+    label: 'CesiumJS',
+    icon: cesiumJsIcon,
+    iconAlt: 'CesiumJS logo',
+    disabled: true,
+    disabledReason: 'Available soon when static basemap tiles are fully supported by the playground.',
+  },
 ];
 const LIBRARY_TUTORIALS = {
   leaflet: 'https://developers.arcgis.com/esri-leaflet/tutorials/',
   maplibre: 'https://developers.arcgis.com/maplibre-gl-js/tutorials/',
+  'arcgis-js-sdk': 'https://developers.arcgis.com/javascript/latest/tutorials/display-a-map/',
+  openlayers: 'https://developers.arcgis.com/openlayers/',
+  'cesium-js': 'https://developers.arcgis.com/cesiumjs/',
 };
 const CODEPEN_URL = 'https://codepen.io/pen/define';
 const DEFAULT_EXPORT_STYLE = 'arcgis/navigation';
@@ -38,7 +56,7 @@ const EXPORT_STEPS = [
 
 function createInitialCodeGeneratorMemory() {
   return {
-    selectedLibrary: LIBRARIES[0].id,
+    selectedLibrary: '',
     hasLibrarySelection: false,
     token: '',
     showToken: false,
@@ -56,13 +74,23 @@ function createInitialCodeGeneratorMemory() {
 
 let codeGeneratorMemory = createInitialCodeGeneratorMemory();
 
+function isSelectableLibrary(libraryId) {
+  const library = LIBRARIES.find((item) => item.id === libraryId);
+  return Boolean(library && !library.disabled);
+}
+
 function sanitizeSharedPreset(sharedPreset) {
   if (!sharedPreset || typeof sharedPreset !== 'object') {
     return null;
   }
 
   const preset = {};
-  if (sharedPreset.selectedLibrary === 'maplibre' || sharedPreset.selectedLibrary === 'leaflet') {
+  if (
+    sharedPreset.selectedLibrary === 'maplibre' ||
+    sharedPreset.selectedLibrary === 'leaflet' ||
+    sharedPreset.selectedLibrary === 'arcgis-js-sdk' ||
+    sharedPreset.selectedLibrary === 'openlayers'
+  ) {
     preset.selectedLibrary = sharedPreset.selectedLibrary;
     preset.hasLibrarySelection = true;
   }
@@ -119,7 +147,52 @@ function renderTemplate(template, values) {
 function buildTemplateHtml({ selectedLibrary, styleName, token, parameters, viewport }) {
   const center = Array.isArray(viewport?.center) && viewport.center.length === 2 ? viewport.center : [0, 30];
   const sourceZoom = Number.isFinite(viewport?.zoom) ? viewport.zoom : 2;
-  const convertedZoom = convertZoomFromMapLibre(sourceZoom, selectedLibrary);
+  const zoomTarget = selectedLibrary === 'arcgis-js-sdk' ? 'arcgis-vector' : selectedLibrary === 'cesium-js' ? 'maplibre' : selectedLibrary;
+  const convertedZoom = convertZoomFromMapLibre(sourceZoom, zoomTarget);
+  const cesiumCameraHeight = Math.max(500, Number((20000000 / Math.pow(2, convertedZoom - 2)).toFixed(2)));
+
+  if (selectedLibrary === 'arcgis-js-sdk') {
+    const places = parameters.places || 'none';
+    return renderTemplate(arcgisJsSdkTemplate, {
+      pageTitle: `ArcGIS Basemap Style (${escapeHtml(styleName)}) - ArcGIS Maps SDK for JavaScript`,
+      accessToken: escapeHtml(token),
+      centerLat: escapeHtml(center[1]),
+      centerLng: escapeHtml(center[0]),
+      zoom: escapeHtml(convertedZoom),
+      basemapEnum: escapeHtml(styleName),
+      language: escapeHtml(parameters.language || 'global'),
+      worldview: escapeHtml(parameters.worldview || ''),
+      places: escapeHtml(places),
+    });
+  }
+
+  if (selectedLibrary === 'openlayers') {
+    return renderTemplate(openlayersTemplate, {
+      pageTitle: `ArcGIS Basemap Style (${escapeHtml(styleName)}) - OpenLayers`,
+      accessToken: escapeHtml(token),
+      centerLat: escapeHtml(center[1]),
+      centerLng: escapeHtml(center[0]),
+      zoom: escapeHtml(convertedZoom),
+      basemapEnum: escapeHtml(styleName),
+      language: escapeHtml(parameters.language || 'global'),
+      worldview: escapeHtml(parameters.worldview || ''),
+      places: escapeHtml(parameters.places || 'none'),
+    });
+  }
+
+  if (selectedLibrary === 'cesium-js') {
+    return renderTemplate(cesiumJsTemplate, {
+      pageTitle: `ArcGIS Basemap Style (${escapeHtml(styleName)}) - CesiumJS`,
+      accessToken: escapeHtml(token),
+      centerLat: escapeHtml(center[1]),
+      centerLng: escapeHtml(center[0]),
+      cameraHeight: escapeHtml(cesiumCameraHeight),
+      basemapEnum: escapeHtml(styleName),
+      language: escapeHtml(parameters.language || 'global'),
+      worldview: escapeHtml(parameters.worldview || ''),
+      places: escapeHtml(parameters.places || 'none'),
+    });
+  }
 
   if (selectedLibrary === 'leaflet') {
     return renderTemplate(leafletTilesTemplate, {
@@ -230,6 +303,7 @@ function formatViewport(viewport) {
  *  exportOptions: Object,
  *  currentStep:number
  * }) => void} [props.onStateChange]
+ * @param {() => void} [props.onOpenSharePanel]
  */
 export function CodeGenerator({
   selectedStyleName,
@@ -238,6 +312,7 @@ export function CodeGenerator({
   sharedPreset,
   onSharedPresetConsumed,
   onStateChange,
+  onOpenSharePanel,
 }) {
   const normalizedSharedPreset = useMemo(() => sanitizeSharedPreset(sharedPreset), [sharedPreset]);
 
@@ -257,17 +332,21 @@ export function CodeGenerator({
     };
   }, [normalizedSharedPreset]);
 
-  const [selectedLibrary, setSelectedLibrary] = useState(() => initialState.selectedLibrary);
-  const [hasLibrarySelection, setHasLibrarySelection] = useState(() => initialState.hasLibrarySelection);
+  const initialSelectedLibrary = isSelectableLibrary(initialState.selectedLibrary)
+    ? initialState.selectedLibrary
+    : '';
+  const initialHasLibrarySelection = isSelectableLibrary(initialState.selectedLibrary)
+    ? initialState.hasLibrarySelection
+    : false;
+
+  const [selectedLibrary, setSelectedLibrary] = useState(() => initialSelectedLibrary);
+  const [hasLibrarySelection, setHasLibrarySelection] = useState(() => initialHasLibrarySelection);
   const [token, setToken] = useState(() => initialState.token);
   const [showToken, setShowToken] = useState(() => initialState.showToken);
   const [hasAcceptedTokenWarning, setHasAcceptedTokenWarning] = useState(() => initialState.hasAcceptedTokenWarning);
   const [currentStep, setCurrentStep] = useState(() => initialState.currentStep);
-  const [shareStatus, setShareStatus] = useState({ kind: '', message: '' });
-  const [shareBusy, setShareBusy] = useState(false);
   const [exportOptions, setExportOptions] = useState(() => initialState.exportOptions);
   const [forceDownloadOnLoad] = useState(() => Boolean(initialState.forceDownload));
-  const shareToastTimeoutRef = useRef(0);
   const hasTriggeredForceDownloadRef = useRef(false);
 
   const hasToken = token.length > 0;
@@ -363,14 +442,6 @@ export function CodeGenerator({
     (currentStep === 3 && (!hasToken || !hasAcceptedTokenWarning));
 
   useEffect(() => {
-    return () => {
-      if (shareToastTimeoutRef.current) {
-        window.clearTimeout(shareToastTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (!normalizedSharedPreset) {
       return;
     }
@@ -444,37 +515,11 @@ export function CodeGenerator({
     setCurrentStep((step) => Math.max(step - 1, 1));
   }
 
-  function showShareStatus(kind, message) {
-    if (shareToastTimeoutRef.current) {
-      window.clearTimeout(shareToastTimeoutRef.current);
-    }
-
-    setShareStatus({ kind, message });
-    shareToastTimeoutRef.current = window.setTimeout(() => {
-      setShareStatus({ kind: '', message: '' });
-      shareToastTimeoutRef.current = 0;
-    }, 3200);
-  }
-
-  async function handleShareLinkCopy() {
-    if (!selectedStyleName || shareBusy) {
+  function handleShareLinkCopy() {
+    if (!selectedStyleName) {
       return;
     }
-
-    setShareBusy(true);
-    try {
-      await generateAndCopyShareUrl({
-        styleName: selectedStyleName,
-        parameters,
-        viewport,
-        baseUrl: window.location.origin + window.location.pathname,
-      });
-      showShareStatus('success', 'Share link copied to clipboard.');
-    } catch (error) {
-      showShareStatus('danger', error.message || 'Failed to create share link.');
-    } finally {
-      setShareBusy(false);
-    }
+    onOpenSharePanel?.();
   }
 
   useEffect(() => {
@@ -545,28 +590,49 @@ export function CodeGenerator({
             scale="s"
             className="code-generator-library-group"
             onCalciteRadioButtonGroupChange={(event) => {
-              setSelectedLibrary(event?.target?.value || LIBRARIES[0].id);
+              const nextValue = event?.target?.value || '';
+              const nextLibrary = LIBRARIES.find((library) => library.id === nextValue);
+              if (nextLibrary?.disabled) {
+                return;
+              }
+              if (!nextValue) {
+                return;
+              }
+              setSelectedLibrary(nextValue);
               setHasLibrarySelection(true);
             }}
           >
             {LIBRARIES.map((library) => {
+              const disabled = Boolean(library.disabled);
               return (
-                <CalciteLabel key={library.id} layout="inline" className="code-generator-library-option">
+                <CalciteLabel
+                  key={library.id}
+                  layout="inline"
+                  className="code-generator-library-option"
+                  title={disabled ? library.disabledReason : undefined}
+                >
                   <CalciteRadioButton
                     value={library.id}
                     checked={selectedLibrary === library.id}
+                    disabled={disabled}
                     onClick={() => {
+                      if (disabled) {
+                        return;
+                      }
                       setSelectedLibrary(library.id);
                       setHasLibrarySelection(true);
                     }}
                     onCalciteRadioButtonChange={() => {
+                      if (disabled) {
+                        return;
+                      }
                       setSelectedLibrary(library.id);
                       setHasLibrarySelection(true);
                     }}
                   />
                   <span className="code-generator-library-button-content">
                     <img className="code-generator-library-icon" src={library.icon} alt={library.iconAlt} />
-                    <span>{library.label}</span>
+                    <span>{disabled ? `${library.label} (Coming soon)` : library.label}</span>
                   </span>
                 </CalciteLabel>
               );
@@ -707,13 +773,13 @@ export function CodeGenerator({
             </CalciteButton>
             <CalciteButton
               data-testid="codegen-share-copy"
-              disabled={!canShare || shareBusy}
+              className="code-generator-share-panel-link-button"
+              disabled={!canShare}
               width="full"
-              appearance="outline"
               iconStart="share"
               onClick={handleShareLinkCopy}
             >
-              {shareBusy ? 'Copying Link...' : 'Copy Share Link'}
+              Copy Share Link
             </CalciteButton>
           </div>
 
@@ -749,18 +815,8 @@ export function CodeGenerator({
           <CalciteButton data-testid="codegen-step-next" disabled={nextDisabled} onClick={goToNextStep}>
             Next
           </CalciteButton>
-        ) : null}
+          ) : null}
       </div>
-
-      {shareStatus.message ? (
-        <div
-          className={`code-generator-toast code-generator-toast-${shareStatus.kind}`}
-          role="status"
-          aria-live="polite"
-        >
-          {shareStatus.message}
-        </div>
-      ) : null}
     </div>
   );
 }

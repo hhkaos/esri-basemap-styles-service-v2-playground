@@ -92,6 +92,39 @@ body,
   min-height: 0;
   height: 100%;
   --calcite-panel-header-background-color: var(--calcite-color-foreground-2);
+  justify-content: center;
+}
+
+.app-viewer-parameter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.15rem;
+  color: var(--calcite-color-text-2);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  justify-content: center;
+}
+
+.app-viewer-parameter-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.app-viewer-parameter-prefix {
+  font-weight: 600;
+  color: var(--calcite-color-text-1);
+}
+
+.app-viewer-style-item {
+  margin-inline-end: 0.25rem;
+}
+
+.app-viewer-parameter-item strong {
+  color: var(--calcite-color-text-1);
+  font-weight: 600;
 }
 
 .app-viewer-panel::part(content) {

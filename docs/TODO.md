@@ -9,6 +9,7 @@
 ### Up Next
 
 - [ ] Add lazy-loaded thumbnails with Intersection Observer
+- [ ] Re-enable CesiumJS export when static basemap tiles are fully supported by the playground
 
 ## Backlog
 
@@ -37,8 +38,8 @@
 
 #### Code Generator Panel
 
-- [ ] Add empty state CTA card ("Need an API key?", "Create Free Account", tutorial video link, API key documentation link)
-- [ ] Add library tabs (MapLibre GL JS, Leaflet)
+- [x] Add empty state CTA card ("Need an API key?", "Create Free Account", tutorial video link, API key documentation link)
+- [x] Add library tabs (MapLibre GL JS, Leaflet)
 
 #### Templates
 
@@ -88,17 +89,17 @@
 #### Testing
 
 - [ ] Add unit tests for template generation (placeholder replacement per library)
-- [ ] Add integration tests for CodePen POST
+- [x] Add integration tests for CodePen POST
 - [ ] Add integration tests for cookie consent flow
 - [ ] Add pre-push hooks (build + tests)
 
 #### Documentation
 
-- [ ] Write CONTRIBUTING.md (add templates, suggest improvements, report bugs, PR process)
+- [x] Write CONTRIBUTING.md (add templates, suggest improvements, report bugs, PR process)
 
 #### Deployment
 
-- [ ] Set up GitHub Actions workflow (build and deploy to `gh-pages` branch)
+- [x] Set up GitHub Actions workflow (build and deploy to `gh-pages` branch)
 
 ### Medium Priority (Phase 2)
 
@@ -106,7 +107,6 @@
 - [ ] Create template dev mode with file watcher, mock data, hot reload
 - [ ] Implement mobile responsive layout (<768px) with modal/drawer sidebar
 - [ ] Add touch-friendly controls (minimum 44x44px tap targets)
-- [ ] Add ArcGIS Maps SDK for JavaScript template (v5.0+)
 - [ ] Add multi-view option (2 synchronized maps)
 - [ ] Add custom style search by itemId
 - [ ] Add session model educational examples with step-by-step guide
@@ -118,8 +118,6 @@
 
 ### Low Priority / Nice to Have (Phase 3+)
 
-- [ ] CesiumJS template
-- [ ] OpenLayers template
 - [ ] 3D map styles support
 - [ ] UI internationalization (Spanish, French, etc.)
 - [ ] Dark mode toggle
@@ -136,18 +134,28 @@
 - [ ] Comparison mode (side-by-side two different styles)
 - [ ] Style customization preview (Vector Tile Style Editor integration)
 - [ ] Static basemap tiles for lightweight previews and non-interactive embeds
+- [ ] Consider adding generate code for Native SDKs (Flutter, Android, Kotlin, etc)
 - [ ] Code snippet preview (simple viewer showing key lines)
 - [ ] Community showcase gallery
 - [ ] iframe embed code generation
 - [ ] User authentication with ArcGIS identity
 - [ ] Rollbar error monitoring
 
-## Blocked
-
-- [ ] ArcGIS Maps SDK template - Blocked by: Waiting for v5.0 release (Feb 2026)
-
 ## Done
 
+- [x] Add explicit agent rules in `AGENTS.md` and `CLAUDE.md` to protect manual HTML/CSS edits and require user confirmation before broader style/markup changes - 2026-02-17
+- [x] Add clearer Share panel purpose text and remove redundant parameter `h4` headings in single-panel Language/Worldview/Places actions - 2026-02-17
+- [x] Remove default client-library preselection in Code Generator step 2 so no option is selected until user explicitly chooses one - 2026-02-17
+- [x] Update Code Generator step-4 `Copy Share Link` action to open the `Share` panel and preselect `Open this panel by default: Code Generator`; style the action button with green Calcite background token - 2026-02-17
+- [x] Replace ArcGIS JS template `map-components-note` UI block with inline JS guidance comment for `places = none`, including ArcGIS Map Components tutorial link - 2026-02-17
+- [x] Temporarily disable CesiumJS selection in Code Generator and show a "coming soon" tooltip until static basemap tiles are fully supported by the playground - 2026-02-17
+- [x] Add OpenLayers export template with `olms.apply(...)`, style parameter URL wiring (language/worldview/places), explicit Esri attribution injection, Code Generator integration, and tests - 2026-02-17
+- [x] Add ArcGIS Maps SDK for JavaScript export template with basemap-style autocasting, codegen wiring, share-library support, and tests - 2026-02-17
+- [x] Reprioritize template roadmap: move ArcGIS Maps SDK for JavaScript, OpenLayers, and CesiumJS templates into Current Sprint Up Next - 2026-02-17
+- [x] Add Code Generator library tabs (MapLibre GL JS, Leaflet) and API-key empty-state CTA resources - 2026-02-17
+- [x] Add CodePen export interaction test coverage in `CodeGenerator.test.jsx` - 2026-02-17
+- [x] Add CONTRIBUTING.md contributor documentation - 2026-02-17
+- [x] Set up GitHub Actions workflows for test and deploy (`.github/workflows/test.yml`, `.github/workflows/deploy.yml`) - 2026-02-17
 - [x] Keep `StyleBrowser` mounted while inactive so shared links that open on non-style panels still hydrate style metadata/capabilities and correctly load Language/Worldview/Places selections - 2026-02-17
 - [x] Add App-level shared-link hydration regression test asserting real parameter radio selections (`ca`, `china`, `all`) after opening on Code Generator panel - 2026-02-17
 - [x] Fix parameter radio hydration UI by explicitly binding `checked` on Language/Worldview/Places `calcite-radio-button` options and add unit test coverage - 2026-02-17
@@ -239,6 +247,7 @@
 - [x] Show supported and not supported capabilities in per-style info modal - 2026-02-17
 - [x] Simplify style-info modal capabilities to show only supported capabilities under one heading - 2026-02-17
 - [x] Add map viewer panel heading + parameter summary description (language, places, worldview) - 2026-02-17
+- [x] Improve map viewer panel parameter summary design with Calcite icons, bold labels, and capability-resolved display names (full language names when available) - 2026-02-17
 - [x] Fix parameter panel scrolling in docked tools layout by constraining block content overflow - 2026-02-17
 - [x] Add Catalan/Greek language flag mappings and hyphenated flag-code validation with unit tests - 2026-02-17
 - [x] Build Code Generator panel UI foundation (tabs, token input show/hide, CTA card, export actions scaffold) - 2026-02-17

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>{{pageTitle}}</title>
+
+    <!--
+      API key is injected from the playground input.
+      Scope keys by referrer and rotate regularly:
+      https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/#best-practices
+    -->
+
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.138/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.138/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+      // Use API key authentication.
+      const accessToken = '{{accessToken}}';
+      const basemapEnum = '{{basemapEnum}}';
+      const language = '{{language}}';
+      const worldview = '{{worldview}}';
+      const places = '{{places}}';
+
+      const baseUrl =
+        'https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1';
+      const styleUrl = new URL(`${baseUrl}/${basemapEnum}/static/tile/{z}/{y}/{x}`);
+      styleUrl.searchParams.set('token', accessToken);
+
+      if (language && language !== 'global') {
+        styleUrl.searchParams.set('language', language);
+      }
+
+      if (worldview) {
+        styleUrl.searchParams.set('worldview', worldview);
+      }
+
+      if (places && places !== 'none') {
+        styleUrl.searchParams.set('places', places);
+      }
+
+      const viewer = new Cesium.Viewer('cesiumContainer', {
+        baseLayer: false,
+        baseLayerPicker: false,
+        timeline: false,
+        animation: false,
+        geocoder: false,
+      });
+
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+          url: styleUrl.toString(),
+          tileWidth: 512,
+          tileHeight: 512,
+        })
+      );
+
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees({{centerLng}}, {{centerLat}}, {{cameraHeight}}),
+      });
+
+      // Add Esri attribution.
+      // Learn more in https://esriurl.com/attribution
+      const poweredByEsri = new Cesium.Credit(
+        "Powered by <a href='https://www.esri.com/en-us/home' target='_blank'>Esri</a>",
+        true
+      );
+      viewer.creditDisplay.addStaticCredit(poweredByEsri);
+    </script>
+  </body>
+</html>

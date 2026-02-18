@@ -5,6 +5,7 @@ import {
   CalciteActionBar,
   CalciteBlock,
   CalciteButton,
+  CalciteIcon,
   CalciteLink,
   CalciteNavigation,
   CalcitePanel,
@@ -49,6 +50,67 @@ function getParameterDisplayValue(value, fallbackValue) {
   return normalized;
 }
 
+function getCapabilityOptionName(options, code) {
+  if (!Array.isArray(options) || !code) {
+    return '';
+  }
+
+  const match = options.find((option) => option?.code === code);
+  return match?.name || '';
+}
+
+function getLanguageNameFromCode(code) {
+  if (!code) {
+    return '';
+  }
+
+  if (code === 'global') {
+    return 'Global';
+  }
+
+  const normalized = code.split('-')[0];
+
+  try {
+    const displayNames = new Intl.DisplayNames(['en'], { type: 'language' });
+    const name = displayNames.of(normalized);
+    if (name) {
+      return name;
+    }
+  } catch {
+    // no-op: Intl.DisplayNames may be unavailable in older runtimes
+  }
+
+  return code.toUpperCase();
+}
+
+function getViewerParameterLabel(parameter, capabilities, value) {
+  if (parameter === 'language') {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    const isDefault = !normalized || normalized === DEFAULT_STYLE_PARAMETERS.language;
+    const code = isDefault ? DEFAULT_STYLE_PARAMETERS.language : normalized;
+    const resolved = getCapabilityOptionName(capabilities?.languages, code) || getLanguageNameFromCode(code);
+    return isDefault ? `${resolved} (default)` : resolved;
+  }
+
+  if (parameter === 'worldview') {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    const isDefault = !normalized;
+    const code = isDefault ? 'global' : normalized;
+    const resolved = getCapabilityOptionName(capabilities?.worldviews, code) || (code === 'global' ? 'Global' : code);
+    return isDefault ? `${resolved} (default)` : resolved;
+  }
+
+  if (parameter === 'places') {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    const isDefault = !normalized || normalized === DEFAULT_STYLE_PARAMETERS.places;
+    const code = isDefault ? DEFAULT_STYLE_PARAMETERS.places : normalized;
+    const resolved = getCapabilityOptionName(capabilities?.places, code) || (code === 'none' ? 'None' : code);
+    return isDefault ? `${resolved} (default)` : resolved;
+  }
+
+  return getParameterDisplayValue(value, '');
+}
+
 function getInitialSharedConfig() {
   if (typeof window === 'undefined') {
     return null;
@@ -60,6 +122,7 @@ function getInitialSharedConfig() {
 function App() {
   const [initialSharedConfig] = useState(getInitialSharedConfig);
   const [sharedCodeGeneratorPreset, setSharedCodeGeneratorPreset] = useState(() => initialSharedConfig?.codeGenerator || null);
+  const [sharePanelPreset, setSharePanelPreset] = useState(null);
   const [selectedStyleName, setSelectedStyleName] = useState(() => initialSharedConfig?.style || '');
   const [selectedStyle, setSelectedStyle] = useState(null);
   const [styleCatalogLoaded, setStyleCatalogLoaded] = useState(false);
@@ -135,10 +198,33 @@ function App() {
   }, [sidebarCollapsed]);
 
   const viewerHeading = selectedStyle?.name || selectedStyleName || 'No style selected';
-  const languageDescription = getParameterDisplayValue(parameters.language, DEFAULT_STYLE_PARAMETERS.language);
-  const placesDescription = getParameterDisplayValue(parameters.places, DEFAULT_STYLE_PARAMETERS.places);
-  const worldviewDescription = getParameterDisplayValue(parameters.worldview, 'global');
-  const viewerDescription = `Language: ${languageDescription} • Places: ${placesDescription} • Worldview: ${worldviewDescription}`;
+  const viewerParameterItems = [
+    {
+      key: 'language',
+      icon: 'language',
+      label: 'Language',
+      value: getViewerParameterLabel('language', capabilities, parameters.language),
+    },
+    {
+      key: 'places',
+      icon: 'pin-plus',
+      label: 'Places',
+      value: getViewerParameterLabel('places', capabilities, parameters.places),
+    },
+    {
+      key: 'worldview',
+      icon: 'globe',
+      label: 'Worldview',
+      value: getViewerParameterLabel('worldview', capabilities, parameters.worldview),
+    },
+  ];
+  const handleOpenSharePanelFromCodeGenerator = useCallback(() => {
+    setSharePanelPreset({
+      includeDefaultPanel: true,
+      defaultPanel: 'code-generator',
+    });
+    setActiveToolPanel('share');
+  }, []);
 
   return (
     <CalciteShell className="app-shell">
@@ -296,6 +382,7 @@ function App() {
                   sharedPreset={sharedCodeGeneratorPreset}
                   onSharedPresetConsumed={() => setSharedCodeGeneratorPreset(null)}
                   onStateChange={setCodeGeneratorState}
+                  onOpenSharePanel={handleOpenSharePanelFromCodeGenerator}
                 />
               </CalciteBlock>
             </CalcitePanel>
@@ -309,6 +396,8 @@ function App() {
                   parameters={parameters}
                   viewport={mapViewport}
                   codeGeneratorState={codeGeneratorState}
+                  panelPreset={sharePanelPreset}
+                  onPanelPresetConsumed={() => setSharePanelPreset(null)}
                 />
               </CalciteBlock>
             </CalcitePanel>
@@ -375,8 +464,22 @@ function App() {
         className="app-viewer-panel"
         loading={mapLoading}
         heading={viewerHeading}
-        description={viewerDescription}
       >
+        <div slot="header-content" className="app-viewer-parameter-summary" aria-label="Current style parameters">
+          <span className="app-viewer-parameter-prefix">Current configuration: </span>
+          <span className="app-viewer-parameter-item app-viewer-style-item">
+            <CalciteIcon icon="palette" scale="s" aria-hidden="true" />
+            <strong>Style:</strong>
+            <span>{viewerHeading}</span>
+          </span>
+          {viewerParameterItems.map((item) => (
+            <span key={item.key} className="app-viewer-parameter-item">
+              <CalciteIcon icon={item.icon} scale="s" aria-hidden="true" />
+              <strong>{item.label}:</strong>
+              <span>{item.value}</span>
+            </span>
+          ))}
+        </div>
         <MapViewer
           styleName={selectedStyleName}
           token={DEFAULT_PLAYGROUND_TOKEN}
