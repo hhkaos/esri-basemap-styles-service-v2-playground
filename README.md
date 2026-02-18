@@ -2,7 +2,7 @@
 
 Interactive playground for exploring and testing the [ArcGIS Basemap Styles Service v2](https://developers.arcgis.com/rest/basemap-styles/), including style browsing, live map updates, and parameter controls for `language`, `worldview`, and `places`.
 
-[Live demo](https://rauljimenez.info/esri-basemap-styles-service-v2-playground)
+[Live demo](https://www.rauljimenez.info/esri-basemap-styles-service-v2-playground/)
 
 ## Features
 
